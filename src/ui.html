@@ -150,7 +150,11 @@ button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulatio
 #scene .sc-next{position:absolute;right:14px;bottom:6px;color:var(--gold);font-size:13px;animation:blink 1s infinite steps(1)}
 #scene .sc-input{display:flex;gap:8px;margin-top:8px}
 #scene .sc-input .btn{flex:none;padding:10px 16px}
-#scene .sc-input input{flex:1;min-width:0;font-family:inherit;font-size:17px;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--gold);background:#0f0c18;color:var(--ink);padding:10px 12px;user-select:text;-webkit-user-select:text;border-radius:0}
+#scene .sc-lever{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;padding:8px 10px;background:#21192f;border:2px solid var(--rim)}
+#scene .sc-lever-label{font-size:12px;color:var(--mute)}
+#scene .sc-lever-button{display:flex;align-items:center;gap:8px;padding:7px 12px;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px #7d332f;background:#38212a;color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+#scene .sc-lever-knob{display:inline-block;width:16px;height:16px;border:2px solid #8c2f2b;border-radius:50%;background:var(--red);box-shadow:0 2px 0 #551b1b;transition:transform .25s}
+#scene .sc-lever-button.pulled .sc-lever-knob{transform:translateY(5px)}
 
 /* ゲーム画面 */
 header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px}
@@ -810,6 +814,7 @@ function nextLine() {
   if (L.cg) setCg(L.cg);
   if (L.fx === 'flash') { const f = $('#scFlash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); tone(1200, 0.3, 'triangle', 0.05, -600); }
   if (L.cmd === 'name') { askName(); return; }
+  if (L.cmd === 'lever') { askPullLever(); return; }
   if (L.title) {
     $('#scTitle').textContent = L.title; sfx.big();
     $('#scName').style.display = 'none'; $('#scPortrait').style.visibility = 'hidden';
@@ -843,6 +848,23 @@ function askName() {
   $('#scNameIn').onclick = e => e.stopPropagation();
   $('#scNameIn').onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') ok(); };
   setTimeout(() => { try { $('#scNameIn').focus(); } catch (e) {} }, 50);
+}
+function askPullLever() {
+  scene.waitInput = true;
+  $('#scName').style.display = 'none';
+  $('#scPortrait').style.visibility = 'hidden';
+  $('#scText').className = 'sc-text narr';
+  $('#scText').textContent = '赤い玉のついたレバーがある。引いてみる？';
+  $('#scNext').style.display = 'none';
+  $('#scInput').innerHTML = '<div class="sc-lever"><span class="sc-lever-label">古いスロット台</span><button class="sc-lever-button" id="scLever"><span class="sc-lever-knob"></span>レバーを引く</button></div>';
+  $('#scLever').onclick = e => {
+    e.stopPropagation();
+    if (!scene || !scene.waitInput) return;
+    scene.waitInput = false;
+    $('#scLever').classList.add('pulled');
+    tone(240, 0.16, 'triangle', 0.07, -100);
+    setTimeout(nextLine, 300);
+  };
 }
 function endScene() {
   if (!scene) return;
@@ -1287,6 +1309,7 @@ async function animateSpin(res, coinsBefore) {
 // =========================================================
 async function doSpin() {
   if (busy || st.phase !== 'spin') return;
+  scrollGameToBottom();
   busy = true; audio();
   const before = st.coins;
   const res = act(st, 's');            // まわして、次の候補まで決める（記録にも残る）
@@ -1299,9 +1322,15 @@ async function doSpin() {
   await animateSpin(res, before);
   st.phase = 'choose'; save();
   busy = false; renderAll();
+  scrollGameToBottom();
   if (res.questDone) { sfx.quest(); toast(`📜 依頼達成！ 報酬 ${st.quest.reward.txt}`); }
   checkAch(res);
-  if (window.innerHeight < 900) $('#act').scrollIntoView({ behavior: 'smooth', block: 'end' });
+}
+function scrollGameToBottom() {
+  requestAnimationFrame(() => {
+    const page = document.scrollingElement;
+    page.scrollTo({ top: page.scrollHeight, behavior: 'smooth' });
+  });
 }
 function pick(k) {
   if (st.phase !== 'choose' || !act(st, 'p:' + (k || ''))) return;
