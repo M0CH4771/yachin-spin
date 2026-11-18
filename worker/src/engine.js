@@ -581,6 +581,7 @@ function spin(st) {
   const cell = cells.map(s => s ? { parts: [], muls: [], add: 0, mul: 1, dead: false, vanish: false, eatenBy: null } : null);
   const ev = [], flags = new Set(), transforms = [], spawns = [], purged = [];
   const baseOf = j => { const s = cells[j]; const d = SYM[s.key]; return d.v + (d.store ? (s.c || 0) : 0); };
+  const invBase = s => { const d = SYM[s.key]; return d.v + (d.store ? (s.c || 0) : 0); };
   const src = x => typeof x === 'number' ? cells[x].key : x;
   let eats = 0;
   const ctx = {
@@ -607,8 +608,8 @@ function spin(st) {
     purgeCheapest: () => {
       const cand = st.inv.filter(s => !onBoard.has(s.id) && !purged.includes(s) && s.key !== 'ninja');
       if (!cand.length) return false;
-      const min = Math.min(...cand.map(s => SYM[s.key].v));
-      purged.push(pickOne(cand.filter(s => SYM[s.key].v === min)));
+      const min = Math.min(...cand.map(invBase));
+      purged.push(pickOne(cand.filter(s => invBase(s) === min)));
       return true;
     },
     flag: f => flags.add(f),
