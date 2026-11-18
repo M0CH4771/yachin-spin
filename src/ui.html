@@ -819,7 +819,7 @@ function showTitle() {
   const cont = $('#bContinue');
   if (inProgress(saved)) {
     const D = DIFFS[saved.diff];
-    cont.innerHTML = `▶ つづきから<small>${D.n}・家賃 ${saved.endless ? '♾️' : ''}${saved.rentIdx + 1}回目・もちコイン ${saved.coins}</small>`;
+    cont.innerHTML = `▸ つづきから<small>${D.n}・家賃 ${saved.endless ? '♾️' : ''}${saved.rentIdx + 1}回目・もちコイン ${saved.coins}</small>`;
     cont.classList.remove('hidden');
   } else cont.classList.add('hidden');
   armedDiff = null; $('#bDaily').dataset.armed = ''; $('#bEndless').dataset.armed = '';
