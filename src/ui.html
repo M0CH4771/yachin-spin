@@ -1756,7 +1756,7 @@ function openInv() {
   const room = N - (st.curse === 'fog' ? 4 : 0);
   $('#invLead').innerHTML = `${st.inv.length}個持っている。盤面は${room}マス${st.inv.length > room ? `なので、<b style="color:var(--gold)">毎回ランダムに${room}個だけ</b>出る` : 'なので、全部が毎回出る'}。<br>✂️除去の残り：${st.removals}回${hasItem(st, 'broom') ? '（🧹除去するたび+8コイン）' : ''}`;
   $('#invGrid').innerHTML = keys.map(k => `<button class="inv-item" data-k="${k}" style="border-color:${SYM[k].r === 'C' ? '' : RARITY[SYM[k].r].color + '88'}">${E(k)}<span class="n">×${counts[k]}</span></button>`).join('');
-  $('#invGrid .inv-item').forEach(b => b.onclick = () => { invSel = b.dataset.k; $('#invGrid .inv-item').forEach(x => x.classList.toggle('sel', x === b)); renderInvDetail(invSel); updRemove(); });
+  $$('#invGrid .inv-item').forEach(b => b.onclick = () => { invSel = b.dataset.k; $$('#invGrid .inv-item').forEach(x => x.classList.toggle('sel', x === b)); renderInvDetail(invSel); updRemove(); });
   $('#invDetail').innerHTML = '<div class="dd" style="color:var(--mute)">シンボルをタップすると説明が出る。いらないものは除去できる。</div>';
   updRemove(); $('#ovInv').classList.add('show');
 }
