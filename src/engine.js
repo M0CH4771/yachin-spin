@@ -756,7 +756,15 @@ function addItem(st, k) {
 }
 function removeSymbol(st, key) {
   if (st.removals <= 0) return false;
-  const idx = st.inv.findIndex(s => s.key === key); if (idx < 0) return false;
+  // 同じ種類でも個体ごとに成長度が違うため、現在の基礎稼ぎが一番低いものを除去する
+  let idx = -1, minValue = Infinity;
+  st.inv.forEach((s, i) => {
+    if (s.key !== key) return;
+    const d = SYM[s.key];
+    const value = d.v + (d.store ? (s.c || 0) : 0);
+    if (value < minValue) { idx = i; minValue = value; }
+  });
+  if (idx < 0) return false;
   st.inv.splice(idx, 1); st.removals--; st.stats.removed++;
   if (hasItem(st, 'broom')) st.coins += 8;
   return true;
