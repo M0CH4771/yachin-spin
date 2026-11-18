@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ヤチン・スピン — 縁日スロットで家賃を払え</title>
+<title>ヤチンスピン — 縁日スロットで家賃を払え</title>
 <meta name="description" content="ばあちゃんのスロット台と、ツケの残った長屋の話。スロットをまわして縁銭を稼ぎ、妖怪の横丁で家賃を払いつづけるブラウザゲーム。">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="ヤチン・スピン">
-<meta property="og:title" content="ヤチン・スピン — 縁日スロットで家賃を払え">
+<meta property="og:site_name" content="ヤチンスピン">
+<meta property="og:title" content="ヤチンスピン — 縁日スロットで家賃を払え">
 <meta property="og:description" content="ばあちゃんのスロット台と、ツケの残った長屋の話。スロットをまわして縁銭を稼ぎ、妖怪の横丁で家賃を払いつづけるブラウザゲーム。">
 <meta property="og:url" content="https://m0ch4771.github.io/yachin-spin/">
 <meta property="og:image" content="https://m0ch4771.github.io/yachin-spin/ogp.png">
@@ -15,7 +15,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="ja_JP">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="ヤチン・スピン — 縁日スロットで家賃を払え">
+<meta name="twitter:title" content="ヤチンスピン — 縁日スロットで家賃を払え">
 <meta name="twitter:description" content="ばあちゃんのスロット台と、ツケの残った長屋の話。スロットをまわして縁銭を稼ぎ、妖怪の横丁で家賃を払いつづけるブラウザゲーム。">
 <meta name="twitter:image" content="https://m0ch4771.github.io/yachin-spin/ogp.png">
 <link rel="icon" type="image/png" href="favicon.png">
@@ -344,7 +344,7 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
 <div class="wrap" id="titleScreen">
   <div class="lanterns"><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span></div>
   <div class="title-logo">
-    <div class="big">ヤチン・<br>スピン</div>
+    <div class="big">ヤチン<br>スピン</div>
     <div class="sub">縁日スロットで家賃を払え</div>
   </div>
   <div class="title-reels"><span>🏮</span><span>🦊</span><span>🍡</span><span>🐉</span><span>🎆</span></div>
@@ -511,7 +511,7 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
 </div></div>
 
 <script>
-// ===== ヤチン・スピン ゲームエンジン（UI非依存） =====
+// ===== ヤチンスピン ゲームエンジン（UI非依存） =====
 const W = 5, H = 4, N = W * H;
 let RNG_FN = null;
 const rnd = () => RNG_FN ? RNG_FN() : Math.random();
@@ -1740,7 +1740,7 @@ const SCENES = {
     { who: 'narr', t: 'その日の夕方。台を背負って、坂の下に立った。' },
     { who: 'maneki', t: 'ゆくか、{name}。' },
     { who: 'me', f: 's', t: '行く。今月の家賃、まだ払ってないし。' },
-    { who: 'narr', t: '——ヤチン・スピン　おしまい' },
+    { who: 'narr', t: '——ヤチンスピン　おしまい' },
     { who: 'narr', t: '（横丁の夜は、フリープレイとエンドレスとデイリーで、まだつづく）' },
   ],
   ch4o: [
@@ -2601,7 +2601,7 @@ function showEndEndless() {
     ['合計かせぎ', st.totalEarned], ['アイテム', st.items.length], ['依頼の達成', st.stats.quests],
   ].map(([a, b]) => `<div class="stat"><b>${b}</b><span>${a}</span></div>`).join('');
   const top = Object.entries(st.inv.reduce((m, s) => (m[s.key] = (m[s.key] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k]) => E(k)).join('');
-  const text = `ヤチン・スピン【エンドレス】\n家賃${n}回・第${sg}段まで住んだ🏮${isNew ? '（自己ベスト）' : ''}\n最高1スピン${st.best}コイン\n編成：${top}\n#ヤチンスピン`;
+  const text = `ヤチンスピン【エンドレス】\n家賃${n}回・第${sg}段まで住んだ🏮${isNew ? '（自己ベスト）' : ''}\n最高1スピン${st.best}コイン\n編成：${top}\n#ヤチンスピン`;
   $('#endBtns').innerHTML = `<a class="btn gold" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(GAME_URL)}" target="_blank" rel="noopener">𝕏 で記録をポストする</a>` +
     `<button class="btn primary" id="eAgain">もう一回（エンドレス）</button><button class="btn" id="eTitle">🏮 タイトルへ</button>`;
   $('#eAgain').onclick = () => { $('#ovEnd').classList.remove('show'); openStarter('endless'); };
@@ -2624,7 +2624,7 @@ function showEnd(win) {
   const top = Object.entries(st.inv.reduce((m, s) => (m[s.key] = (m[s.key] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k]) => E(k)).join('');
   const its = st.items.slice(0, 6).map(k => ITEMS[k].e).join('');
   const label = CH ? `ストーリー${CH.n}` : st.daily ? `デイリー${st.daily}` : D.n;
-  const head = st.daily ? `ヤチン・スピン【デイリー ${st.daily}】家賃${Math.min(st.rentIdx, T)}/${T}回${win ? '👑' : ''}` : CH && win ? `ヤチン・スピン【${label}「${CH.t}」】クリア🏮` : win ? `ヤチン・スピン【${D.n}】クリア🎆` : st.endless ? `ヤチン・スピン【${D.n}】エンドレス${st.rentIdx - T}回♾️` : `ヤチン・スピン【${D.n}】家賃${st.rentIdx}/${T}回🏠`;
+  const head = st.daily ? `ヤチンスピン【デイリー ${st.daily}】家賃${Math.min(st.rentIdx, T)}/${T}回${win ? '👑' : ''}` : CH && win ? `ヤチンスピン【${label}「${CH.t}」】クリア🏮` : win ? `ヤチンスピン【${D.n}】クリア🎆` : st.endless ? `ヤチンスピン【${D.n}】エンドレス${st.rentIdx - T}回♾️` : `ヤチンスピン【${D.n}】家賃${st.rentIdx}/${T}回🏠`;
   const text = `${head}\n最高1スピン${st.best}コイン\n編成：${top}${its ? `\nお守り：${its}` : ''}\n#ヤチンスピン`;
   const share = `<a class="btn" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(GAME_URL)}" target="_blank" rel="noopener">𝕏 でポストする</a>`;
   const nextCh = CH && win && CH.id < 4 ? CHAPTERS[CH.id] : null;

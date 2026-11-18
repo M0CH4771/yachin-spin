@@ -1,4 +1,4 @@
-// ===== ヤチン・スピン ゲームエンジン（UI非依存） =====
+// ===== ヤチンスピン ゲームエンジン（UI非依存） =====
 const W = 5, H = 4, N = W * H;
 let RNG_FN = null;
 const rnd = () => RNG_FN ? RNG_FN() : Math.random();

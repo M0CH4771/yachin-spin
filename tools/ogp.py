@@ -50,7 +50,7 @@ canvas.alpha_composite(card, (W - card.width - 54, 54))
 # 左：タイトル（ドット文字）
 sd = lambda s: [(s * 2, s * 2, RED), (s * 4, s * 4, EDGE)]
 y = 58
-for line in ('ヤチン・', 'スピン'):
+for line in ('ヤチン', 'スピン'):
     t = pixel_text(line, 22, 6, INK, sd(2)); canvas.alpha_composite(t, (64, y)); y += t.height - 10
 sub = pixel_text('縁日スロットで家賃を払え', 13, 3, GOLD, [(3, 3, EDGE)]); canvas.alpha_composite(sub, (70, y + 14))
 tag = pixel_text('ばあちゃんのスロット台と、ツケの残った長屋の話。', 12, 2, MUTE, [(2, 2, EDGE)]); canvas.alpha_composite(tag, (72, y + 14 + sub.height + 12))
