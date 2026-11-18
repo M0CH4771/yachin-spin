@@ -18,13 +18,14 @@
 ## ファイル
 
 ```
-index.html            組み立て済みのゲーム本体（これ1つで動く）
+index.html            組み立て済みのゲーム本体（背景の bg/ と同じ場所に置く）
 src/ui.html           画面・演出・会話シーン（組み立て前のひな形）
 src/engine.js         ルール（シンボル・お守り・家賃・難易度・デイリー）
 src/story.js          台本・背景・章立て
 art/sheet.png         ドット絵シート（32×32、16列）
 art/sheet.json        シート内の並び
 art/busts.json        会話の顔窓（8人×4表情）
+bg/                   会話シーンの背景（14枚、720px幅のJPEG）
 tools/build.py        src/ と art/ から index.html を組み立てる
 tools/pixel/          ドット絵の描画コード（Python）
 tools/sim/balance.js  ストーリー各話のクリア率を調べるシミュレーター

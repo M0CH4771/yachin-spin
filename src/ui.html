@@ -692,12 +692,23 @@ function playScene(ids, done) {
   saveRec();
   if (!lines.length) { done && done(); return; }
   scene = { lines, i: -1, done, typing: null, full: '', waitInput: false };
+  preloadBgs(lines);
   $('#scTitle').textContent = ''; $('#scDeco').innerHTML = ''; $('#scPortrait').innerHTML = '';
   $('#scene').classList.add('show');
   nextLine();
 }
 window.playScene = (...a) => playScene(...a);
-function setBg(k) { const b = BGS[k] || BGS.yokocho; $('#scene').style.background = b.g; $('#scDeco').innerHTML = b.d.map(n => spr(n)).join(''); }
+function setBg(k) {
+  const b = BGS[k] || BGS.yokocho, sc = $('#scene');
+  if (b.img) {
+    // 下のほうを暗くして、会話の枠と文字が読みやすいように
+    sc.style.background = `linear-gradient(180deg, rgba(12,9,20,.25) 0%, rgba(12,9,20,0) 30%, rgba(12,9,20,.15) 55%, rgba(12,9,20,.8) 100%), url(${b.img}) center top / cover no-repeat, ${b.g}`;
+    $('#scDeco').innerHTML = '';
+  } else { sc.style.background = b.g; $('#scDeco').innerHTML = b.d.map(n => spr(n)).join(''); }
+}
+// 会話シーンで使う背景を先に読みこんでおく
+const bgCache = {};
+function preloadBgs(lines) { lines.forEach(l => { const b = l.bg && BGS[l.bg]; if (b && b.img && !bgCache[b.img]) { bgCache[b.img] = new Image(); bgCache[b.img].src = b.img; } }); }
 function nextLine() {
   if (!scene || scene.waitInput) return;
   if (scene.typing) { clearInterval(scene.typing); scene.typing = null; $('#scText').textContent = scene.full; $('#scNext').style.display = ''; return; }

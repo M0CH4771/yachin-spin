@@ -13,18 +13,21 @@ const CHARS = {
   gyosho:  { n: '藁人', img: 'gyosho', c: '#e8c45a' },
 };
 const BGS = {
-  house:    { g: '#1d1a24', d: ['i_box'] },
-  room:     { g: '#241a14', d: ['i_candle'] },
-  shisetsu: { g: '#26303f', d: ['sun'] },
-  yokocho:  { g: '#221430', d: ['lantern', 'lantern', 'lantern', 'lantern', 'lantern'] },
-  dim:      { g: '#150f1e', d: ['lantern', 'u_blank', 'lantern', 'u_blank', 'u_blank'] },
-  nagaya:   { g: '#1b1630', d: ['lantern', 'u_house', 'u_house', 'lantern'] },
-  choba:    { g: '#2a1a16', d: ['soroban', 'i_andon'] },
-  festival: { g: '#2a1336', d: ['firework', 'lantern', 'firework', 'lantern', 'firework'] },
-  river:    { g: '#101a33', d: ['wave', 'i_andon', 'wave'] },
-  shrine:   { g: '#10142c', d: ['mikazuki', 'torii'] },
-  dawn:     { g: '#3a2a4a', d: ['i_hinode'] },
-  letter:   { g: '#2a2218', d: ['i_scroll'] },
+  // img：背景の絵（bg/ フォルダ）。g：絵が読みこまれるまでの色。d：絵がないときのドット絵の飾り
+  house:    { img: 'bg/house.jpg',    g: '#1d1a24', d: ['i_box'] },
+  room:     { img: 'bg/room.jpg',     g: '#241a14', d: ['i_candle'] },
+  shisetsu: { img: 'bg/shisetsu.jpg', g: '#26303f', d: ['sun'] },
+  yokocho:  { img: 'bg/yokocho.jpg',  g: '#221430', d: ['lantern', 'lantern', 'lantern', 'lantern', 'lantern'] },
+  dim:      { img: 'bg/dim.jpg',      g: '#150f1e', d: ['lantern', 'u_blank', 'lantern', 'u_blank', 'u_blank'] },
+  nagaya:   { img: 'bg/nagaya.jpg',   g: '#1b1630', d: ['lantern', 'u_house', 'u_house', 'lantern'] },
+  yojohan:  { img: 'bg/yojohan.jpg',  g: '#241a14', d: ['lantern'] },
+  choba:    { img: 'bg/choba.jpg',    g: '#2a1a16', d: ['soroban', 'i_andon'] },
+  festival: { img: 'bg/festival.jpg', g: '#2a1336', d: ['firework', 'lantern', 'firework', 'lantern', 'firework'] },
+  river:    { img: 'bg/river.jpg',    g: '#101a33', d: ['wave', 'i_andon', 'wave'] },
+  shrine:   { img: 'bg/shrine.jpg',   g: '#10142c', d: ['mikazuki', 'torii'] },
+  dawn:     { img: 'bg/dawn.jpg',     g: '#3a2a4a', d: ['i_hinode'] },
+  letter:   { img: 'bg/letter.jpg',   g: '#2a2218', d: ['i_scroll'] },
+  slope:    { img: 'bg/slope.jpg',    g: '#3a2440', d: ['sun'] },
 };
 
 const SCENES = {
@@ -98,7 +101,7 @@ const SCENES = {
 
   // ───────────── 第一話 ─────────────
   ch1: [
-    { bg: 'nagaya', title: '第一話　ひっこし' },
+    { bg: 'yojohan', title: '第一話　ひっこし' },
     { who: 'narr', t: '長屋の部屋は四畳半。たたみが一枚、少しへこんでいる。戸口の上に、火の入っていない提灯がひとつ。' },
     { who: 'okon', t: '前の店子が置いてった布団がある。干しといたから使いな。' },
     { who: 'me', t: 'ありがとうございます。' },
@@ -144,7 +147,7 @@ const SCENES = {
     { who: 'maneki', t: '（頼まれたら、と言うたな。……払わせたくない、とは言うとらん）' },
   ],
   ch1m8: [
-    { bg: 'nagaya' },
+    { bg: 'yojohan' },
     { who: 'narr', t: '支払いのあと、おコンさんが算盤を置いて、めずらしく上がりかまちに腰をおろした。' },
     { who: 'okon', t: 'あんた、レバーの引き方がハナにそっくりだね。最後にちょっとためるところ。' },
     { who: 'me', f: 'o', t: 'そうなんですか。' },
@@ -467,7 +470,7 @@ const SCENES = {
     { who: 'me', t: 'でも大丈夫。帳簿に、わたしの名前が書いてあるから。' },
     { who: 'me', t: 'ねえ、この家は売っちゃうけど、台はわたしがもらってもいい？' },
     { who: 'grandma', f: 's', t: '最初から、あなたのよ。' },
-    { bg: 'dawn' },
+    { bg: 'slope' },
     { who: 'narr', t: 'その日の夕方。台を背負って、坂の下に立った。' },
     { who: 'maneki', t: 'ゆくか、{name}。' },
     { who: 'me', f: 's', t: '行く。今月の家賃、まだ払ってないし。' },
