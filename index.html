@@ -62,6 +62,8 @@ button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulatio
 .mode{width:100%;text-align:left;border:3px solid var(--edge);padding:14px;margin-top:10px;display:flex;gap:12px;align-items:center;position:relative}
 .mode.story{background:#3a1d2c;box-shadow:inset 0 0 0 2px #7a3a4a}
 .mode.daily{background:#1b2a3d;box-shadow:inset 0 0 0 2px #2f5a7a}
+.mode.endless{background:#33240f;box-shadow:inset 0 0 0 2px #8a6a1e}
+.mode.lock{filter:grayscale(.8);opacity:.55}
 .mode .mi{font-size:34px;flex:none}
 .mode .mt{font-size:20px;line-height:1.2}
 .mode .md{font-size:13px;color:#e2d8f2;margin-top:4px;line-height:1.55}
@@ -324,9 +326,8 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
   <div class="title-reels"><span>🏮</span><span>🦊</span><span>🍡</span><span>🐉</span><span>🎆</span></div>
   <button class="continue hidden" id="bContinue"></button>
   <button class="mode story" id="bStory"><span class="mi">📖</span><div><div class="mt">ストーリー</div><div class="md">ばあちゃんのスロット台と、ツケの残った長屋の話。</div><div class="mp" id="storyProg"></div></div><span class="go">›</span></button>
-  <button class="mode daily" id="bDaily"><span class="mi">🎯</span><div><div class="mt">デイリーチャレンジ</div><div class="md" id="dailyDesc"></div><div class="mp" id="dailyProg"></div></div><span class="go">›</span></button>
-  <div class="sec-h">🎲 フリープレイ</div>
-  <div class="diffs" id="diffs"></div>
+  <button class="mode endless" id="bEndless"><span class="mi" id="endlessIcon">🏮</span><div><div class="mt">エンドレス</div><div class="md">家賃を払いつづけて、どこまで住めるか。5回ごとに段が上がる。</div><div class="mp" id="endlessProg"></div></div><span class="go">›</span></button>
+  <button class="mode daily" id="bDaily"><span class="mi" id="dailyIcon">🎯</span><div><div class="mt">デイリーチャレンジ</div><div class="md" id="dailyDesc"></div><div class="mp" id="dailyProg"></div></div><span class="go">›</span></button>
   <div class="title-btns">
     <button class="tbtn" id="tHelp">📖 あそびかた</button>
     <button class="tbtn" id="tDex">📚 ずかん<small id="tDexN"></small></button>
@@ -387,7 +388,7 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
 <!-- 話をえらぶ -->
 <div class="ov" id="ovChapters"><div class="sheet">
   <h2>📖 ストーリー</h2>
-  <p class="lead">話をクリアすると次の話が解放される。物語の中の家賃は、それぞれの難易度と同じルール。</p>
+  <p class="lead">話をクリアすると次の話が解放される。最終話をクリアすると、エンドレスとデイリーが解放される。</p>
   <div id="chapList"></div>
   <div class="sec">🎞️ 思い出（見たシーンをもう一度）</div>
   <div class="replay" id="replayList"></div>
@@ -428,7 +429,7 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
   <div class="vbtns">
     <button class="btn" id="mTitle">🏮 タイトルへもどる</button>
     <button class="btn" id="mDex">📚 ずかん・実績</button>
-    <button class="btn" id="mRestart">🔁 この難易度で最初から</button>
+    <button class="btn" id="mRestart">🔁 最初からやり直す</button>
     <button class="btn" data-close>とじる</button>
   </div>
 </div></div>
@@ -441,13 +442,13 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
   <div class="steps">
     <div class="stp"><div class="si">🧿</div><div><b>お守り</b><span>家賃を払うと、おコンさんがおまけを1つくれる。盤面には出ないで、ずっと効く。</span></div></div>
     <div class="stp"><div class="si">📜</div><div><b>大家の依頼</b><span>2回目の家賃から、ちょっとした頼みごとが来る。片づければ、その場でお礼がもらえる。</span></div></div>
-    <div class="stp"><div class="si">😈</div><div><b>大家の気まぐれ</b><span>HARDから先は、おコンさんの機嫌で妙なルールがつく。四すみを使うな、とか。</span></div></div>
+    <div class="stp"><div class="si">😈</div><div><b>大家の気まぐれ</b><span>話が進むと、おコンさんの機嫌で妙なルールがつく。四すみを使うな、とか。エンドレスでは第2段から。</span></div></div>
     <div class="stp"><div class="si">🎒</div><div><b>手持ちと盤面</b><span>台は20マス。手持ちが多すぎると、出番のないシンボルが出てくる。✂️で減らすのも手。</span></div></div>
     <div class="stp"><div class="si">🍴</div><div><b>食べる・消える</b><span>食べられたシンボルは、手持ちからいなくなる。</span></div></div>
     <div class="stp"><div class="si">🏘️</div><div><b>横丁のできごと</b><span>支払いのあと、ときどき横丁で何か起きる。どっちに転ぶかは、選び方しだい。</span></div></div>
-    <div class="stp"><div class="si">🎒</div><div><b>はじめの荷物</b><span>フリープレイでは、最初に持っていくシンボルを選べる。話を進めると増える。</span></div></div>
+    <div class="stp"><div class="si">🎒</div><div><b>はじめの荷物</b><span>エンドレスでは、最初に持っていくシンボルを選べる。話を進めると増える。</span></div></div>
     <div class="stp"><div class="si">🎯</div><div><b>デイリーチャレンジ</b><span>その日のお題と台の出方は、だれが遊んでも同じ。何回でもやり直せる。</span></div></div>
-    <div class="stp"><div class="si">♾️</div><div><b>エンドレス</b><span>払いきったあとも住みつづけられる。家賃は上がりつづける。</span></div></div>
+    <div class="stp"><div class="si">♾️</div><div><b>エンドレス</b><span>ストーリーをクリアすると解放。5回ごとに段が上がって、家賃も気まぐれもきつくなる。どこまで住めたかを𝕏でくらべよう。</span></div></div>
   </div>
   <div class="actions"><button class="btn" data-close>とじる</button></div>
 </div></div>
@@ -771,7 +772,14 @@ const DIFFS = {
             desc: ['家賃が高く、後半ほど急に上がる', '初期アイテム・🔄なし', '3回目から ときどき大家の気まぐれ'] },
   super:  { n: 'SUPER HARD', jp: 'ちょうむずかしい', color: '#ff5d8f', rentMul: 1.3, ramp: 0.12, rents: 14, rerolls: 0, removals: 0, extra: [], startItem: false, curseFrom: 1, curseChance: 1, luck: -0.01,
             desc: ['家賃が高い上に全14回', '2回目から毎回 大家の気まぐれ', '🔄✂️なし・レアが出にくい'] },
+  // ストーリークリアで解放。終わりなし。5回ごとに「段」が上がって、家賃と気まぐれがきつくなる
+  endless: { n: 'エンドレス', jp: 'どこまで住める？', color: '#f2c14e', rentMul: 1.25, ramp: 0, rents: Infinity, rerolls: 1, removals: 1, extra: [], startItem: true, curseFrom: 5, curseChance: 0, luck: 0, endless: true, growth: 1.2,
+            desc: ['家賃を払いつづける', '5回ごとに段が上がる', '第2段から気まぐれ'] },
 };
+const STAGE_LEN = 5;
+const endlessStage = idx => Math.floor(idx / STAGE_LEN) + 1;
+// 段ごとの気まぐれの出やすさ
+const stageCurseChance = stage => stage <= 1 ? 0 : Math.min(1, 0.3 * (stage - 1));
 
 // 家賃の基本スケジュール（難易度の倍率をかける）
 const BASE_RENTS = [
@@ -781,10 +789,10 @@ const BASE_RENTS = [
   { rent: 1100, spins: 9 }, { rent: 1400, spins: 10 }, { rent: 1750, spins: 10 },
   { rent: 2150, spins: 10 }, { rent: 2700, spins: 11 },
 ];
-function baseRent(idx) {
+function baseRent(idx, growth) {
   if (idx < BASE_RENTS.length) return BASE_RENTS[idx];
   const last = BASE_RENTS[BASE_RENTS.length - 1];
-  return { rent: Math.round(last.rent * Math.pow(1.3, idx - BASE_RENTS.length + 1)), spins: 11 };
+  return { rent: Math.round(last.rent * Math.pow(growth || 1.3, idx - BASE_RENTS.length + 1)), spins: 11 };
 }
 const round5 = x => Math.max(5, Math.round(x / 5) * 5);
 const pickOne = a => a[Math.floor(rnd() * a.length)];
@@ -828,8 +836,9 @@ let UID = 1;
 function mk(key) { return { key, id: UID++, c: 0 }; }
 
 function startPeriod(st) {
-  const D = DIFFS[st.diff], b = baseRent(st.rentIdx);
-  st.curse = st.fixedCurse || ((st.rentIdx >= D.curseFrom && rnd() < D.curseChance && !hasItem(st, 'ofuda')) ? pickOne(Object.keys(CURSES)) : null);
+  const D = DIFFS[st.diff], b = baseRent(st.rentIdx, D.growth);
+  const chance = D.endless ? stageCurseChance(endlessStage(st.rentIdx)) : D.curseChance;
+  st.curse = st.fixedCurse || ((st.rentIdx >= D.curseFrom && rnd() < chance && !hasItem(st, 'ofuda')) ? pickOne(Object.keys(CURSES)) : null);
   let rent = b.rent * D.rentMul * (1 + (D.ramp || 0) * Math.min(st.rentIdx, 13));
   if (st.curse === 'raise') rent *= 1.2;
   if (hasItem(st, 'key')) rent *= 0.9;
@@ -840,6 +849,9 @@ function startPeriod(st) {
   st.quest = st.rentIdx >= 1 ? makeQuest(st) : null;
 }
 function totalRents(st) { return DIFFS[st.diff].rents; }
+const isEndlessMode = st => !!DIFFS[st.diff].endless;
+// エンドレスで払った回数（ストーリーのあとに続けた分もふくむ）
+const endlessCount = st => isEndlessMode(st) ? st.rentIdx : st.endless ? st.rentIdx - totalRents(st) : 0;
 
 // ===== はじめの荷物 =====
 const STARTERS = {
@@ -862,7 +874,7 @@ function newGame(diff, opt) {
     diff, starter: STARTERS[opt.starter] ? opt.starter : 'basic', story: opt.story || null, daily: opt.daily || null,
     inv: [...S.inv, ...D.extra].map(mk), items: [],
     coins: 0, rentIdx: 0, rerolls: D.rerolls, removals: D.removals, totalSpins: 0, totalEarned: 0, best: 0,
-    board: null, last: null, choices: null, itemChoices: null, itemPicks: 0, endless: false, event: null, fixedCurse: opt.fixedCurse || null,
+    board: null, last: null, choices: null, itemChoices: null, itemPicks: 0, endless: !!D.endless, event: null, fixedCurse: opt.fixedCurse || null,
     stats: { eats: 0, gone: 0, quests: 0, curses: 0, removed: 0, maxInv: 0, events: 0, flags: [] },
     phase: 'spin',
   };
@@ -1181,7 +1193,7 @@ function payRent(st) {
 }
 function goEndless(st) { st.endless = true; startPeriod(st); st.itemPicks++; rollItems(st); st.phase = 'item'; }
 
-if (typeof module !== 'undefined') module.exports = { W, H, N, SYM, ITEMS, CURSES, DIFFS, RARITY, STARTERS, EVENTS, newGame, newDaily, runEvent, setRng, seededRng, spin, rollChoices, rollItems, addItem, removeSymbol, rentDue, payRent, goEndless, canReroll, mk, rarityOdds, neighbors, partners, totalRents, hasItem };
+if (typeof module !== 'undefined') module.exports = { STAGE_LEN, endlessStage, stageCurseChance, isEndlessMode, endlessCount, W, H, N, SYM, ITEMS, CURSES, DIFFS, RARITY, STARTERS, EVENTS, newGame, newDaily, runEvent, setRng, seededRng, spin, rollChoices, rollItems, addItem, removeSymbol, rentDue, payRent, goEndless, canReroll, mk, rarityOdds, neighbors, partners, totalRents, hasItem };
 
 </script>
 <script>
@@ -1807,10 +1819,10 @@ function drec(d) { return rec.diff[d] || (rec.diff[d] = { best: 0, clears: 0, en
 const ACH = [
   { id: 'first', e: '🎰', n: 'はじめの一回', d: 'はじめて まわす', c: s => s.totalSpins >= 1 },
   { id: 'rent1', e: '🏠', n: 'はじめての家賃', d: '家賃を1回払う', c: s => s.rentIdx >= 1 },
-  { id: 'clear_easy', e: '🟢', n: 'EASY クリア', d: 'EASYで家賃を全部払う' },
-  { id: 'clear_normal', e: '🔵', n: 'NORMAL クリア', d: 'NORMALで家賃を全部払う' },
-  { id: 'clear_hard', e: '🟠', n: 'HARD クリア', d: 'HARDで家賃を全部払う' },
-  { id: 'clear_super', e: '🔴', n: 'SUPER HARD クリア', d: 'SUPER HARDで家賃を全部払う' },
+  { id: 'stage2', e: '🏮', n: '二段目', d: 'エンドレスで第2段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 2 },
+  { id: 'stage4', e: '🎆', n: '四段目', d: 'エンドレスで第4段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 4 },
+  { id: 'stage6', e: '🏯', n: '六段目', d: 'エンドレスで第6段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 6 },
+  { id: 'stage8', e: '👑', n: '八段目', d: 'エンドレスで第8段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 8 },
   { id: 's50', e: '💴', n: 'いい稼ぎ', d: '1回で50コイン以上', c: (s, r) => r && r.total >= 50 },
   { id: 's150', e: '💰', n: '大もうけ', d: '1回で150コイン以上', c: (s, r) => r && r.total >= 150 },
   { id: 's500', e: '🏦', n: '千両役者', d: '1回で500コイン以上', c: (s, r) => r && r.total >= 500 },
@@ -1833,8 +1845,8 @@ const ACH = [
   { id: 'quest20', e: '🏅', n: '頼れる店子', d: '依頼を通算20回 達成する', c: () => rec.quests >= 20 },
   { id: 'curse5', e: '😈', n: '気まぐれ慣れ', d: '1回の遊びで 気まぐれを5回のりこえる', c: s => s.stats.curses >= 5 },
   { id: 'noremove', e: '✋', n: 'ありのまま', d: '✂️除去を使わずに NORMAL以上をクリア' },
-  { id: 'endless3', e: '♾️', n: 'まだまだ住む', d: 'エンドレスで3回 家賃を払う', c: s => s.endless && s.rentIdx - totalRents(s) >= 3 },
-  { id: 'endless10', e: '🏯', n: '長屋の主', d: 'エンドレスで10回 家賃を払う', c: s => s.endless && s.rentIdx - totalRents(s) >= 10 },
+  { id: 'endless3', e: '♾️', n: 'まだまだ住む', d: 'エンドレスで10回 家賃を払う', c: s => endlessCount(s) >= 10 },
+  { id: 'endless10', e: '🏯', n: '長屋の主', d: 'エンドレスで25回 家賃を払う', c: s => endlessCount(s) >= 25 },
   { id: 'spins300', e: '🔁', n: '常連さん', d: '通算300回 まわす', c: () => rec.spins >= 300 },
   { id: 'story1', e: '🏠', n: '横丁の店子', d: 'ストーリー第一話をクリア', c: () => rec.story >= 1 },
   { id: 'story2', e: '🎆', n: 'まつりの立役者', d: 'ストーリー第二話をクリア', c: () => rec.story >= 2 },
@@ -1978,7 +1990,7 @@ function showTitle() {
     cont.innerHTML = `▶ つづきから<small>${D.n}・家賃 ${saved.endless ? '♾️' : ''}${saved.rentIdx + 1}回目・もちコイン ${saved.coins}</small>`;
     cont.classList.remove('hidden');
   } else cont.classList.add('hidden');
-  armedDiff = null; renderDiffs(saved); $('#bDaily').dataset.armed = '';
+  armedDiff = null; $('#bDaily').dataset.armed = ''; $('#bEndless').dataset.armed = '';
   $('#tDexN').textContent = `${rec.seen.length}/${SYM_KEYS.length}`;
   $('#tAchN').textContent = `${rec.ach.length}/${ACH.length}`;
   $('#tSymN').textContent = SYM_KEYS.length; $('#tItemN').textContent = ITEM_KEYS.length; $('#tCurseN').textContent = Object.keys(CURSES).length;
@@ -1987,6 +1999,12 @@ function showTitle() {
   const td = todayStr(), dp = dailyPreview(td), dr = rec.daily[td];
   $('#dailyDesc').innerHTML = `${td}　お題：${CURSES[dp.curse].e}${CURSES[dp.curse].n}・${STARTERS[dp.starter].e}${STARTERS[dp.starter].n}・${ITEMS[dp.item].e}${ITEMS[dp.item].n}`;
   $('#dailyProg').textContent = dr ? `今日の最高：家賃 ${dr.best}回${dr.clear ? '・クリア👑' : ''}` : '今日はまだ挑戦していない';
+  const open = modesOpen();
+  $('#bEndless').classList.toggle('lock', !open); $('#bDaily').classList.toggle('lock', !open);
+  $('#endlessIcon').textContent = open ? '🏮' : '🔒'; $('#dailyIcon').textContent = open ? '🎯' : '🔒';
+  const eb = rec.endlessBest || 0;
+  $('#endlessProg').textContent = !open ? 'ストーリーの最終話をクリアすると解放' : eb ? `自己ベスト：家賃 ${eb}回・第${endlessStage(eb)}段` : 'まだ挑戦していない';
+  if (!open) { $('#dailyDesc').textContent = '日付ごとにお題と台の出方が全員同じ。'; $('#dailyProg').textContent = 'ストーリーの最終話をクリアすると解放'; }
   setRng(null);
   window.scrollTo(0, 0);
 }
@@ -1996,6 +2014,7 @@ function dailyPreview(td) {
   const keep = UID; const tmp = newDaily(td); setRng(null); UID = keep;
   return dailyCache[td] = { curse: tmp.fixedCurse, starter: tmp.starter, item: tmp.items.find(k => k !== STARTERS[tmp.starter].item) || tmp.items[0] };
 }
+const modesOpen = () => rec.story >= 4;
 function renderDiffs(saved) {
   $('#diffs').innerHTML = Object.entries(DIFFS).map(([k, D]) => {
     const r = drec(k);
@@ -2028,6 +2047,7 @@ function startRun(diff, opt) {
   opt = opt || {};
   setRng(null);
   st = opt.daily ? newDaily(opt.daily) : newGame(diff, opt);
+  st.bestBefore = rec.endlessBest || 0;
   rec.runs++; saveRec();
   sel = null; selItem = null;
   if (st.itemChoices) st.itemChoices.forEach(seeItem);
@@ -2212,7 +2232,7 @@ function renderHUD(coinsOverride) {
   $('#verdict').classList.toggle('ok', ok);
   $('#rentBar').style.width = Math.min(100, coins / st.rent * 100) + '%';
   $('#rentBar').classList.toggle('ok', ok);
-  $('#rentNo').textContent = st.endless ? `♾️ エンドレス ${st.rentIdx - T + 1}回目` : `${Math.min(st.rentIdx + 1, T)} / ${T} 回目`;
+  $('#rentNo').textContent = isEndlessMode(st) ? `第${endlessStage(st.rentIdx)}段・${st.rentIdx + 1}回目` : st.endless ? `♾️ エンドレス ${st.rentIdx - T + 1}回目` : `${Math.min(st.rentIdx + 1, T)} / ${T} 回目`;
   const left = Math.max(0, st.spinsLeft);
   $('#spinsLeft').textContent = left;
   $('#pips').innerHTML = Array.from({ length: st.spinsMax }, (_, k) => `<span class="${k < left ? 'on' : ''} ${k === 0 && left === 1 ? 'last' : ''}"></span>`).join('');
@@ -2439,18 +2459,19 @@ function pay() {
   if (info.questDone) { rec.quests++; toast(`📜 依頼達成！ 報酬 ${st.quest.reward.txt}`); }
   const r = st.daily ? { best: 0, clears: 0, endless: 0 } : drec(st.diff);
   if (st.daily) { const d = rec.daily[st.daily] || (rec.daily[st.daily] = { best: 0, clear: false }); d.best = Math.max(d.best, st.rentIdx); }
+  if (isEndlessMode(st)) { rec.endlessBest = Math.max(rec.endlessBest || 0, st.rentIdx); }
   if (!info.ok) {
     r.best = Math.max(r.best, st.rentIdx); saveRec(); st.phase = 'over'; sfx.bad(); save(); renderAll();
     if (st.story) playScene(CHAPTERS[st.story - 1].over, () => showEnd(false)); else showEnd(false);
     return;
   }
   r.best = Math.max(r.best, Math.min(st.rentIdx, totalRents(st)));
-  if (st.endless) r.endless = Math.max(r.endless || 0, st.rentIdx - totalRents(st));
+  if (st.endless && !isEndlessMode(st)) r.endless = Math.max(r.endless || 0, st.rentIdx - totalRents(st));
   if (before + 1 === 5 && st.inv.length <= 10) unlock('mini');
   saveRec();
   if (st.phase === 'clear') {
     r.clears++; if (st.daily) rec.daily[st.daily].clear = true;
-    saveRec(); unlock('clear_' + st.diff);
+    saveRec();
     if (st.daily) unlock('dailyclear');
     if (st.stats.removed === 0 && st.diff !== 'easy') unlock('noremove');
     sfx.mega(); save(); renderAll();
@@ -2458,7 +2479,7 @@ function pay() {
       const ch = CHAPTERS[st.story - 1];
       const firstClear = rec.story < ch.id;
       rec.story = Math.max(rec.story, ch.id); saveRec();
-      playScene(ch.id === 4 ? [ch.end, 'epilogue'] : ch.end, () => { showEnd(true); if (firstClear && ch.id < 4) setTimeout(() => toast(`📖 ${CHAPTERS[ch.id].n}「${CHAPTERS[ch.id].t}」が解放された！`), 400); checkAch(); });
+      playScene(ch.id === 4 ? [ch.end, 'epilogue'] : ch.end, () => { showEnd(true); if (firstClear && ch.id < 4) setTimeout(() => toast(`📖 ${CHAPTERS[ch.id].n}「${CHAPTERS[ch.id].t}」が解放された！`), 400); if (firstClear && ch.id === 4) setTimeout(() => toast('🏮 エンドレスとデイリーが解放された！'), 400); checkAch(); });
     } else showEnd(true);
     return;
   }
@@ -2466,9 +2487,33 @@ function pay() {
   if (st.story && !st.endless) { const mid = CHAPTERS[st.story - 1].mids[st.rentIdx]; if (mid && !scene) playScene(mid); }
   sfx.coin(); toast('家賃を払った！ 🔄+1　✂️+1' + (info.bonus.length ? '　' + info.bonus.join(' ') : ''));
   if (st.curse) setTimeout(() => toast(`😈 大家の気まぐれ：${CURSES[st.curse].e} ${CURSES[st.curse].n}`), 300);
+  if (isEndlessMode(st) && st.rentIdx % STAGE_LEN === 0) {
+    const sg = endlessStage(st.rentIdx);
+    setTimeout(() => toast(`🏮 第${sg}段へ。家賃がまた上がる${sg === 2 ? '。気まぐれも出はじめる' : ''}`), 600);
+  }
+  checkAch();
+}
+const GAME_URL = 'https://m0ch4771.github.io/yachin-spin/';
+function showEndEndless() {
+  const n = st.rentIdx, sg = endlessStage(n), best = rec.endlessBest || 0, isNew = n > 0 && n >= best && n > (st.bestBefore || 0);
+  $('#endEmo').textContent = isNew ? '👑' : '🏚️';
+  $('#endTitle').textContent = isNew ? '自己ベスト！' : '追い出された…';
+  $('#endLead').textContent = `家賃を ${n}回払って、第${sg}段まで住んだ。` + (isNew ? '' : `自己ベストは ${best}回。`);
+  $('#endStats').innerHTML = [
+    ['払った家賃', `${n}回`], ['とどいた段', `第${sg}段`], ['最高の1スピン', st.best],
+    ['合計かせぎ', st.totalEarned], ['アイテム', st.items.length], ['依頼の達成', st.stats.quests],
+  ].map(([a, b]) => `<div class="stat"><b>${b}</b><span>${a}</span></div>`).join('');
+  const top = Object.entries(st.inv.reduce((m, s) => (m[s.key] = (m[s.key] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k]) => E(k)).join('');
+  const text = `ヤチン・スピン【エンドレス】\n家賃${n}回・第${sg}段まで住んだ🏮${isNew ? '（自己ベスト）' : ''}\n最高1スピン${st.best}コイン\n編成：${top}\n#ヤチンスピン`;
+  $('#endBtns').innerHTML = `<a class="btn gold" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(GAME_URL)}" target="_blank" rel="noopener">𝕏 で記録をポストする</a>` +
+    `<button class="btn primary" id="eAgain">もう一回（エンドレス）</button><button class="btn" id="eTitle">🏮 タイトルへ</button>`;
+  $('#eAgain').onclick = () => { $('#ovEnd').classList.remove('show'); openStarter('endless'); };
+  $('#eTitle').onclick = showTitle;
+  $('#ovEnd').classList.add('show');
   checkAch();
 }
 function showEnd(win) {
+  if (isEndlessMode(st)) { showEndEndless(); return; }
   const D = DIFFS[st.diff], T = totalRents(st);
   const CH = st.story ? CHAPTERS[st.story - 1] : null;
   $('#endEmo').textContent = win ? (CH ? CH.e : '🎆') : '🏚️';
@@ -2484,13 +2529,13 @@ function showEnd(win) {
   const label = CH ? `ストーリー${CH.n}` : st.daily ? `デイリー${st.daily}` : D.n;
   const head = st.daily ? `ヤチン・スピン【デイリー ${st.daily}】家賃${Math.min(st.rentIdx, T)}/${T}回${win ? '👑' : ''}` : CH && win ? `ヤチン・スピン【${label}「${CH.t}」】クリア🏮` : win ? `ヤチン・スピン【${D.n}】クリア🎆` : st.endless ? `ヤチン・スピン【${D.n}】エンドレス${st.rentIdx - T}回♾️` : `ヤチン・スピン【${D.n}】家賃${st.rentIdx}/${T}回🏠`;
   const text = `${head}\n最高1スピン${st.best}コイン\n編成：${top}${its ? `\nお守り：${its}` : ''}\n#ヤチンスピン`;
-  const share = `<a class="btn" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">𝕏 でポストする</a>`;
+  const share = `<a class="btn" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(GAME_URL)}" target="_blank" rel="noopener">𝕏 でポストする</a>`;
   const nextCh = CH && win && CH.id < 4 ? CHAPTERS[CH.id] : null;
   $('#endBtns').innerHTML = (nextCh ? `<button class="btn gold" id="eNext">📖 つぎの話へ：${nextCh.t}</button>` : '') +
-    (win ? `<button class="btn ${nextCh ? '' : 'gold'}" id="eEndless">♾️ エンドレスで続ける</button>` : '') + share +
+    (win && CH && CH.id === 4 ? `<button class="btn gold" id="eEndless">🏮 エンドレスへ</button>` : '') + share +
     `<button class="btn primary" id="eAgain">${CH ? 'この話をもう一回' : st.daily ? 'デイリーにもう一回挑戦' : `もう一回（${D.n}）`}</button><button class="btn" id="eTitle">🏮 タイトルへ</button>`;
   if (nextCh) $('#eNext').onclick = () => { $('#ovEnd').classList.remove('show'); startRun(nextCh.diff, { story: nextCh.id, starter: 'basic' }); };
-  if (win) $('#eEndless').onclick = () => { goEndless(st); save(); $('#ovEnd').classList.remove('show'); renderAll(); toast('♾️ エンドレス開始！ 家賃はどんどん上がる'); };
+  if (win && CH && CH.id === 4) $('#eEndless').onclick = () => { $('#ovEnd').classList.remove('show'); openStarter('endless'); };
   $('#eAgain').onclick = () => { $('#ovEnd').classList.remove('show'); startRun(st.diff, st.story ? { story: st.story, starter: 'basic' } : st.daily ? { daily: todayStr() } : { starter: st.starter }); };
   $('#eTitle').onclick = showTitle;
   $('#ovEnd').classList.add('show');
@@ -2544,7 +2589,7 @@ function renderDex() {
     }).join('');
   } else if (dexTab === 'curse') {
     const ks = Object.keys(CURSES);
-    h = `<div class="progress-line">出会った：${rec.seenCurses.length} / ${ks.length}種　（HARD・SUPER HARDで出てくる）</div><div class="dex">` +
+    h = `<div class="progress-line">出会った：${rec.seenCurses.length} / ${ks.length}種　（話の後半とエンドレスで出てくる）</div><div class="dex">` +
       ks.map(k => rec.seenCurses.includes(k) ? `<div class="dex-row"><div class="de">${CURSES[k].e}</div><div><div class="dn">${CURSES[k].n}</div><div class="dd">${CURSES[k].d}</div></div></div>` : `<div class="dex-row unk"><div class="de">${CURSES[k].e}</div><div><div class="dn">？？？</div><div class="dd">まだ出会っていない</div></div></div>`).join('') + '</div>';
   } else {
     h = `<div class="progress-line">解除：${rec.ach.length} / ${ACH.length}　・通算 ${rec.spins}回まわした・依頼 ${rec.quests}回達成</div><div class="dex">` +
@@ -2579,12 +2624,22 @@ $('#tDex').onclick = () => openDex('sym');
 $('#tAch').onclick = () => openDex('ach');
 $('#mDex').onclick = () => { $('#ovMenu').classList.remove('show'); openDex('sym'); };
 $$('#dexTabs .tab').forEach(t => t.onclick = () => { dexTab = t.dataset.tab; renderDex(); });
-$('#bMenu').onclick = () => { $('#mRestart').textContent = '🔁 この難易度で最初から'; $('#mRestart').dataset.armed = ''; $('#ovMenu').classList.add('show'); };
+$('#bMenu').onclick = () => { $('#mRestart').textContent = '🔁 最初からやり直す'; $('#mRestart').dataset.armed = ''; $('#ovMenu').classList.add('show'); };
 $('#mTitle').onclick = () => { save(); showTitle(); };
 $('#mRestart').onclick = e => { const b = e.currentTarget; if (b.dataset.armed) { $('#ovMenu').classList.remove('show'); startRun(st.diff, st.story ? { story: st.story, starter: 'basic' } : st.daily ? { daily: todayStr() } : { starter: st.starter }); } else { b.dataset.armed = '1'; b.textContent = 'もう一度押すと最初から（今のデータは消える）'; } };
 $('#bStory').onclick = () => { audio(); openChapters(); };
+$('#bEndless').onclick = () => {
+  audio();
+  if (!modesOpen()) { toast('🔒 ストーリーの最終話をクリアすると解放'); return; }
+  const saved = loadSave();
+  if (inProgress(saved) && isEndlessMode(saved)) { st = saved; enterGame(); return; }
+  if (inProgress(saved) && $('#bEndless').dataset.armed !== '1') { $('#bEndless').dataset.armed = '1'; $('#endlessProg').textContent = 'もう一度タップで開始（今のつづきは消える）'; return; }
+  openStarter('endless');
+};
 $('#bDaily').onclick = () => {
-  audio(); const saved = loadSave();
+  audio();
+  if (!modesOpen()) { toast('🔒 ストーリーの最終話をクリアすると解放'); return; }
+  const saved = loadSave();
   if (inProgress(saved) && !(saved.daily === todayStr())) { if ($('#bDaily').dataset.armed !== '1') { $('#bDaily').dataset.armed = '1'; $('#dailyProg').textContent = 'もう一度タップで開始（今のつづきは消える）'; return; } }
   if (inProgress(saved) && saved.daily === todayStr()) { st = saved; enterGame(); return; }
   startRun('normal', { daily: todayStr() });

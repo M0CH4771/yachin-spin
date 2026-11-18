@@ -286,7 +286,14 @@ const DIFFS = {
             desc: ['家賃が高く、後半ほど急に上がる', '初期アイテム・🔄なし', '3回目から ときどき大家の気まぐれ'] },
   super:  { n: 'SUPER HARD', jp: 'ちょうむずかしい', color: '#ff5d8f', rentMul: 1.3, ramp: 0.12, rents: 14, rerolls: 0, removals: 0, extra: [], startItem: false, curseFrom: 1, curseChance: 1, luck: -0.01,
             desc: ['家賃が高い上に全14回', '2回目から毎回 大家の気まぐれ', '🔄✂️なし・レアが出にくい'] },
+  // ストーリークリアで解放。終わりなし。5回ごとに「段」が上がって、家賃と気まぐれがきつくなる
+  endless: { n: 'エンドレス', jp: 'どこまで住める？', color: '#f2c14e', rentMul: 1.25, ramp: 0, rents: Infinity, rerolls: 1, removals: 1, extra: [], startItem: true, curseFrom: 5, curseChance: 0, luck: 0, endless: true, growth: 1.2,
+            desc: ['家賃を払いつづける', '5回ごとに段が上がる', '第2段から気まぐれ'] },
 };
+const STAGE_LEN = 5;
+const endlessStage = idx => Math.floor(idx / STAGE_LEN) + 1;
+// 段ごとの気まぐれの出やすさ
+const stageCurseChance = stage => stage <= 1 ? 0 : Math.min(1, 0.3 * (stage - 1));
 
 // 家賃の基本スケジュール（難易度の倍率をかける）
 const BASE_RENTS = [
@@ -296,10 +303,10 @@ const BASE_RENTS = [
   { rent: 1100, spins: 9 }, { rent: 1400, spins: 10 }, { rent: 1750, spins: 10 },
   { rent: 2150, spins: 10 }, { rent: 2700, spins: 11 },
 ];
-function baseRent(idx) {
+function baseRent(idx, growth) {
   if (idx < BASE_RENTS.length) return BASE_RENTS[idx];
   const last = BASE_RENTS[BASE_RENTS.length - 1];
-  return { rent: Math.round(last.rent * Math.pow(1.3, idx - BASE_RENTS.length + 1)), spins: 11 };
+  return { rent: Math.round(last.rent * Math.pow(growth || 1.3, idx - BASE_RENTS.length + 1)), spins: 11 };
 }
 const round5 = x => Math.max(5, Math.round(x / 5) * 5);
 const pickOne = a => a[Math.floor(rnd() * a.length)];
@@ -343,8 +350,9 @@ let UID = 1;
 function mk(key) { return { key, id: UID++, c: 0 }; }
 
 function startPeriod(st) {
-  const D = DIFFS[st.diff], b = baseRent(st.rentIdx);
-  st.curse = st.fixedCurse || ((st.rentIdx >= D.curseFrom && rnd() < D.curseChance && !hasItem(st, 'ofuda')) ? pickOne(Object.keys(CURSES)) : null);
+  const D = DIFFS[st.diff], b = baseRent(st.rentIdx, D.growth);
+  const chance = D.endless ? stageCurseChance(endlessStage(st.rentIdx)) : D.curseChance;
+  st.curse = st.fixedCurse || ((st.rentIdx >= D.curseFrom && rnd() < chance && !hasItem(st, 'ofuda')) ? pickOne(Object.keys(CURSES)) : null);
   let rent = b.rent * D.rentMul * (1 + (D.ramp || 0) * Math.min(st.rentIdx, 13));
   if (st.curse === 'raise') rent *= 1.2;
   if (hasItem(st, 'key')) rent *= 0.9;
@@ -355,6 +363,9 @@ function startPeriod(st) {
   st.quest = st.rentIdx >= 1 ? makeQuest(st) : null;
 }
 function totalRents(st) { return DIFFS[st.diff].rents; }
+const isEndlessMode = st => !!DIFFS[st.diff].endless;
+// エンドレスで払った回数（ストーリーのあとに続けた分もふくむ）
+const endlessCount = st => isEndlessMode(st) ? st.rentIdx : st.endless ? st.rentIdx - totalRents(st) : 0;
 
 // ===== はじめの荷物 =====
 const STARTERS = {
@@ -377,7 +388,7 @@ function newGame(diff, opt) {
     diff, starter: STARTERS[opt.starter] ? opt.starter : 'basic', story: opt.story || null, daily: opt.daily || null,
     inv: [...S.inv, ...D.extra].map(mk), items: [],
     coins: 0, rentIdx: 0, rerolls: D.rerolls, removals: D.removals, totalSpins: 0, totalEarned: 0, best: 0,
-    board: null, last: null, choices: null, itemChoices: null, itemPicks: 0, endless: false, event: null, fixedCurse: opt.fixedCurse || null,
+    board: null, last: null, choices: null, itemChoices: null, itemPicks: 0, endless: !!D.endless, event: null, fixedCurse: opt.fixedCurse || null,
     stats: { eats: 0, gone: 0, quests: 0, curses: 0, removed: 0, maxInv: 0, events: 0, flags: [] },
     phase: 'spin',
   };
@@ -696,4 +707,4 @@ function payRent(st) {
 }
 function goEndless(st) { st.endless = true; startPeriod(st); st.itemPicks++; rollItems(st); st.phase = 'item'; }
 
-if (typeof module !== 'undefined') module.exports = { W, H, N, SYM, ITEMS, CURSES, DIFFS, RARITY, STARTERS, EVENTS, newGame, newDaily, runEvent, setRng, seededRng, spin, rollChoices, rollItems, addItem, removeSymbol, rentDue, payRent, goEndless, canReroll, mk, rarityOdds, neighbors, partners, totalRents, hasItem };
+if (typeof module !== 'undefined') module.exports = { STAGE_LEN, endlessStage, stageCurseChance, isEndlessMode, endlessCount, W, H, N, SYM, ITEMS, CURSES, DIFFS, RARITY, STARTERS, EVENTS, newGame, newDaily, runEvent, setRng, seededRng, spin, rollChoices, rollItems, addItem, removeSymbol, rentDue, payRent, goEndless, canReroll, mk, rarityOdds, neighbors, partners, totalRents, hasItem };
