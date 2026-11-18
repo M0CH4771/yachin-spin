@@ -107,6 +107,14 @@ button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulatio
 #scene .sc-title{position:absolute;top:30%;left:0;right:0;text-align:center;font-size:26px;color:#ffe2a8;text-shadow:3px 3px 0 #a32f28,6px 6px 0 #0b0812;animation:fade .6s}
 #scene .sc-skip{position:absolute;top:12px;right:12px;border:3px solid var(--edge);background:var(--panel2);color:#fff;padding:6px 12px;font-size:13px;z-index:3}
 #scene .sc-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+#scene.cgin{animation:cgin .6s ease-out}
+@keyframes cgin{from{filter:brightness(2.2) saturate(.4)}to{filter:none}}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.gallery button{position:relative;aspect-ratio:9/16;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--rim);background:#140f1e center top/cover no-repeat;padding:0}
+.gallery button span{position:absolute;left:0;right:0;bottom:0;background:#0b0812d0;font-size:11px;padding:3px 2px;line-height:1.3}
+.gallery button.lock{background-image:none!important;display:grid;place-items:center;font-size:22px;color:var(--dim)}
+#cgView{position:fixed;inset:0;z-index:80;background:#0b0812 center/contain no-repeat;display:none}
+#cgView.show{display:block;animation:fade .2s}
 #scene .sc-flash.go{animation:flash .5s steps(4)}
 @keyframes flash{0%{opacity:.9}100%{opacity:0}}
 #scene .sc-portrait{align-self:flex-end;margin:0 max(14px,calc(50% - 248px)) -3px 0;width:min(40vw,168px);aspect-ratio:1;z-index:1;background:#14101e;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px #6a5a8a,5px 5px 0 #0009;padding:5px;display:grid;place-items:center;animation:fade .25s steps(3)}
@@ -386,12 +394,15 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
 </div>
 
 <!-- 話をえらぶ -->
+<div id="cgView"></div>
 <div class="ov" id="ovChapters"><div class="sheet">
   <h2>📖 ストーリー</h2>
   <p class="lead">話をクリアすると次の話が解放される。最終話をクリアすると、エンドレスとデイリーが解放される。</p>
   <div id="chapList"></div>
   <div class="sec">🎞️ 思い出（見たシーンをもう一度）</div>
   <div class="replay" id="replayList"></div>
+  <div class="sec">🖼️ 挿絵 <small id="cgN" style="color:var(--mute)"></small></div>
+  <div class="gallery" id="cgList"></div>
   <div class="actions"><button class="btn" data-close>とじる</button></div>
 </div></div>
 
@@ -542,7 +553,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
   del(k) { try { localStorage.removeItem(k); } catch (e) {} },
 };
-const blankRec = () => ({ diff: {}, bestSpin: 0, seen: [], seenItems: [], seenCurses: [], ach: [], spins: 0, quests: 0, runs: 0, story: 0, name: 'ツグミ', scenes: [], daily: {}, events: 0, lastStarter: 'basic' });
+const blankRec = () => ({ diff: {}, bestSpin: 0, seen: [], seenItems: [], seenCurses: [], ach: [], spins: 0, quests: 0, runs: 0, story: 0, name: 'ツグミ', scenes: [], daily: {}, events: 0, lastStarter: 'basic', cgs: [] });
 let rec = Object.assign(blankRec(), store.get(REC) || {});
 const E = k => SYM[k].e;
 const SYM_KEYS = Object.keys(SYM), ITEM_KEYS = Object.keys(ITEMS);
@@ -706,16 +717,25 @@ function setBg(k) {
     $('#scDeco').innerHTML = '';
   } else { sc.style.background = b.g; $('#scDeco').innerHTML = b.d.map(n => spr(n)).join(''); }
 }
+// 挿絵を全画面に出す。次の { bg } まで、顔窓はかくす
+function setCg(k) {
+  const sc = $('#scene');
+  sc.style.background = `linear-gradient(180deg, rgba(12,9,20,0) 0%, rgba(12,9,20,0) 62%, rgba(12,9,20,.7) 100%), url(cg/${k}.jpg) center top / cover no-repeat, #140f1e`;
+  $('#scDeco').innerHTML = ''; scene.cg = k;
+  sc.classList.remove('cgin'); void sc.offsetWidth; sc.classList.add('cgin');
+  if (!rec.cgs.includes(k)) { rec.cgs.push(k); saveRec(); }
+}
 // 会話シーンで使う背景を先に読みこんでおく
 const bgCache = {};
-function preloadBgs(lines) { lines.forEach(l => { const b = l.bg && BGS[l.bg]; if (b && b.img && !bgCache[b.img]) { bgCache[b.img] = new Image(); bgCache[b.img].src = b.img; } }); }
+function preloadBgs(lines) { lines.forEach(l => { const b = l.bg && BGS[l.bg]; const src = l.cg ? `cg/${l.cg}.jpg` : b && b.img; if (src && !bgCache[src]) { bgCache[src] = new Image(); bgCache[src].src = src; } }); }
 function nextLine() {
   if (!scene || scene.waitInput) return;
   if (scene.typing) { clearInterval(scene.typing); scene.typing = null; $('#scText').textContent = scene.full; $('#scNext').style.display = ''; return; }
   scene.i++;
   const L = scene.lines[scene.i];
   if (!L) { endScene(); return; }
-  if (L.bg) setBg(L.bg);
+  if (L.bg) { setBg(L.bg); scene.cg = null; }
+  if (L.cg) setCg(L.cg);
   if (L.fx === 'flash') { const f = $('#scFlash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); tone(1200, 0.3, 'triangle', 0.05, -600); }
   if (L.cmd === 'name') { askName(); return; }
   if (L.title) {
@@ -729,7 +749,7 @@ function nextLine() {
   const C = CHARS[L.who] || CHARS.narr;
   const nm = L.anon ? '？？？' : fillName(C.n);
   $('#scName').textContent = nm; $('#scName').style.display = nm ? '' : 'none'; $('#scName').style.color = C.c || '#fff';
-  $('#scPortrait').innerHTML = L.anon ? '<span class="anon">？</span>' : C.img ? `<img src="${BUSTS[C.img + '_' + (L.f || 'n')] || BUSTS[C.img + '_n']}" alt="">` : ''; $('#scPortrait').style.visibility = (C.img || L.anon) ? 'visible' : 'hidden';
+  $('#scPortrait').innerHTML = L.anon ? '<span class="anon">？</span>' : C.img ? `<img src="${BUSTS[C.img + '_' + (L.f || 'n')] || BUSTS[C.img + '_n']}" alt="">` : ''; $('#scPortrait').style.visibility = ((C.img || L.anon) && !scene.cg) ? 'visible' : 'hidden';
   $('#scPortrait').style.animation = 'none'; void $('#scPortrait').offsetWidth; $('#scPortrait').style.animation = '';
   const txt = $('#scText'); txt.className = 'sc-text' + (L.who === 'narr' ? ' narr' : '');
   scene.full = fillName(L.t); txt.textContent = ''; $('#scNext').style.display = 'none'; $('#scInput').innerHTML = '';
@@ -760,6 +780,7 @@ function endScene() {
   d && d();
 }
 $('#scene').addEventListener('click', () => { audio(); nextLine(); });
+$('#cgView').addEventListener('click', () => $('#cgView').classList.remove('show'));
 $('#scSkip').onclick = e => {
   e.stopPropagation(); if (!scene) return;
   const rest = scene.lines.slice(scene.i + 1);
@@ -873,6 +894,12 @@ function openChapters() {
   const seen = Object.keys(names).filter(k => rec.scenes.includes(k));
   $('#replayList').innerHTML = seen.length ? seen.map(k => `<button data-s="${k}">${names[k]}</button>`).join('') : '<span class="muted" style="font-size:12px">まだ見たシーンはない</span>';
   $$('#replayList button').forEach(b => b.onclick = () => playScene(b.dataset.s));
+  const cgk = Object.keys(CGS);
+  $('#cgN').textContent = `${rec.cgs.length} / ${cgk.length}`;
+  $('#cgList').innerHTML = cgk.map(k => rec.cgs.includes(k)
+    ? `<button data-cg="${k}" style="background-image:url(cg/${k}.jpg)"><span>${CGS[k].t}</span></button>`
+    : `<button class="lock" disabled>🔒<span>${CGS[k].ch}</span></button>`).join('');
+  $$('#cgList button[data-cg]').forEach(b => b.onclick = () => { $('#cgView').style.backgroundImage = `url(cg/${b.dataset.cg}.jpg)`; $('#cgView').classList.add('show'); });
   $('#ovChapters').classList.add('show');
 }
 function enterGame() {

@@ -107,6 +107,14 @@ button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulatio
 #scene .sc-title{position:absolute;top:30%;left:0;right:0;text-align:center;font-size:26px;color:#ffe2a8;text-shadow:3px 3px 0 #a32f28,6px 6px 0 #0b0812;animation:fade .6s}
 #scene .sc-skip{position:absolute;top:12px;right:12px;border:3px solid var(--edge);background:var(--panel2);color:#fff;padding:6px 12px;font-size:13px;z-index:3}
 #scene .sc-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+#scene.cgin{animation:cgin .6s ease-out}
+@keyframes cgin{from{filter:brightness(2.2) saturate(.4)}to{filter:none}}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.gallery button{position:relative;aspect-ratio:9/16;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--rim);background:#140f1e center top/cover no-repeat;padding:0}
+.gallery button span{position:absolute;left:0;right:0;bottom:0;background:#0b0812d0;font-size:11px;padding:3px 2px;line-height:1.3}
+.gallery button.lock{background-image:none!important;display:grid;place-items:center;font-size:22px;color:var(--dim)}
+#cgView{position:fixed;inset:0;z-index:80;background:#0b0812 center/contain no-repeat;display:none}
+#cgView.show{display:block;animation:fade .2s}
 #scene .sc-flash.go{animation:flash .5s steps(4)}
 @keyframes flash{0%{opacity:.9}100%{opacity:0}}
 #scene .sc-portrait{align-self:flex-end;margin:0 max(14px,calc(50% - 248px)) -3px 0;width:min(40vw,168px);aspect-ratio:1;z-index:1;background:#14101e;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px #6a5a8a,5px 5px 0 #0009;padding:5px;display:grid;place-items:center;animation:fade .25s steps(3)}
@@ -386,12 +394,15 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
 </div>
 
 <!-- 話をえらぶ -->
+<div id="cgView"></div>
 <div class="ov" id="ovChapters"><div class="sheet">
   <h2>📖 ストーリー</h2>
   <p class="lead">話をクリアすると次の話が解放される。最終話をクリアすると、エンドレスとデイリーが解放される。</p>
   <div id="chapList"></div>
   <div class="sec">🎞️ 思い出（見たシーンをもう一度）</div>
   <div class="replay" id="replayList"></div>
+  <div class="sec">🖼️ 挿絵 <small id="cgN" style="color:var(--mute)"></small></div>
+  <div class="gallery" id="cgList"></div>
   <div class="actions"><button class="btn" data-close>とじる</button></div>
 </div></div>
 
@@ -1229,6 +1240,25 @@ const BGS = {
   slope:    { img: 'bg/slope.jpg',    g: '#3a2440', d: ['sun'] },
 };
 
+// 挿絵（cg/ フォルダ）。会話の途中で { cg: 'key' } と書くと全画面に出る。次の { bg } で消える
+const CGS = {
+  maneki:  { t: '猫じゃない、招き猫じゃ', ch: '序章' },
+  yokocho: { t: 'はじめての横丁', ch: '序章' },
+  okon:    { t: 'おコンとの出会い', ch: '序章' },
+  onigiri: { t: '戸の前のおにぎり', ch: '第一話' },
+  hi:      { t: 'これはあんたの火だ', ch: '第一話' },
+  ohana:   { t: '桜の木のおハナ', ch: '第二話' },
+  happa:   { t: '葉っぱの提灯事件', ch: '第二話' },
+  mado:    { t: '灯籠の先の窓', ch: '第二話' },
+  dango:   { t: '石段のだんご', ch: '第三話' },
+  rokujuu: { t: '六十年', ch: '第三話' },
+  minna:   { t: 'みんなで灯籠を', ch: '最終話' },
+  sen:     { t: '千の灯り', ch: '最終話' },
+  tanako:  { t: '店子　ツグミ', ch: 'エピローグ' },
+  saisho:  { t: '最初から、あなたのよ', ch: 'エピローグ' },
+  saka:    { t: '坂の下で', ch: 'エピローグ' },
+};
+
 const SCENES = {
   // ───────────── 序章 ─────────────
   prologue: [
@@ -1244,10 +1274,12 @@ const SCENES = {
     { who: 'narr', t: 'ガコン。' },
     { bg: 'room', fx: 'flash' },
     { who: 'maneki', anon: true, t: '……ぬし、引くならもっと腰を入れんか。' },
+    { cg: 'maneki' },
     { who: 'me', f: 'o', t: 'しゃべった。箱が。' },
     { who: 'maneki', t: '箱ではない。わしはマネキ。この台に住んでおる、招き猫じゃ。' },
     { who: 'me', t: '猫……' },
     { who: 'maneki', f: 'x', t: '猫じゃない、招き猫じゃ。そこ大事。' },
+    { bg: 'room' },
     { who: 'maneki', t: 'ぬし、ハナのにおいがするのう。孫か。' },
     { who: 'me', t: '……孫だけど。ばあちゃんを知ってるの？' },
     { who: 'maneki', t: '知っとるとも。ハナが十七の夏、この台をまわしとったのは、わしの目の前じゃ。' },
@@ -1266,17 +1298,21 @@ const SCENES = {
     { cmd: 'name' },
     { who: 'maneki', t: '{name}か。よし、レバーをもう一回じゃ。今度は思いきり。' },
     { bg: 'yokocho', fx: 'flash' },
+    { cg: 'yokocho' },
     { who: 'narr', t: '気がつくと、提灯だらけの路地に立っていた。台は、背中の木箱に収まっている。' },
     { who: 'narr', t: '焼きイカのにおい。遠くで太鼓。どの屋台の店番も、人の形をしていない。' },
     { who: 'me', f: 'o', t: '……夢？' },
     { who: 'maneki', t: '夢なら腹は減らん。どうじゃ、減っとるじゃろ。' },
     { who: 'narr', t: '減っていた。' },
+    { bg: 'yokocho' },
     { who: 'maneki', t: 'ここの提灯は、表の者が「お祭り」を覚えとるあいだだけ灯る。忘れられれば、消える。消えきれば、横丁はたたまれる。' },
     { who: 'maneki', t: 'それと、この台。ここでまわすと「縁銭」が出る。表とのつながり——縁を、お金に変える台じゃ。招き猫じゃからな。' },
     { who: 'okon', anon: true, t: 'ちょいと。そこの箱持ち。' },
+    { cg: 'okon' },
     { who: 'narr', t: '狐の面を頭にのせた女の人が、算盤を片手に、こっちを見ていた。後ろで、白い尾がいくつもゆれている。' },
     { who: 'okon', t: '見ない顔だね。その台……ハナのかい。' },
     { who: 'me', t: 'おコンさん、ですか。ハナの孫です。ばあちゃんが、あなたにツケを返さなきゃって。' },
+    { bg: 'yokocho' },
     { who: 'okon', f: 'o', t: '……。' },
     { who: 'okon', t: '三十縁銭。帳簿に、まだ残ってるよ。' },
     { who: 'me', t: '払います。いま、これしかないけど。' },
@@ -1315,8 +1351,10 @@ const SCENES = {
   ],
   ch1m2: [
     { bg: 'nagaya' },
+    { cg: 'onigiri' },
     { who: 'narr', t: '翌朝。戸の前に、梅干しのおにぎりが二つ置いてあった。' },
     { who: 'me', f: 's', t: '……ほんとに来た。' },
+    { bg: 'yojohan' },
     { who: 'maneki', t: '口は悪いが、面倒見はええ。そういう狐じゃ。' },
     { who: 'me', t: 'ねえマネキ。縁銭って、結局なんなの。' },
     { who: 'maneki', t: '表の者が、祭りや横丁を思い出すと、細い糸みたいなものがこっちに届く。それが縁じゃ。' },
@@ -1370,6 +1408,7 @@ const SCENES = {
     { bg: 'dawn' },
     { who: 'narr', t: '十二回目の支払いを終えたころ、路地の向こうが白みはじめた。' },
     { who: 'okon', t: 'はい、確かに。……これで、あんたもここの店子だ。' },
+    { cg: 'hi' },
     { who: 'narr', t: 'おコンさんが戸口の提灯に火を入れた。部屋の中が、はじめて明るくなった。' },
     { who: 'okon', t: 'これはあんたの家賃で灯ってる火だ。消すんじゃないよ。' },
     { who: 'me', f: 's', t: 'また来てもいいですか。' },
@@ -1392,10 +1431,12 @@ const SCENES = {
     { who: 'narr', t: '横丁のなつまつりは、七日間つづく。通りに屋台がならび、提灯の数が倍になる。' },
     { who: 'ohana', anon: true, t: 'あ、新しい人。{name}ちゃん？ ハナさんのお孫さんの。' },
     { who: 'me', f: 'o', t: 'そうだけど……あなたは？' },
+    { cg: 'ohana' },
     { who: 'ohana', f: 's', t: 'おハナ。長屋の裏の、桜の木。' },
     { who: 'me', t: '木。' },
     { who: 'ohana', t: 'うん、木。夜だけこうして歩けるの。' },
     { who: 'ohana', f: 's', t: '名前はね、ハナさんにもらったの。「ハナのお花だから、おハナ」って。だから、わたしとハナさんは別の人。まぎらわしくて、ごめんね。' },
+    { bg: 'festival' },
     { who: 'okon', t: 'まつりの間は、家賃がまつり価格だよ。' },
     { who: 'me', t: 'なんで上がるんですか。' },
     { who: 'okon', t: '提灯が倍になれば、灯り代も倍になる。まつりの火は、横丁中の家賃で灯してるんだ。' },
@@ -1414,6 +1455,7 @@ const SCENES = {
   ],
   ch2m4: [
     { bg: 'dim' },
+    { cg: 'happa' },
     { who: 'narr', t: 'その夜、通りの提灯がいくつか、葉っぱに変わっていた。' },
     { who: 'ponta', f: 'o', t: 'ちがう！ オイラじゃない！ ……いや、オイラだけど！ ちょっと目立ちたかっただけで！' },
     { who: 'ohana', t: 'ポン太くん、それ、元に戻せないやつでしょう。' },
@@ -1454,9 +1496,11 @@ const SCENES = {
   ch2e: [
     { bg: 'river' },
     { who: 'narr', t: 'まつりの最後の夜。川の上で花火があがり、みんなが灯籠を流した。' },
+    { cg: 'mado' },
     { who: 'narr', t: '{name}の灯籠は、ゆっくり川下へ流れて——水面に、知っている窓が映った。' },
     { who: 'me', f: 'o', t: '……施設の窓だ。ばあちゃんの部屋。' },
     { who: 'narr', t: '窓の向こうで、ばあちゃんが起きあがって、外を見ていた。灯りを見つけたみたいに、少し笑った。' },
+    { bg: 'river' },
     { who: 'ohana', t: '灯籠はね、表まで届く灯りなの。ひとつ流すと、だれかが一晩、まつりを思い出してくれる。' },
     { who: 'ohana', t: 'そうすると、横丁に届く縁が、ほんの少し太くなる。' },
     { who: 'maneki', t: '百年に一度、宵まつりという夜がある。その夜に千の灯籠をいっぺんに流せば、表じゅうが祭りを思い出す、と言われとる。' },
@@ -1514,6 +1558,7 @@ const SCENES = {
     { who: 'narr', t: 'ゴンゾウが、ひょうたんを片手に、通りの石段に座っていた。' },
     { who: 'gonzo', f: 'x', t: '……おまえか。だんご、持ってないか。' },
     { who: 'me', t: 'あります。三本。' },
+    { cg: 'dango' },
     { who: 'narr', t: 'ゴンゾウは三本まとめて口に入れて、しばらく黙っていた。' },
     { who: 'gonzo', t: '昔、人間の店子がいた。毎晩、だんごを一本くれた。' },
     { who: 'gonzo', t: 'そいつは帰る前の晩、おコンと約束した。「この横丁の灯りは、消さないでおいて。また来るから」と。' },
@@ -1550,6 +1595,7 @@ const SCENES = {
     { who: 'okon', f: 'x', t: '……六十年待って、来たのは孫だったけどね。バカだろう。' },
     { who: 'me', t: 'ばあちゃん、言ってました。約束、守れなかったって。大人になったら、道が見えなくなったって。' },
     { who: 'okon', f: 'o', t: '……そうかい。' },
+    { cg: 'rokujuu' },
     { who: 'narr', t: 'おコンさんは少しだけ笑って、それから算盤でこっちの頭を小突いた。' },
     { who: 'okon', f: 's', t: '余計なことは言わなくていいんだよ。' },
     { who: 'narr', t: '——第三話　おしまい' },
@@ -1589,6 +1635,7 @@ const SCENES = {
   ],
   ch4m4: [
     { bg: 'festival' },
+    { cg: 'minna' },
     { who: 'ponta', f: 's', t: '灯籠の骨組み、百個運んできた！ ……本物だぞ！ 藁人のところからもらってきた！ 一回なめて確かめた！' },
     { who: 'ohana', f: 's', t: 'わたしは、枝を全部光らせるね。灯籠を作るあいだの明かりくらいには、なるから。少し、くたびれちゃうけど。' },
     { who: 'gonzo', t: '重いものは、オレが運ぶ。' },
@@ -1624,6 +1671,7 @@ const SCENES = {
   ],
   ch4e: [
     { bg: 'river', fx: 'flash' },
+    { cg: 'sen' },
     { who: 'narr', t: '最後の家賃を払ったとき、千の灯籠が、いっぺんに川へ流れ出した。' },
     { who: 'narr', t: '川が光の帯になって、横丁が昼みたいに明るくなった。消えていた提灯が、端から順に灯っていく。' },
     { who: 'ponta', f: 's', t: 'やった、やったぞ！ オイラの折った灯籠が、いちばん明るい！' },
@@ -1649,6 +1697,7 @@ const SCENES = {
     { who: 'okon', t: '……確かに。利子は、まけといてやるよ。' },
     { who: 'me', t: 'これで、ばあちゃんとここの縁、切れちゃうんですか。' },
     { who: 'okon', f: 's', t: 'ばかだね。' },
+    { cg: 'tanako' },
     { who: 'narr', t: 'おコンさんは同じページの、そのすぐ下に、新しく一行書き足した。「店子　{name}」。' },
     { who: 'okon', t: '来月の家賃も、ちゃんと持ってきな。部屋は空けとくから。' },
     { who: 'maneki', t: '素直じゃないのう。' },
@@ -1668,8 +1717,10 @@ const SCENES = {
     { who: 'grandma', f: 'x', t: 'あら。じゃあ、ふたりして同じことをしてたのね。' },
     { who: 'me', t: 'でも大丈夫。帳簿に、わたしの名前が書いてあるから。' },
     { who: 'me', t: 'ねえ、この家は売っちゃうけど、台はわたしがもらってもいい？' },
+    { cg: 'saisho' },
     { who: 'grandma', f: 's', t: '最初から、あなたのよ。' },
     { bg: 'slope' },
+    { cg: 'saka' },
     { who: 'narr', t: 'その日の夕方。台を背負って、坂の下に立った。' },
     { who: 'maneki', t: 'ゆくか、{name}。' },
     { who: 'me', f: 's', t: '行く。今月の家賃、まだ払ってないし。' },
@@ -1761,7 +1812,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
   del(k) { try { localStorage.removeItem(k); } catch (e) {} },
 };
-const blankRec = () => ({ diff: {}, bestSpin: 0, seen: [], seenItems: [], seenCurses: [], ach: [], spins: 0, quests: 0, runs: 0, story: 0, name: 'ツグミ', scenes: [], daily: {}, events: 0, lastStarter: 'basic' });
+const blankRec = () => ({ diff: {}, bestSpin: 0, seen: [], seenItems: [], seenCurses: [], ach: [], spins: 0, quests: 0, runs: 0, story: 0, name: 'ツグミ', scenes: [], daily: {}, events: 0, lastStarter: 'basic', cgs: [] });
 let rec = Object.assign(blankRec(), store.get(REC) || {});
 const E = k => SYM[k].e;
 const SYM_KEYS = Object.keys(SYM), ITEM_KEYS = Object.keys(ITEMS);
@@ -1925,16 +1976,25 @@ function setBg(k) {
     $('#scDeco').innerHTML = '';
   } else { sc.style.background = b.g; $('#scDeco').innerHTML = b.d.map(n => spr(n)).join(''); }
 }
+// 挿絵を全画面に出す。次の { bg } まで、顔窓はかくす
+function setCg(k) {
+  const sc = $('#scene');
+  sc.style.background = `linear-gradient(180deg, rgba(12,9,20,0) 0%, rgba(12,9,20,0) 62%, rgba(12,9,20,.7) 100%), url(cg/${k}.jpg) center top / cover no-repeat, #140f1e`;
+  $('#scDeco').innerHTML = ''; scene.cg = k;
+  sc.classList.remove('cgin'); void sc.offsetWidth; sc.classList.add('cgin');
+  if (!rec.cgs.includes(k)) { rec.cgs.push(k); saveRec(); }
+}
 // 会話シーンで使う背景を先に読みこんでおく
 const bgCache = {};
-function preloadBgs(lines) { lines.forEach(l => { const b = l.bg && BGS[l.bg]; if (b && b.img && !bgCache[b.img]) { bgCache[b.img] = new Image(); bgCache[b.img].src = b.img; } }); }
+function preloadBgs(lines) { lines.forEach(l => { const b = l.bg && BGS[l.bg]; const src = l.cg ? `cg/${l.cg}.jpg` : b && b.img; if (src && !bgCache[src]) { bgCache[src] = new Image(); bgCache[src].src = src; } }); }
 function nextLine() {
   if (!scene || scene.waitInput) return;
   if (scene.typing) { clearInterval(scene.typing); scene.typing = null; $('#scText').textContent = scene.full; $('#scNext').style.display = ''; return; }
   scene.i++;
   const L = scene.lines[scene.i];
   if (!L) { endScene(); return; }
-  if (L.bg) setBg(L.bg);
+  if (L.bg) { setBg(L.bg); scene.cg = null; }
+  if (L.cg) setCg(L.cg);
   if (L.fx === 'flash') { const f = $('#scFlash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); tone(1200, 0.3, 'triangle', 0.05, -600); }
   if (L.cmd === 'name') { askName(); return; }
   if (L.title) {
@@ -1948,7 +2008,7 @@ function nextLine() {
   const C = CHARS[L.who] || CHARS.narr;
   const nm = L.anon ? '？？？' : fillName(C.n);
   $('#scName').textContent = nm; $('#scName').style.display = nm ? '' : 'none'; $('#scName').style.color = C.c || '#fff';
-  $('#scPortrait').innerHTML = L.anon ? '<span class="anon">？</span>' : C.img ? `<img src="${BUSTS[C.img + '_' + (L.f || 'n')] || BUSTS[C.img + '_n']}" alt="">` : ''; $('#scPortrait').style.visibility = (C.img || L.anon) ? 'visible' : 'hidden';
+  $('#scPortrait').innerHTML = L.anon ? '<span class="anon">？</span>' : C.img ? `<img src="${BUSTS[C.img + '_' + (L.f || 'n')] || BUSTS[C.img + '_n']}" alt="">` : ''; $('#scPortrait').style.visibility = ((C.img || L.anon) && !scene.cg) ? 'visible' : 'hidden';
   $('#scPortrait').style.animation = 'none'; void $('#scPortrait').offsetWidth; $('#scPortrait').style.animation = '';
   const txt = $('#scText'); txt.className = 'sc-text' + (L.who === 'narr' ? ' narr' : '');
   scene.full = fillName(L.t); txt.textContent = ''; $('#scNext').style.display = 'none'; $('#scInput').innerHTML = '';
@@ -1979,6 +2039,7 @@ function endScene() {
   d && d();
 }
 $('#scene').addEventListener('click', () => { audio(); nextLine(); });
+$('#cgView').addEventListener('click', () => $('#cgView').classList.remove('show'));
 $('#scSkip').onclick = e => {
   e.stopPropagation(); if (!scene) return;
   const rest = scene.lines.slice(scene.i + 1);
@@ -2092,6 +2153,12 @@ function openChapters() {
   const seen = Object.keys(names).filter(k => rec.scenes.includes(k));
   $('#replayList').innerHTML = seen.length ? seen.map(k => `<button data-s="${k}">${names[k]}</button>`).join('') : '<span class="muted" style="font-size:12px">まだ見たシーンはない</span>';
   $$('#replayList button').forEach(b => b.onclick = () => playScene(b.dataset.s));
+  const cgk = Object.keys(CGS);
+  $('#cgN').textContent = `${rec.cgs.length} / ${cgk.length}`;
+  $('#cgList').innerHTML = cgk.map(k => rec.cgs.includes(k)
+    ? `<button data-cg="${k}" style="background-image:url(cg/${k}.jpg)"><span>${CGS[k].t}</span></button>`
+    : `<button class="lock" disabled>🔒<span>${CGS[k].ch}</span></button>`).join('');
+  $$('#cgList button[data-cg]').forEach(b => b.onclick = () => { $('#cgView').style.backgroundImage = `url(cg/${b.dataset.cg}.jpg)`; $('#cgView').classList.add('show'); });
   $('#ovChapters').classList.add('show');
 }
 function enterGame() {
