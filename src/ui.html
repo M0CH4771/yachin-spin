@@ -304,6 +304,9 @@ h1{font-size:18px;margin:0}
 .detail{margin-top:12px;background:var(--panel2);border:3px solid var(--edge);padding:10px 12px;display:flex;gap:12px;align-items:center;min-height:70px}
 .detail .de{font-size:34px}
 .detail .dd{font-size:13px;color:#e2d8f2;line-height:1.6}
+.detail:has(.removal-preview){flex-wrap:wrap}
+.removal-preview{flex:0 0 100%;border-top:1px solid var(--edge);padding-top:8px;font-size:13px;line-height:1.6;color:var(--ink)}
+.removal-preview strong{color:var(--gold)}
 .tabs{display:flex;gap:6px;margin:4px 0 12px;position:sticky;top:-18px;background:var(--panel);padding:8px 0;z-index:2}
 .tab{flex:1;border:3px solid var(--edge);background:var(--panel2);padding:7px 4px;font-size:13px}
 .tab.on{background:var(--gold);color:#2a1a00}
@@ -1729,6 +1732,23 @@ function showEnd(win) {
 // 手持ち
 // =========================================================
 let invSel = null;
+// 手動除去と同じ計算で、選んだ種類の中から最も稼ぎが低い個体の値を出す
+function removalPreviewValue(key) {
+  const d = SYM[key];
+  if (!d) return null;
+  let min = Infinity;
+  st.inv.forEach(s => {
+    if (s.key !== key) return;
+    min = Math.min(min, d.v + (d.store ? (s.c || 0) : 0));
+  });
+  return Number.isFinite(min) ? min : null;
+}
+function renderInvDetail(key) {
+  const value = removalPreviewValue(key);
+  const copies = st.inv.filter(s => s.key === key).length;
+  $('#invDetail').innerHTML = symRow(key) +
+    `<div class="removal-preview">✂️ 除去される個体：<strong>現在の稼ぎ ${value} コイン</strong>（成長分込み）${copies > 1 ? `<br>${copies}個のうち、最も稼ぎが低い個体を除去します。` : ''}</div>`;
+}
 function openInv() {
   invSel = null;
   const counts = st.inv.reduce((m, s) => (m[s.key] = (m[s.key] || 0) + 1, m), {});
@@ -1736,11 +1756,11 @@ function openInv() {
   const room = N - (st.curse === 'fog' ? 4 : 0);
   $('#invLead').innerHTML = `${st.inv.length}個持っている。盤面は${room}マス${st.inv.length > room ? `なので、<b style="color:var(--gold)">毎回ランダムに${room}個だけ</b>出る` : 'なので、全部が毎回出る'}。<br>✂️除去の残り：${st.removals}回${hasItem(st, 'broom') ? '（🧹除去するたび+8コイン）' : ''}`;
   $('#invGrid').innerHTML = keys.map(k => `<button class="inv-item" data-k="${k}" style="border-color:${SYM[k].r === 'C' ? '' : RARITY[SYM[k].r].color + '88'}">${E(k)}<span class="n">×${counts[k]}</span></button>`).join('');
-  $$('#invGrid .inv-item').forEach(b => b.onclick = () => { invSel = b.dataset.k; $$('#invGrid .inv-item').forEach(x => x.classList.toggle('sel', x === b)); $('#invDetail').innerHTML = symRow(invSel); updRemove(); });
+  $('#invGrid .inv-item').forEach(b => b.onclick = () => { invSel = b.dataset.k; $('#invGrid .inv-item').forEach(x => x.classList.toggle('sel', x === b)); renderInvDetail(invSel); updRemove(); });
   $('#invDetail').innerHTML = '<div class="dd" style="color:var(--mute)">シンボルをタップすると説明が出る。いらないものは除去できる。</div>';
   updRemove(); $('#ovInv').classList.add('show');
 }
-function updRemove() { const b = $('#bRemove'); b.disabled = !invSel || st.removals <= 0 || !['spin', 'choose', 'item'].includes(st.phase); b.textContent = st.removals > 0 ? '✂️ これを1つ除去' : '✂️ 除去の残りなし'; }
+function updRemove() { const b = $('#bRemove'); b.disabled = !invSel || st.removals <= 0 || !['spin', 'choose', 'item'].includes(st.phase); b.textContent = st.removals <= 0 ? '✂️ 除去の残りなし' : invSel ? `✂️ 稼ぎ${removalPreviewValue(invSel)}の個体を除去` : '✂️ これを1つ除去'; }
 function removeSel() {
   if (!invSel || !act(st, 'x:' + invSel)) return;
   save(); renderHUD(); tone(240, 0.1, 'sawtooth', 0.05, -80);
