@@ -3,7 +3,7 @@ const G = require('../../src/engine.js');
 const src = require('fs').readFileSync(require('path').join(__dirname, 'balance.js'), 'utf8');
 const body = src.slice(0, src.indexOf("for (const diff of"));
 const play = new Function('G', 'require', body.replace("const G = require('../../src/engine.js');", '').replace('guard < 400', 'guard < 3000') + '; return play;')(G, require);
-const growth = +(process.argv[2] || 1.22), mul = +(process.argv[3] || 0.9);
+const growth = +(process.argv[2] || G.DIFFS.endless.growth), mul = +(process.argv[3] || G.DIFFS.endless.rentMul);
 G.DIFFS.endless.growth = growth; G.DIFFS.endless.rentMul = mul;
 for (const mode of ['random', 'smart']) {
   const n = 1200, res = [];

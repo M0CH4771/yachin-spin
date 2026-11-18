@@ -6,6 +6,7 @@ from PIL import Image, ImageDraw
 from pixel import hx, N
 from sprites import SP
 import sprites_fix
+import sprites_fix2
 names = list(SP.keys())
 cols = 16
 rows = (len(names) + cols - 1) // cols

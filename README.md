@@ -27,10 +27,10 @@ art/sheet.json        シート内の並び
 art/busts.json        会話の顔窓（8人×4表情）
 bg/                   会話シーンの背景（14枚、720px幅のJPEG）
 cg/                   物語の挿絵（15枚。見た挿絵はストーリー画面のギャラリーで見返せる）
-ogp.png               URLを貼ったときに出る共有用の画像（1200×630）
+ogp.png               URLを貼ったときに出る共有用の画像（1200×630、元絵は art/ogp/ogp_original.png）
 favicon.png           タブのアイコン
 tools/build.py        src/ と art/ から index.html を組み立てる
-tools/ogp.py          共有用の画像とアイコンを作る
+tools/ogp.py          アイコン（favicon.png）と、ドット版の共有画像の試作（art/ogp/ogp_dot.png）を作る
 tools/pixel/          ドット絵の描画コード（Python）
 tools/sim/balance.js  ストーリー各話のクリア率を調べるシミュレーター
 tools/sim/endless.js  エンドレスで何回払えるかの分布を調べるシミュレーター

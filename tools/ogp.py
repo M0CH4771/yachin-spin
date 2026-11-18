@@ -63,9 +63,9 @@ for k in ('lantern', 'fox', 'dango', 'dragon', 'firework'):
     box = Image.new('RGBA', (76, 76), (44, 35, 66, 255))
     box.alpha_composite(cell(k).resize((64, 64), Image.NEAREST), (6, 6))
     b = frame(box, 5); canvas.alpha_composite(b, (x, H - b.height - 40)); x += b.width + 12
-canvas.convert('RGB').save(p('ogp.png'), optimize=True)
+canvas.convert('RGB').save(p('art', 'ogp', 'ogp_dot.png'), optimize=True)
 
 # タブのアイコン：提灯のドット絵
 ic = Image.new('RGBA', (64, 64), (0, 0, 0, 0)); ic.alpha_composite(cell('lantern').resize((64, 64), Image.NEAREST))
 ic.save(p('favicon.png'))
-print('ogp.png', os.path.getsize(p('ogp.png')) // 1024, 'KB / favicon.png')
+print('art/ogp/ogp_dot.png', os.path.getsize(p('ogp.png')) // 1024, 'KB / favicon.png')
