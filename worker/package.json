@@ -1,0 +1,9 @@
+{
+  "name": "yachin-spin-rank",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "test": "node --no-warnings test/local.mjs"
+  }
+}

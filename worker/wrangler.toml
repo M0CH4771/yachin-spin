@@ -1,0 +1,10 @@
+name = "yachin-spin-rank"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "yachin-spin"
+database_id = "ここに d1 create で出た database_id を貼る"
+
+# 管理用のキーは `npx wrangler secret put ADMIN_KEY` で設定する（ここには書かない）

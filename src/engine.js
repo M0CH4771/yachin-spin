@@ -289,6 +289,9 @@ const DIFFS = {
   // ストーリークリアで解放。終わりなし。5回ごとに「段」が上がって、家賃と気まぐれがきつくなる
   endless: { n: 'エンドレス', jp: 'どこまで住める？', color: '#f2c14e', rentMul: 1.25, ramp: 0, rents: Infinity, rerolls: 1, removals: 1, extra: [], startItem: true, curseFrom: 5, curseChance: 0, luck: 0, endless: true, growth: 1.2,
             desc: ['家賃を払いつづける', '5回ごとに段が上がる', '第2段から気まぐれ'] },
+  // デイリー：お題（ずっと続く気まぐれ）・荷物・最初のおまけは全員同じ。そのあとは1回ごとにランダム。払えるかぎり続く
+  daily: { n: 'デイリー', jp: '今日のお題', color: '#5ab0e8', rentMul: 1.15, ramp: 0, rents: Infinity, rerolls: 1, removals: 1, extra: [], startItem: true, curseFrom: 99, curseChance: 0, luck: 0, growth: 1.2,
+            desc: ['お題は全員同じ', '家賃を払えるかぎり続く', '何回払えたかで競う'] },
 };
 const STAGE_LEN = 5;
 const endlessStage = idx => Math.floor(idx / STAGE_LEN) + 1;
@@ -465,15 +468,91 @@ function seedFrom(str) { let h = 1779033703 ^ str.length; for (let i = 0; i < st
 function seededRng(st) {
   return () => { st.rng = (st.rng + 0x6D2B79F5) | 0; let t = st.rng; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 }
-function newDaily(dateStr) {
+// 日付で決まるお題（気まぐれ・荷物・おまけ）。全員同じ
+function dailySetup(dateStr) {
   const tmp = { rng: seedFrom('yachin-' + dateStr) };
-  setRng(seededRng(tmp));
+  const keep = RNG_FN; setRng(seededRng(tmp));
   const curse = pickOne(Object.keys(CURSES).filter(k => k !== 'seal'));
   const starter = pickOne(Object.keys(STARTERS));
   const item = pickOne(Object.keys(ITEMS).filter(k => ITEMS[k].r !== 'R' && k !== 'ofuda'));
-  const st = newGame('normal', { starter, daily: dateStr, fixedCurse: curse, item });
-  st.rng = tmp.rng;
+  setRng(keep);
+  return { curse, starter, item, rng: tmp.rng };
+}
+// runSeed：1回ごとのタネ（ランキングではサーバーが配る）。最初のおまけの候補までは日付のタネで決めるので全員同じ
+function newDaily(dateStr, runSeed) {
+  const D0 = dailySetup(dateStr);
+  const tmp = { rng: D0.rng };
+  setRng(seededRng(tmp));
+  const st = newGame('daily', { starter: D0.starter, daily: dateStr, fixedCurse: D0.curse, item: D0.item });
+  st.runSeed = (runSeed === undefined ? 0 : runSeed) >>> 0;
+  st.rng = (seedFrom('run-' + st.runSeed) ^ tmp.rng) | 0;
+  st.log = [];
   setRng(seededRng(st));
+  return st;
+}
+
+// ===== 操作の入口（画面もサーバーの検証も、ここを通す） =====
+// 操作は短い文字列で記録する： s=まわす p:k=シンボルを取る（p:=取らない） r=引き直し i:k=おまけ（i:=取らない）
+// e:n=できごとの選択 $=家賃を払う x:k=シンボルを除去
+function afterItems(st) { st.itemChoices = null; st.phase = st.event ? 'event' : 'spin'; }
+function prepItems(st) {
+  if (st.itemPicks <= 0) { afterItems(st); return; }
+  rollItems(st);
+  if (!st.itemChoices.length) { st.itemPicks = 0; afterItems(st); }
+}
+function act(st, code) {
+  const c = code[0], arg = code.length > 2 ? code.slice(2) : '';
+  let r = null;
+  if (c === 's') {
+    if (st.phase !== 'spin') return null;
+    r = spin(st); st.last.questDone = r.questDone; rollChoices(st); st.phase = 'choose';
+  } else if (c === 'p') {
+    if (st.phase !== 'choose' || (arg && !(st.choices || []).includes(arg))) return null;
+    if (arg) st.inv.push(mk(arg));
+    st.choices = null; st.phase = rentDue(st) ? 'rent' : 'spin'; r = { k: arg };
+  } else if (c === 'r') {
+    if (st.phase !== 'choose' || !canReroll(st)) return null;
+    st.rerolls--; rollChoices(st); r = {};
+  } else if (c === 'i') {
+    if (st.phase !== 'item' || (arg && !(st.itemChoices || []).includes(arg))) return null;
+    if (arg) addItem(st, arg);
+    st.itemPicks = Math.max(0, st.itemPicks - 1); st.itemChoices = null;
+    if (st.itemPicks > 0) { st.phase = 'item'; prepItems(st); } else afterItems(st);
+    r = { k: arg };
+  } else if (c === 'e') {
+    if (st.phase !== 'event') return null;
+    r = runEvent(st, +arg); if (!r) return null;
+    if (st.itemPicks > 0) { st.phase = 'item'; prepItems(st); } else st.phase = 'spin';
+  } else if (c === '$') {
+    if (st.phase !== 'rent') return null;
+    r = payRent(st);
+    if (r.ok && st.phase !== 'clear') { st.phase = 'item'; prepItems(st); }
+  } else if (c === 'x') {
+    if (!['spin', 'choose', 'item'].includes(st.phase) || !removeSymbol(st, arg)) return null;
+    r = {};
+  } else return null;
+  if (st.log) st.log.push(code);
+  return r;
+}
+// サーバーで少しずつ確かめるための、途中の状態の書き出しと読み込み（操作の記録は入れない）
+function exportDaily(st) { const o = Object.assign({}, st); delete o.log; return JSON.stringify(o); }
+function importDaily(json) {
+  const st = JSON.parse(json); st.log = null;
+  UID = Math.max(1, ...st.inv.map(x => x.id + 1), ...((st.board || []).filter(Boolean).map(x => (x.id || 0) + 1)));
+  setRng(seededRng(st));
+  return st;
+}
+// 状態に操作をまとめて当てる。全部通れば true
+function stepDaily(st, codes) {
+  for (const code of codes) { if (typeof code !== 'string' || code.length > 40 || !act(st, code)) return false; }
+  return true;
+}
+// 記録を最初から再生して、最後の状態を返す（おかしな操作があれば null）
+function replayDaily(dateStr, runSeed, log) {
+  const keepUID = UID;
+  const st = newDaily(dateStr, runSeed);
+  for (const code of log) { if (typeof code !== 'string' || code.length > 40 || !act(st, code)) { setRng(null); UID = keepUID; return null; } }
+  setRng(null); UID = keepUID;
   return st;
 }
 
@@ -707,4 +786,4 @@ function payRent(st) {
 }
 function goEndless(st) { st.endless = true; startPeriod(st); st.itemPicks++; rollItems(st); st.phase = 'item'; }
 
-if (typeof module !== 'undefined') module.exports = { STAGE_LEN, endlessStage, stageCurseChance, isEndlessMode, endlessCount, W, H, N, SYM, ITEMS, CURSES, DIFFS, RARITY, STARTERS, EVENTS, newGame, newDaily, runEvent, setRng, seededRng, spin, rollChoices, rollItems, addItem, removeSymbol, rentDue, payRent, goEndless, canReroll, mk, rarityOdds, neighbors, partners, totalRents, hasItem };
+if (typeof module !== 'undefined') module.exports = { exportDaily, importDaily, stepDaily, act, prepItems, afterItems, dailySetup, replayDaily, seedFrom, STAGE_LEN, endlessStage, stageCurseChance, isEndlessMode, endlessCount, W, H, N, SYM, ITEMS, CURSES, DIFFS, RARITY, STARTERS, EVENTS, newGame, newDaily, runEvent, setRng, seededRng, spin, rollChoices, rollItems, addItem, removeSymbol, rentDue, payRent, goEndless, canReroll, mk, rarityOdds, neighbors, partners, totalRents, hasItem };

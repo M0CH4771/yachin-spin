@@ -10,7 +10,9 @@
 
 - **ストーリー**：序章＋全4話＋エピローグ。祖母ハナの残した三十縁銭のツケをめぐる話。最初はこれだけ
 - **エンドレス**（最終話クリアで解放）：家賃を払いつづけて、どこまで住めるか。5回ごとに段が上がり、家賃も大家の気まぐれもきつくなる。結果は 𝕏 にポストして #ヤチンスピン でくらべられる
-- **デイリー**（最終話クリアで解放）：日付ごとにお題と台の出方が全員同じ
+- **デイリー**（最終話クリアで解放）：その日のお題（ずっと続く気まぐれ・はじめの荷物・最初のおまけ）は全員同じで、そのあとは毎回ランダム。家賃を何回払えたかを、リアルタイムのランキングで競う。各プレイヤーの最終的な構成も見られる
+- 結果は画像つきで 𝕏 にポストできる（スマホは共有シートから、PCは画像を保存してポスト画面をひらく）
+- ホーム画面に追加すると、アプリのように開ける（オフラインでも起動できる）
 - シンボル 89種・お守り 45種・横丁のできごと 14種・大家の気まぐれ 8種・実績 44個・図鑑
 
 スマホの縦画面向けです。進み具合はブラウザに保存されます。
@@ -34,6 +36,11 @@ tools/ogp.py          アイコン（favicon.png）と、ドット版の共有�
 tools/pixel/          ドット絵の描画コード（Python）
 tools/sim/balance.js  ストーリー各話のクリア率を調べるシミュレーター
 tools/sim/endless.js  エンドレスで何回払えるかの分布を調べるシミュレーター
+tools/sim/daily.js    デイリーの分布と、記録を再生したとき結果が一致するかを調べる
+manifest.webmanifest  ホーム画面に追加するための設定
+sw.js                 オフラインでも起動できるようにするキャッシュ
+icons/                ホーム画面のアイコン
+worker/               デイリーランキングのサーバー（Cloudflare Workers + D1）
 ```
 
 ## 組み立て方
@@ -51,6 +58,52 @@ node tools/sim/endless.js 1.2 1.25    # 家賃の伸び率と倍率を変えて�
 ```
 
 Python 3 と Pillow、Node.js が必要です。
+
+## デイリーランキングのサーバー（Cloudflare Workers + D1）
+
+ゲームは GitHub Pages だけで動きます。ランキングを出すには、`worker/` を Cloudflare に置いて、その URL を `src/ui.html` の `RANK_API_DEFAULT` に書きます（空のあいだはランキングなしで遊べます）。
+
+**しくみ**
+
+- 1回ごとに、サーバーが乱数のタネを配ります。お題と最初のおまけは日付で決まるので全員同じ
+- プレイヤーの操作（まわす・取る・家賃を払う…）を、家賃を払うたびに12個ずつ送ります
+- サーバーは同じエンジン（`worker/src/engine.js`、`tools/build.py` が `src/engine.js` から作る）で、その操作をゲームの状態に当てて確かめます。手元で数字を書きかえても、ランキングには入りません
+- 1回の処理は数ミリ秒なので、無料プランの「1回 10ms まで」に収まります
+- ランキングは「その日の、プレイヤーごとのいちばんいい回」。家賃の回数 → かせいだコインの順。挑戦中の人は「挑戦中」と出ます
+
+**はじめて置くとき**（`worker/` の中で）
+
+```
+cd worker
+npx wrangler login
+npx wrangler d1 create yachin-spin
+#   → 出てきた database_id を wrangler.toml の database_id に貼る
+npx wrangler d1 execute yachin-spin --remote --file=schema.sql
+npx wrangler secret put ADMIN_KEY
+#   → 管理用の合言葉を入力（出入り禁止にするときに使う）
+npx wrangler deploy
+#   → https://yachin-spin-rank.＜あなたのサブドメイン＞.workers.dev が出る
+```
+
+出てきた URL を `src/ui.html` の `const RANK_API_DEFAULT = '';` に入れて、`python3 tools/build.py` で組み立て直します。
+
+**エンジンを変えたとき**は、`python3 tools/build.py` のあと `cd worker && npx wrangler deploy` で、サーバーのエンジンもそろえてください（ずれると記録が確かめられなくなります）。
+
+**手元で試す**
+
+```
+cd worker
+npm test                                   # node:sqlite で API を通しで試す
+node --no-warnings test/serve.mjs 8787     # ブラウザ用のローカルサーバー
+#   ブラウザの開発者ツールで localStorage.setItem('yachin-spin-api', '"http://127.0.0.1:8787"') として再読みこみ
+```
+
+**困った名前の人を消す**
+
+```
+curl -X POST https://＜workerのURL＞/api/admin -H "X-Admin: ＜ADMIN_KEY＞" -H "Content-Type: application/json" -d '{"find":"名前"}'
+curl -X POST https://＜workerのURL＞/api/admin -H "X-Admin: ＜ADMIN_KEY＞" -H "Content-Type: application/json" -d '{"ban":"＜上で出たid＞"}'
+```
 
 ## クレジット
 

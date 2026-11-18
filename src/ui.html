@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ヤチンスピン — 縁日スロットで家賃を払え</title>
 <meta name="description" content="ばあちゃんのスロット台と、ツケの残った長屋の話。スロットをまわして縁銭を稼ぎ、妖怪の横丁で家賃を払いつづけるブラウザゲーム。">
 <meta property="og:type" content="website">
@@ -19,7 +19,13 @@
 <meta name="twitter:description" content="ばあちゃんのスロット台と、ツケの残った長屋の話。スロットをまわして縁銭を稼ぎ、妖怪の横丁で家賃を払いつづけるブラウザゲーム。">
 <meta name="twitter:image" content="https://m0ch4771.github.io/yachin-spin/ogp.png">
 <link rel="icon" type="image/png" href="favicon.png">
-<link rel="apple-touch-icon" href="favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#16111f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ヤチンスピン">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
@@ -36,6 +42,7 @@ body{
   background-size:46px 46px, 73px 73px; background-position:0 0, 21px 13px;
   color:var(--ink); font-family:'DotGothic16',monospace; min-height:100vh; letter-spacing:.02em;
   -webkit-tap-highlight-color:transparent; touch-action:manipulation; user-select:none; -webkit-user-select:none;
+  padding-top:env(safe-area-inset-top); padding-bottom:env(safe-area-inset-bottom);   /* ホーム画面から開いたときに、ノッチの下にもぐらないように */
 }
 button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulation;letter-spacing:inherit}
 .num{font-family:'DotGothic16',monospace}
@@ -296,6 +303,29 @@ h1{font-size:18px;margin:0}
 .tabs{display:flex;gap:6px;margin:4px 0 12px;position:sticky;top:-18px;background:var(--panel);padding:8px 0;z-index:2}
 .tab{flex:1;border:3px solid var(--edge);background:var(--panel2);padding:7px 4px;font-size:13px}
 .tab.on{background:var(--gold);color:#2a1a00}
+/* デイリーランキング */
+.rankbtn{width:100%;margin-top:8px;padding:10px;border:3px solid var(--edge);background:#16324a;box-shadow:inset 0 0 0 2px #2f5a7a;color:var(--ink);font-size:15px}
+.rkhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;color:var(--mute);margin:0 0 8px}
+.rklist{display:grid;gap:5px}
+.rkrow{display:grid;grid-template-columns:38px 1fr auto;gap:8px;align-items:center;background:var(--panel2);border:3px solid var(--edge);padding:6px 8px;text-align:left;width:100%;color:var(--ink)}
+.rkrow.me{box-shadow:inset 0 0 0 2px var(--gold)}
+.rkrow .rn{font-size:18px;text-align:center;color:var(--mute)}
+.rkrow.top1 .rn{color:#ffd24a}.rkrow.top2 .rn{color:#d8dcea}.rkrow.top3 .rn{color:#e0a060}
+.rkrow .nm{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rkrow .bd{font-size:11px;color:var(--mute);margin-top:2px;white-space:nowrap;overflow:hidden}
+.rkrow .bd .spr{width:18px;height:18px}
+.rkrow .sc{text-align:right;font-size:17px;color:var(--gold);white-space:nowrap}
+.rkrow .sc small{display:block;font-size:11px;color:var(--mute)}
+.rkrow .live{display:inline-block;font-size:10px;background:#a32f28;color:#fff;padding:0 4px;margin-left:4px;vertical-align:2px}
+.rkfull{grid-column:1/-1;display:none;margin-top:6px;border-top:2px dashed var(--rim);padding-top:6px;font-size:12px;color:#e2d8f2;line-height:1.9}
+.rkrow.open .rkfull{display:block}
+.rkfull .spr{width:24px;height:24px}
+.rkmine{background:#1b2a3d;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px #2f5a7a;padding:8px 10px;margin-bottom:10px;font-size:14px}
+.rkname{display:flex;gap:6px;margin-top:12px;align-items:center}
+.rkname input{flex:1;min-width:0;font-family:inherit;font-size:15px;border:3px solid var(--edge);background:#0f0c18;color:var(--ink);padding:7px 9px;border-radius:0;user-select:text;-webkit-user-select:text}
+.rkname .btn{flex:none;padding:8px 12px}
+.rankbox{background:#1b2a3d;border:3px solid var(--edge);padding:9px;margin:4px 0 2px;font-size:15px}
+.rankbox b{color:var(--gold);font-size:22px;font-weight:400}
 .dex{display:grid;gap:6px}
 .dex-h{margin:10px 0 2px;font-size:13px}
 .dex-row{display:flex;gap:10px;align-items:center;background:var(--panel2);border:3px solid var(--edge);padding:7px 10px}
@@ -352,11 +382,13 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
   <button class="mode story" id="bStory"><span class="mi">📖</span><div><div class="mt">ストーリー</div><div class="md">ばあちゃんのスロット台と、ツケの残った長屋の話。</div><div class="mp" id="storyProg"></div></div><span class="go">›</span></button>
   <button class="mode endless" id="bEndless"><span class="mi" id="endlessIcon">🏮</span><div><div class="mt">エンドレス</div><div class="md">家賃を払いつづけて、どこまで住めるか。5回ごとに段が上がる。</div><div class="mp" id="endlessProg"></div></div><span class="go">›</span></button>
   <button class="mode daily" id="bDaily"><span class="mi" id="dailyIcon">🎯</span><div><div class="mt">デイリーチャレンジ</div><div class="md" id="dailyDesc"></div><div class="mp" id="dailyProg"></div></div><span class="go">›</span></button>
+  <button class="rankbtn hidden" id="bRank">🏆 デイリーランキングを見る</button>
   <div class="title-btns">
     <button class="tbtn" id="tHelp">📖 あそびかた</button>
     <button class="tbtn" id="tDex">📚 ずかん<small id="tDexN"></small></button>
     <button class="tbtn" id="tAch">🏅 実績<small id="tAchN"></small></button>
   </div>
+  <button class="rankbtn hidden" id="bInstall" style="background:#2a2140;box-shadow:inset 0 0 0 2px var(--rim)">📲 ホーム画面に追加（アプリのように遊べる）</button>
   <div class="title-foot">シンボル <span id="tSymN"></span>種・アイテム <span id="tItemN"></span>種・できごと <span id="tEvN"></span>種・気まぐれ <span id="tCurseN"></span>種・はじめの荷物 <span id="tStN"></span>種</div>
 </div>
 
@@ -474,7 +506,7 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
     <div class="stp"><div class="si">🍴</div><div><b>食べる・消える</b><span>食べられたシンボルは、手持ちからいなくなる。</span></div></div>
     <div class="stp"><div class="si">🏘️</div><div><b>横丁のできごと</b><span>支払いのあと、ときどき横丁で何か起きる。どっちに転ぶかは、選び方しだい。</span></div></div>
     <div class="stp"><div class="si">🎒</div><div><b>はじめの荷物</b><span>エンドレスでは、最初に持っていくシンボルを選べる。話を進めると増える。</span></div></div>
-    <div class="stp"><div class="si">🎯</div><div><b>デイリーチャレンジ</b><span>その日のお題と台の出方は、だれが遊んでも同じ。何回でもやり直せる。</span></div></div>
+    <div class="stp"><div class="si">🎯</div><div><b>デイリーチャレンジ</b><span>その日のお題（ずっと続く気まぐれ・はじめの荷物・最初のおまけ）は全員同じ。そのあとの出方は毎回ちがう。家賃を何回払えたかでランキングを競う。何回でも挑戦できて、いちばんいい記録が残る。</span></div></div>
     <div class="stp"><div class="si">♾️</div><div><b>エンドレス</b><span>ストーリーをクリアすると解放。5回ごとに段が上がって、家賃も気まぐれもきつくなる。どこまで住めたかを𝕏でくらべよう。</span></div></div>
   </div>
   <div class="actions"><button class="btn" data-close>とじる</button></div>
@@ -509,6 +541,30 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
   <div class="stats" id="endStats"></div>
   <div class="vbtns" id="endBtns"></div>
 </div></div>
+
+<!-- デイリーランキング -->
+<div class="ov" id="ovRank"><div class="sheet">
+  <h2>🏆 デイリーランキング</h2>
+  <div class="tabs" id="rkTabs"><button class="tab on" data-ago="0">今日</button><button class="tab" data-ago="1">昨日</button></div>
+  <p class="lead" id="rkLead" style="margin-bottom:8px"></p>
+  <div class="rkhead"><span id="rkTotal"></span><span id="rkTime"></span></div>
+  <div id="rkMine"></div>
+  <div class="rklist" id="rkList"></div>
+  <div class="rkname"><input id="rkName" maxlength="12" placeholder="ランキングの名前"><button class="btn" id="rkSave">名前を変える</button></div>
+  <div class="actions"><button class="btn" data-close>とじる</button></div>
+</div></div>
+
+<!-- ホーム画面に追加（iPhone向けの説明） -->
+<div class="ov center" id="ovInstall"><div class="sheet">
+  <h2>📲 ホーム画面に追加</h2>
+  <div class="steps">
+    <div class="stp"><div class="si">1</div><div><b>Safari で開く</b><span>このページを Safari で開いてください（Xやアプリの中のブラウザでは追加できません）。</span></div></div>
+    <div class="stp"><div class="si">2</div><div><b>共有ボタンをタップ</b><span>画面の下（iPadは上）にある、四角から矢印が出たボタン。</span></div></div>
+    <div class="stp"><div class="si">3</div><div><b>「ホーム画面に追加」</b><span>一覧を下にスクロールすると出てきます。ちょうちんのアイコンが置かれます。</span></div></div>
+  </div>
+  <div class="actions"><button class="btn" data-close>とじる</button></div>
+</div></div>
+
 
 <script>
 /*__ENGINE__*/
@@ -664,7 +720,7 @@ const ACH = [
   { id: 'story3', e: '🦊', n: '大家の味方', d: 'ストーリー第三話をクリア', c: () => rec.story >= 3 },
   { id: 'story4', e: '🏮', n: '千の灯り', d: 'ストーリー最終話をクリア', c: () => rec.story >= 4 },
   { id: 'daily5', e: '📅', n: '今日の運だめし', d: 'デイリーで家賃を5回払う', c: s => s.daily && s.rentIdx >= 5 },
-  { id: 'dailyclear', e: '🗓️', n: '毎日がまつり', d: 'デイリーをクリアする' },
+  { id: 'dailyclear', e: '🗓️', n: '毎日がまつり', d: 'デイリーで家賃を15回払う', c: s => s.daily && s.rentIdx >= 15 },
   { id: 'event10', e: '🏘️', n: '横丁の顔なじみ', d: 'できごとに通算10回 出会う', c: () => rec.events >= 10 },
   { id: 'kazan', e: '🌋', n: '大噴火', d: '🌋かざんを噴火させる', c: s => s.stats.flags.includes('kazan') },
   { id: 's5000', e: '🌠', n: '縁銭長者', d: '1回で5000コイン以上', c: (s, r) => r && r.total >= 5000 },
@@ -707,7 +763,7 @@ function starterCond(k) {
   if (u.story) return `ストーリー${['', '第一話', '第二話', '第三話', '最終話'][u.story]}をクリアで解放`;
   const a = ACH.find(x => x.id === u.ach); return a ? `実績「${a.n}」で解放` : '';
 }
-const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+const todayStr = () => new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);   // 日本時間の日付（ランキングと同じ）
 
 // =========================================================
 // 会話シーン
@@ -830,21 +886,23 @@ function showTitle() {
   $('#storyProg').textContent = rec.story >= 4 ? '👑 全話クリア！ 思い出を見返せる' : rec.story ? `${CHAPTERS[rec.story - 1].n}までクリア・つぎは「${CHAPTERS[rec.story].t}」` : 'まずはここから！';
   const td = todayStr(), dp = dailyPreview(td), dr = rec.daily[td];
   $('#dailyDesc').innerHTML = `${td}　お題：${CURSES[dp.curse].e}${CURSES[dp.curse].n}・${STARTERS[dp.starter].e}${STARTERS[dp.starter].n}・${ITEMS[dp.item].e}${ITEMS[dp.item].n}`;
-  $('#dailyProg').textContent = dr ? `今日の最高：家賃 ${dr.best}回${dr.clear ? '・クリア👑' : ''}` : '今日はまだ挑戦していない';
+  $('#dailyProg').textContent = dr ? `今日の自己ベスト：家賃 ${dr.best}回${dr.rank ? `・${dr.rank}位` : ''}` : '今日はまだ挑戦していない';
+  $('#bRank').classList.toggle('hidden', !RANK_API);
+  updInstall();
   const open = modesOpen();
   $('#bEndless').classList.toggle('lock', !open); $('#bDaily').classList.toggle('lock', !open);
   $('#endlessIcon').textContent = open ? '🏮' : '🔒'; $('#dailyIcon').textContent = open ? '🎯' : '🔒';
   const eb = rec.endlessBest || 0;
   $('#endlessProg').textContent = !open ? 'ストーリーの最終話をクリアすると解放' : eb ? `自己ベスト：家賃 ${eb}回・第${endlessStage(eb)}段` : 'まだ挑戦していない';
-  if (!open) { $('#dailyDesc').textContent = '日付ごとにお題と台の出方が全員同じ。'; $('#dailyProg').textContent = 'ストーリーの最終話をクリアすると解放'; }
+  if (!open) { $('#dailyDesc').textContent = 'その日のお題は全員同じ。家賃を何回払えるかをランキングで競う。'; $('#dailyProg').textContent = 'ストーリーの最終話をクリアすると解放'; }
   setRng(null);
   window.scrollTo(0, 0);
 }
 let dailyCache = {};
 function dailyPreview(td) {
   if (dailyCache[td]) return dailyCache[td];
-  const keep = UID; const tmp = newDaily(td); setRng(null); UID = keep;
-  return dailyCache[td] = { curse: tmp.fixedCurse, starter: tmp.starter, item: tmp.items.find(k => k !== STARTERS[tmp.starter].item) || tmp.items[0] };
+  const d = dailySetup(td);
+  return dailyCache[td] = { curse: d.curse, starter: d.starter, item: d.item };
 }
 const modesOpen = () => rec.story >= 4;
 function renderDiffs(saved) {
@@ -878,7 +936,8 @@ function openStarter(diff) {
 function startRun(diff, opt) {
   opt = opt || {};
   setRng(null);
-  st = opt.daily ? newDaily(opt.daily) : newGame(diff, opt);
+  st = opt.daily ? newDaily(opt.daily, opt.seed) : newGame(diff, opt);
+  if (opt.daily) st.rank = { run: opt.run || null, from: 0 };
   st.bestBefore = rec.endlessBest || 0;
   rec.runs++; saveRec();
   sel = null; selItem = null;
@@ -923,7 +982,8 @@ function enterGame() {
   const D = DIFFS[st.diff];
   setRng(st.daily ? seededRng(st) : null);
   $('#dBadge').textContent = st.story ? `📖 ${CHAPTERS[st.story - 1].n}` : st.daily ? `🎯 デイリー` : D.n; $('#dBadge').style.color = D.color;
-  if (st.phase === 'item' && (!st.itemChoices || !st.itemChoices.length)) prepItems();
+  if (st.daily) { updRankBadge(); rankSync(); }
+  if (st.phase === 'item' && (!st.itemChoices || !st.itemChoices.length) && !st.daily) prepItems(st);
   renderAll();
   if (st.phase === 'rent') openRent();
   else if (st.phase === 'over') showEnd(false);
@@ -1070,7 +1130,7 @@ function renderHUD(coinsOverride) {
   $('#verdict').classList.toggle('ok', ok);
   $('#rentBar').style.width = Math.min(100, coins / st.rent * 100) + '%';
   $('#rentBar').classList.toggle('ok', ok);
-  $('#rentNo').textContent = isEndlessMode(st) ? `第${endlessStage(st.rentIdx)}段・${st.rentIdx + 1}回目` : st.endless ? `♾️ エンドレス ${st.rentIdx - T + 1}回目` : `${Math.min(st.rentIdx + 1, T)} / ${T} 回目`;
+  $('#rentNo').textContent = st.daily ? `🎯 ${st.rentIdx + 1}回目` : isEndlessMode(st) ? `第${endlessStage(st.rentIdx)}段・${st.rentIdx + 1}回目` : st.endless ? `♾️ エンドレス ${st.rentIdx - T + 1}回目` : `${Math.min(st.rentIdx + 1, T)} / ${T} 回目`;
   const left = Math.max(0, st.spinsLeft);
   $('#spinsLeft').textContent = left;
   $('#pips').innerHTML = Array.from({ length: st.spinsMax }, (_, k) => `<span class="${k < left ? 'on' : ''} ${k === 0 && left === 1 ? 'last' : ''}"></span>`).join('');
@@ -1229,8 +1289,7 @@ async function doSpin() {
   if (busy || st.phase !== 'spin') return;
   busy = true; audio();
   const before = st.coins;
-  const res = spin(st);
-  st.last.questDone = res.questDone;
+  const res = act(st, 's');            // まわして、次の候補まで決める（記録にも残る）
   st.phase = 'anim'; renderHUD(before); renderAct();
   $('#info').innerHTML = '<div class="ttl" style="color:var(--mute)">まわしてる…</div>';
   rec.bestSpin = Math.max(rec.bestSpin, res.total); rec.spins++;
@@ -1238,42 +1297,31 @@ async function doSpin() {
   res.keys.forEach(k => k && seeSym(k)); res.born.forEach(b => seeSym(b.key));
   saveRec();
   await animateSpin(res, before);
-  rollChoices(st); st.phase = 'choose'; save();
+  st.phase = 'choose'; save();
   busy = false; renderAll();
   if (res.questDone) { sfx.quest(); toast(`📜 依頼達成！ 報酬 ${st.quest.reward.txt}`); }
   checkAch(res);
   if (window.innerHeight < 900) $('#act').scrollIntoView({ behavior: 'smooth', block: 'end' });
 }
 function pick(k) {
-  if (st.phase !== 'choose') return;
-  if (k) { st.inv.push(mk(k)); sfx.pick(); toast(`${E(k)} ${SYM[k].n} を手持ちに追加した`); seeSym(k); }
-  st.choices = null;
-  if (rentDue(st)) { st.phase = 'rent'; save(); renderAll(); openRent(); }
-  else { st.phase = 'spin'; save(); renderAll(); }
+  if (st.phase !== 'choose' || !act(st, 'p:' + (k || ''))) return;
+  if (k) { sfx.pick(); toast(`${E(k)} ${SYM[k].n} を手持ちに追加した`); seeSym(k); }
+  save(); renderAll();
+  if (st.phase === 'rent') openRent();
   checkAch();
 }
-function reroll() { if (st.phase !== 'choose' || !canReroll(st)) return; st.rerolls--; rollChoices(st); save(); renderHUD(); renderAct(); tone(600, 0.06, 'square', 0.04); }
-function afterItems() { st.itemChoices = null; st.phase = st.event ? 'event' : 'spin'; }
-function prepItems() {
-  if (st.itemPicks <= 0) { afterItems(); return; }
-  rollItems(st);
-  if (!st.itemChoices.length) { st.itemPicks = 0; afterItems(); }
-}
+function reroll() { if (st.phase !== 'choose' || !act(st, 'r')) return; save(); renderHUD(); renderAct(); tone(600, 0.06, 'square', 0.04); }
 function chooseEvent(i) {
   if (st.phase !== 'event') return;
-  const r = runEvent(st, i); if (!r) return;
+  const r = act(st, 'e:' + i); if (!r) return;
   rec.events++; saveRec();
   (r.got || []).forEach(seeSym);
   sfx.item(); toast(r.msg);
-  if (st.itemPicks > 0) { st.phase = 'item'; prepItems(); } else st.phase = 'spin';
   save(); renderAll(); checkAch();
 }
 function pickItem(k) {
-  if (st.phase !== 'item') return;
-  if (k) { addItem(st, k); sfx.item(); toast(`${ITEMS[k].e} ${ITEMS[k].n} を手に入れた`); seeItem(k); }
-  st.itemPicks = Math.max(0, st.itemPicks - 1);
-  st.itemChoices = null;
-  if (st.itemPicks > 0) { st.phase = 'item'; prepItems(); } else afterItems();
+  if (st.phase !== 'item' || !act(st, 'i:' + (k || ''))) return;
+  if (k) { sfx.item(); toast(`${ITEMS[k].e} ${ITEMS[k].n} を手に入れた`); seeItem(k); }
   save(); renderAll(); checkAch();
 }
 function openRent() {
@@ -1292,14 +1340,15 @@ function pay() {
   if (st.phase !== 'rent') return;
   audio();
   const before = st.rentIdx;
-  const info = payRent(st);
+  const info = act(st, '$'); if (!info) return;
   $('#ovRent').classList.remove('show');
   if (info.questDone) { rec.quests++; toast(`📜 依頼達成！ 報酬 ${st.quest.reward.txt}`); }
   const r = st.daily ? { best: 0, clears: 0, endless: 0 } : drec(st.diff);
   if (st.daily) { const d = rec.daily[st.daily] || (rec.daily[st.daily] = { best: 0, clear: false }); d.best = Math.max(d.best, st.rentIdx); }
   if (isEndlessMode(st)) { rec.endlessBest = Math.max(rec.endlessBest || 0, st.rentIdx); }
   if (!info.ok) {
-    r.best = Math.max(r.best, st.rentIdx); saveRec(); st.phase = 'over'; sfx.bad(); save(); renderAll();
+    r.best = Math.max(r.best, st.rentIdx); saveRec(); sfx.bad(); save(); renderAll();
+    if (st.daily) rankSync();
     if (st.story) playScene(CHAPTERS[st.story - 1].over, () => showEnd(false)); else showEnd(false);
     return;
   }
@@ -1310,7 +1359,6 @@ function pay() {
   if (st.phase === 'clear') {
     r.clears++; if (st.daily) rec.daily[st.daily].clear = true;
     saveRec();
-    if (st.daily) unlock('dailyclear');
     if (st.stats.removed === 0 && st.diff !== 'easy') unlock('noremove');
     sfx.mega(); save(); renderAll();
     if (st.story) {
@@ -1321,7 +1369,8 @@ function pay() {
     } else showEnd(true);
     return;
   }
-  st.phase = 'item'; prepItems(); save(); renderAll();
+  save(); renderAll();
+  if (st.daily) rankSync();
   if (st.story && !st.endless) { const mid = CHAPTERS[st.story - 1].mids[st.rentIdx]; if (mid && !scene) playScene(mid); }
   sfx.coin(); toast('家賃を払った！ 🔄+1　✂️+1' + (info.bonus.length ? '　' + info.bonus.join(' ') : ''));
   if (st.curse) setTimeout(() => toast(`😈 大家の気まぐれ：${CURSES[st.curse].e} ${CURSES[st.curse].n}`), 300);
@@ -1332,6 +1381,268 @@ function pay() {
   checkAch();
 }
 const GAME_URL = 'https://m0ch4771.github.io/yachin-spin/';
+
+// =========================================================
+// デイリーランキング（サーバーは worker/。操作を少しずつ送って、サーバーで確かめてもらう）
+// =========================================================
+// ランキングサーバーの URL。空のあいだはランキングなしで遊べる（記録は端末に残る）
+const RANK_API_DEFAULT = '';
+const RANK_API = String(store.get('yachin-spin-api') || RANK_API_DEFAULT).replace(/\/$/, '');
+const SYNC_CHUNK = 12;
+function playerId() {
+  let id = store.get('yachin-spin-player');
+  if (!id) {
+    id = (crypto.randomUUID ? crypto.randomUUID() : 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)).replace(/[^A-Za-z0-9-]/g, '').slice(0, 64);
+    store.set('yachin-spin-player', id);
+  }
+  return id;
+}
+const rankName = () => rec.rankName || rec.name || 'ななし';
+async function api(path, body, ms = 7000) {
+  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), ms);
+  try {
+    const r = await fetch(RANK_API + path, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal } : { signal: ctl.signal, cache: 'no-store' });
+    let data = {}; try { data = await r.json(); } catch (e) {}
+    return { ok: r.ok, status: r.status, data: data || {} };
+  } finally { clearTimeout(t); }
+}
+async function startDaily() {
+  audio();
+  let opt = null;
+  if (RANK_API) {
+    $('#dailyProg').textContent = 'ランキングにつないでいます…';
+    try { const r = await api('/api/start', { player: playerId(), name: rankName() }); if (r.ok && r.data.run) opt = { daily: r.data.day, seed: r.data.seed, run: r.data.run }; } catch (e) {}
+  }
+  if (!opt) {
+    const a = new Uint32Array(1); try { crypto.getRandomValues(a); } catch (e) { a[0] = Math.random() * 4294967296; }
+    opt = { daily: todayStr(), seed: a[0], run: null };
+    if (RANK_API) setTimeout(() => toast('ランキングにつながらないので、今回は記録だけ残ります'), 400);
+  }
+  startRun('daily', opt);
+}
+// 1回分を送れるところまで送る。全部送れたら true
+async function pushRun(r, log) {
+  try {
+    while (r.from < log.length) {
+      const res = await api('/api/step', { player: playerId(), run: r.run, from: r.from, codes: log.slice(r.from, r.from + SYNC_CHUNK), name: rankName() });
+      if (res.status === 409 && Number.isInteger(res.data.n)) { r.from = res.data.n; continue; }
+      if (!res.ok) { if (res.status >= 400 && res.status < 500) r.error = res.data.error || ('エラー ' + res.status); r.offline = res.status >= 500; return false; }
+      r.from = res.data.n; r.result = res.data;
+    }
+    r.offline = false; return true;
+  } catch (e) { r.offline = true; return false; }
+}
+let syncing = null;
+function rankSync() { if (!RANK_API) return Promise.resolve(); if (!syncing) syncing = doSync().finally(() => { syncing = null; }); return syncing; }
+async function doSync() {
+  // 前に送りきれなかった回
+  const pend = rec.rankPending || [];
+  for (const p of pend.slice()) { const done = await pushRun(p, p.log); if (done || p.error) { pend.splice(pend.indexOf(p), 1); if (p.result) noteRank(p.day, p.result); } }
+  rec.rankPending = pend; saveRec();
+  const S = st;
+  if (!S || !S.daily || !S.rank || !S.rank.run || S.rank.error) return;
+  const done = await pushRun(S.rank, S.log);
+  if (S.rank.result) noteRank(S.daily, S.rank.result);
+  if (S === st) { save(); updRankBadge(); updEndRank(); }
+  // 終わった回を送りきれなかったら、あとで送る
+  if (!done && !S.rank.error && S.phase === 'over' && !pend.some(p => p.run === S.rank.run)) { pend.push({ run: S.rank.run, day: S.daily, from: S.rank.from, log: S.log.slice() }); saveRec(); }
+}
+function noteRank(day, res) { const d = rec.daily[day] || (rec.daily[day] = { best: 0 }); if (res.rank) d.rank = res.rank; saveRec(); }
+function updRankBadge() {
+  if (!st || !st.daily) return;
+  const r = st.rank && st.rank.result;
+  $('#dBadge').textContent = `🎯 デイリー${r && r.rank ? `・${r.rank}位` : ''}`;
+}
+function rankText(S) {
+  const r = S.rank;
+  if (!RANK_API) return '';
+  if (!r || !r.run) return 'この回はランキングに入っていません（つながらないまま始めたため）';
+  if (r.error) return `ランキングに記録できませんでした（${escH(String(r.error))}）`;
+  if (r.result && r.from >= S.log.length) return r.result.rank ? `あなたの今日の順位　<b>${r.result.rank}位</b> / ${r.result.total}人` : 'ランキングに記録しました';
+  if (r.offline) return 'いまオフラインです。つながったら自動で送ります';
+  return 'ランキングに送っています…';
+}
+function updEndRank() { const b = $('#endRank'); if (b && st && st.daily) b.innerHTML = rankText(st); }
+function buildTop(inv, n) { return inv.slice(0, n).map(([k, c]) => (SYM[k] ? SYM[k].e : '') + (c > 1 ? `×${c}` : '')).join(' '); }
+
+function showEndDaily() {
+  const n = st.rentIdx, d = rec.daily[st.daily] || { best: 0 }, C = CURSES[st.fixedCurse];
+  const isBest = n > 0 && n >= d.best;
+  $('#endEmo').textContent = '🎯';
+  $('#endTitle').textContent = `デイリー ${st.daily}`;
+  $('#endLead').textContent = `お題「${C.n}」で、家賃を ${n}回払った。` + (isBest ? '今日の自己ベスト！' : `今日の自己ベストは ${d.best}回。`);
+  $('#endStats').innerHTML = [
+    ['払った家賃', `${n}回`], ['合計かせぎ', st.totalEarned], ['最高の1スピン', st.best], ['アイテム', st.items.length],
+  ].map(([a, b]) => `<div class="stat"><b>${b}</b><span>${a}</span></div>`).join('') + (RANK_API ? `<div class="rankbox" id="endRank" style="grid-column:1/-1"></div>` : '');
+  $('#endBtns').innerHTML = `<button class="btn gold" id="eShareImg">𝕏 に結果をポストする</button>` +
+    (RANK_API ? `<button class="btn" id="eRank">🏆 ランキングを見る</button>` : '') +
+    `<button class="btn primary" id="eAgain">デイリーにもう一回挑戦</button><button class="btn" id="eTitle">🏮 タイトルへ</button>`;
+  $('#eShareImg').onclick = () => shareResult();
+  if (RANK_API) $('#eRank').onclick = () => openRank(0);
+  $('#eAgain').onclick = () => { $('#ovEnd').classList.remove('show'); startDaily(); };
+  $('#eTitle').onclick = showTitle;
+  updEndRank();
+  $('#ovEnd').classList.add('show');
+  checkAch();
+  rankSync();
+}
+
+// =========================================================
+// 結果の画像（1200×630）。スマホは画像つきで共有、PCは画像を保存して𝕏のポスト画面をひらく
+// =========================================================
+let shareText = '', sheetImgP = null;
+const loadImg = src => new Promise((ok, ng) => { const i = new Image(); i.onload = () => ok(i); i.onerror = ng; i.src = src; });
+function sheetImage() {
+  if (!sheetImgP) { const v = getComputedStyle(document.documentElement).getPropertyValue('--sheet').trim(); sheetImgP = loadImg(v.replace(/^url\(["']?/, '').replace(/["']?\)$/, '')); }
+  return sheetImgP;
+}
+function sprKey(k) { return SPR.idx[k] !== undefined ? k : SPR.idx['i_' + k] !== undefined ? 'i_' + k : SPR.idx['c_' + k] !== undefined ? 'c_' + k : null; }
+function drawSpr(ctx, img, k, x, y, size) { const key = sprKey(k); if (!key) return; const i = SPR.idx[key]; ctx.drawImage(img, (i % SPR.cols) * 32, Math.floor(i / SPR.cols) * 32, 32, 32, x, y, size, size); }
+function frame(ctx, x, y, w, h, fill) {
+  ctx.fillStyle = '#0b0812'; ctx.fillRect(x - 6, y - 6, w + 12, h + 12);
+  ctx.fillStyle = '#41345e'; ctx.fillRect(x - 3, y - 3, w + 6, h + 6);
+  ctx.fillStyle = fill; ctx.fillRect(x, y, w, h);
+}
+function txt(ctx, s, x, y, size, color, align) {
+  ctx.font = `${size}px "DotGothic16", monospace`; ctx.textAlign = align || 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = '#0b0812'; ctx.fillText(s, x + Math.max(2, size / 16), y + Math.max(2, size / 16));
+  ctx.fillStyle = color; ctx.fillText(s, x, y);
+}
+function resultInfo(S) {
+  const D = DIFFS[S.diff], T = totalRents(S), CH = S.story ? CHAPTERS[S.story - 1] : null;
+  if (S.daily) {
+    const r = S.rank && S.rank.result;
+    return { mode: `デイリー ${S.daily}`, color: '#5ab0e8', big: `家賃 ${S.rentIdx}回`, sub: `お題：${CURSES[S.fixedCurse].n}`, extra: r && r.rank ? `今日の ${r.rank}位 / ${r.total}人` : '' };
+  }
+  if (isEndlessMode(S)) return { mode: 'エンドレス', color: '#f2c14e', big: `家賃 ${S.rentIdx}回`, sub: `第${endlessStage(S.rentIdx)}段まで住んだ`, extra: '' };
+  const win = S.phase === 'clear';
+  if (CH) return { mode: `ストーリー ${CH.n}「${CH.t}」`, color: '#ff9ab0', big: win ? 'クリア！' : `家賃 ${Math.min(S.rentIdx, T)}/${T}回`, sub: win ? '家賃を払いきった' : '追い出された…', extra: '' };
+  return { mode: D.n, color: D.color, big: win ? 'クリア！' : S.endless ? `家賃 ${S.rentIdx}回` : `家賃 ${Math.min(S.rentIdx, T)}/${T}回`, sub: '', extra: '' };
+}
+async function makeResultImage(S) {
+  const W = 1200, H = 630, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const ctx = c.getContext('2d'); ctx.imageSmoothingEnabled = false;
+  try { await document.fonts.load('40px "DotGothic16"'); } catch (e) {}
+  const img = await sheetImage();
+  // 背景
+  try {
+    const bg = await loadImg('bg/festival.jpg'); const sc = Math.max(W / bg.width, H / bg.height);
+    ctx.imageSmoothingEnabled = true; ctx.filter = 'blur(3px) brightness(.45)'; ctx.drawImage(bg, (W - bg.width * sc) / 2, (H - bg.height * sc) / 2, bg.width * sc, bg.height * sc); ctx.filter = 'none'; ctx.imageSmoothingEnabled = false;
+  } catch (e) { const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#2a1a3e'); g.addColorStop(1, '#120c1c'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
+  ctx.fillStyle = 'rgba(16,10,26,.35)'; ctx.fillRect(0, 0, W, H);
+  for (let k = 0; k < 12; k++) drawSpr(ctx, img, 'lantern', 18 + k * 99, 8 + Math.round(Math.sin(k / 11 * Math.PI) * 10), 40);
+  const R = resultInfo(S);
+  // 左：タイトルと記録
+  txt(ctx, 'ヤチンスピン', 56, 128, 54, '#ffe2a8');
+  txt(ctx, R.mode, 58, 186, 30, R.color);
+  txt(ctx, R.big, 54, 286, 84, '#f2c14e');
+  let y = 336;
+  if (R.sub) { txt(ctx, R.sub, 58, y, 30, '#f3e9d2'); y += 44; }
+  if (R.extra) { txt(ctx, R.extra, 58, y, 34, '#7ccf62'); y += 46; }
+  txt(ctx, `最高の1スピン ${S.best}コイン・合計 ${S.totalEarned}コイン`, 58, y + 4, 22, '#b0a3c8');
+  // 右：最後の盤面
+  const cs = 76, bx = W - 56 - cs * 5, by = 72;
+  frame(ctx, bx, by, cs * 5, cs * 4, '#231b36');
+  for (let i = 0; i < 20; i++) {
+    const x = bx + (i % 5) * cs, yy = by + Math.floor(i / 5) * cs;
+    ctx.fillStyle = (i + Math.floor(i / 5)) % 2 ? '#2c2342' : '#271f3b'; ctx.fillRect(x + 2, yy + 2, cs - 4, cs - 4);
+    const cell = S.board && S.board[i];
+    if (cell) drawSpr(ctx, img, cell.key, x + 8, yy + 8, cs - 16);
+  }
+  txt(ctx, '最後の盤面', bx + cs * 2.5, by + cs * 4 + 40, 20, '#b0a3c8', 'center');
+  // 下：編成とお守り
+  const counts = Object.entries(S.inv.reduce((m, s) => (m[s.key] = (m[s.key] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]).slice(0, 9);
+  const yb = 470;
+  frame(ctx, 50, yb, 650, 112, 'rgba(28,22,41,.92)');
+  txt(ctx, '手持ち', 66, yb + 30, 20, '#b0a3c8');
+  counts.forEach(([k, n], j) => { drawSpr(ctx, img, k, 66 + j * 70, yb + 40, 48); txt(ctx, `×${n}`, 66 + j * 70 + 46, yb + 98, 18, '#f2c14e', 'right'); });
+  if (S.items.length) {
+    txt(ctx, 'お守り', 740, yb + 30, 20, '#b0a3c8');
+    S.items.slice(0, 8).forEach((k, j) => drawSpr(ctx, img, 'i_' + k, 740 + (j % 8) * 52, yb + 44, 44));
+  }
+  txt(ctx, '#ヤチンスピン　m0ch4771.github.io/yachin-spin', W - 50, H - 16, 20, '#e2d8f2', 'right');
+  return await new Promise(ok => c.toBlob(ok, 'image/png'));
+}
+function intentUrl(text) { return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(GAME_URL)}`; }
+async function shareResult() {
+  const S = st, btn = $('#eShareImg'), label = btn ? btn.innerHTML : '';
+  if (S.daily) {
+    const r = S.rank && S.rank.result, top = Object.entries(S.inv.reduce((m, s) => (m[s.key] = (m[s.key] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k]) => E(k)).join('');
+    shareText = `ヤチンスピン【デイリー ${S.daily}】\n家賃${S.rentIdx}回🎯${r && r.rank ? `今日の${r.rank}位/${r.total}人` : ''}\nお題：${CURSES[S.fixedCurse].n}\n編成：${top}\n#ヤチンスピン`;
+  }
+  const mobile = matchMedia('(pointer: coarse)').matches && navigator.canShare;
+  const win = mobile ? null : window.open('', '_blank');   // ポップアップ止めにかからないよう、先にひらいておく
+  if (btn) { btn.disabled = true; btn.textContent = '画像を作っています…'; }
+  let blob = null; try { blob = await makeResultImage(S); } catch (e) {}
+  const name = `yachin-spin-${S.daily || new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10)}.png`;
+  try {
+    const file = blob ? new File([blob], name, { type: 'image/png' }) : null;
+    if (mobile && file && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], text: shareText + '\n' + GAME_URL });
+    } else {
+      if (blob) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); }
+      if (win) win.location.href = intentUrl(shareText); else window.open(intentUrl(shareText), '_blank');
+      if (blob) toast('結果の画像を保存しました。ポストに添付してください');
+    }
+  } catch (e) {
+    if (e && e.name === 'AbortError') { /* 共有をやめた */ }
+    else { if (win) win.location.href = intentUrl(shareText); else location.href = intentUrl(shareText); }
+  }
+  if (btn) { btn.disabled = false; btn.innerHTML = label; }
+}
+
+// ランキングの画面（ひらいているあいだ 15秒ごとに更新）
+let rkAgo = 0, rkTimer = null, rkData = null;
+function rkDay(ago) { return new Date(Date.now() + 9 * 3600000 - ago * 86400000).toISOString().slice(0, 10); }
+async function loadRank() {
+  const day = rkDay(rkAgo), dp = dailyPreview(day);
+  $('#rkLead').innerHTML = `${day}　お題：${CURSES[dp.curse].e}${CURSES[dp.curse].n}・${STARTERS[dp.starter].e}${STARTERS[dp.starter].n}・${ITEMS[dp.item].e}${ITEMS[dp.item].n}`;
+  try {
+    const r = await api(`/api/ranking?day=${day}&limit=100&player=${encodeURIComponent(playerId())}`);
+    if (!r.ok) throw new Error();
+    rkData = r.data; renderRank();
+  } catch (e) {
+    $('#rkTime').textContent = 'つながりませんでした';
+    if (!rkData) $('#rkList').innerHTML = '<div class="dd" style="color:var(--mute)">ランキングを読みこめませんでした。電波のいいところで、もう一度ひらいてください。</div>';
+  }
+}
+function renderRank() {
+  const R = rkData; if (!R) return;
+  const t = new Date(R.now || Date.now());
+  $('#rkTotal').textContent = `参加 ${R.total}人`;
+  $('#rkTime').textContent = `${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}:${String(t.getSeconds()).padStart(2, '0')} 更新${rkAgo ? '' : '・自動で更新中'}`;
+  $('#rkMine').innerHTML = R.mine ? `<div class="rkmine">あなた（${escH(rankName())}）：<b style="color:var(--gold)">${R.mine.rank}位</b>・家賃 ${R.mine.rents}回</div>` : '';
+  $('#rkList').innerHTML = R.list.length ? R.list.map((x, i) => {
+    const b = x.build;
+    const full = b ? `<div class="rkfull">手持ち：${b.inv.map(([k, c]) => (SYM[k] ? SYM[k].e : '') + `×${c}`).join('　')}<br>お守り：${b.items.length ? b.items.map(k => ITEMS[k] ? ITEMS[k].e + ITEMS[k].n : '').join('・') : 'なし'}<br>最高の1スピン：${b.best}コイン</div>` : '';
+    return `<button class="rkrow ${x.me ? 'me' : ''} ${x.rank <= 3 ? 'top' + x.rank : ''}" data-i="${i}"><span class="rn">${x.rank}</span>
+      <span style="min-width:0"><div class="nm">${escH(String(x.name))}${x.live ? '<span class="live">挑戦中</span>' : ''}</div><div class="bd">${b ? buildTop(b.inv, 6) : ''}</div></span>
+      <span class="sc">${x.rents}回<small>${x.earned}コイン</small></span>${full}</button>`;
+  }).join('') : '<div class="dd" style="color:var(--mute)">まだだれも記録していません。一番乗りのチャンス！</div>';
+  $$('#rkList .rkrow').forEach(b => b.onclick = () => b.classList.toggle('open'));
+}
+function openRank(ago) {
+  if (!RANK_API) return;
+  rkAgo = ago || 0; rkData = null;
+  $$('#rkTabs .tab').forEach(t => t.classList.toggle('on', +t.dataset.ago === rkAgo));
+  $('#rkList').innerHTML = '<div class="dd" style="color:var(--mute)">読みこみ中…</div>'; $('#rkMine').innerHTML = ''; $('#rkTotal').textContent = ''; $('#rkTime').textContent = '';
+  $('#rkName').value = rankName();
+  $('#ovRank').classList.add('show');
+  loadRank();
+  clearInterval(rkTimer);
+  rkTimer = setInterval(() => { if (!$('#ovRank').classList.contains('show')) { clearInterval(rkTimer); return; } if (!rkAgo && !document.hidden) loadRank(); }, 15000);
+}
+window.addEventListener('online', () => rankSync());
+
+// ホーム画面に追加（Android は追加の画面を出す。iPhone は手順を見せる）
+let installEv = null;
+const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+function updInstall() { const b = $('#bInstall'); if (b) b.classList.toggle('hidden', standalone() || !(installEv || isIOS())); }
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEv = e; updInstall(); });
+window.addEventListener('appinstalled', () => { installEv = null; updInstall(); toast('ホーム画面に追加しました'); });
+if ('serviceWorker' in navigator && location.protocol === 'https:') { window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {})); }
+
 function showEndEndless() {
   const n = st.rentIdx, sg = endlessStage(n), best = rec.endlessBest || 0, isNew = n > 0 && n >= best && n > (st.bestBefore || 0);
   $('#endEmo').textContent = isNew ? '👑' : '🏚️';
@@ -1343,8 +1654,10 @@ function showEndEndless() {
   ].map(([a, b]) => `<div class="stat"><b>${b}</b><span>${a}</span></div>`).join('');
   const top = Object.entries(st.inv.reduce((m, s) => (m[s.key] = (m[s.key] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k]) => E(k)).join('');
   const text = `ヤチンスピン【エンドレス】\n家賃${n}回・第${sg}段まで住んだ🏮${isNew ? '（自己ベスト）' : ''}\n最高1スピン${st.best}コイン\n編成：${top}\n#ヤチンスピン`;
-  $('#endBtns').innerHTML = `<a class="btn gold" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(GAME_URL)}" target="_blank" rel="noopener">𝕏 で記録をポストする</a>` +
+  shareText = text;
+  $('#endBtns').innerHTML = `<button class="btn gold" id="eShareImg">𝕏 で記録をポストする</button>` +
     `<button class="btn primary" id="eAgain">もう一回（エンドレス）</button><button class="btn" id="eTitle">🏮 タイトルへ</button>`;
+  $('#eShareImg').onclick = () => shareResult();
   $('#eAgain').onclick = () => { $('#ovEnd').classList.remove('show'); openStarter('endless'); };
   $('#eTitle').onclick = showTitle;
   $('#ovEnd').classList.add('show');
@@ -1352,6 +1665,7 @@ function showEndEndless() {
 }
 function showEnd(win) {
   if (isEndlessMode(st)) { showEndEndless(); return; }
+  if (st.daily) { showEndDaily(); return; }
   const D = DIFFS[st.diff], T = totalRents(st);
   const CH = st.story ? CHAPTERS[st.story - 1] : null;
   $('#endEmo').textContent = win ? (CH ? CH.e : '🎆') : '🏚️';
@@ -1367,14 +1681,16 @@ function showEnd(win) {
   const label = CH ? `ストーリー${CH.n}` : st.daily ? `デイリー${st.daily}` : D.n;
   const head = st.daily ? `ヤチンスピン【デイリー ${st.daily}】家賃${Math.min(st.rentIdx, T)}/${T}回${win ? '👑' : ''}` : CH && win ? `ヤチンスピン【${label}「${CH.t}」】クリア🏮` : win ? `ヤチンスピン【${D.n}】クリア🎆` : st.endless ? `ヤチンスピン【${D.n}】エンドレス${st.rentIdx - T}回♾️` : `ヤチンスピン【${D.n}】家賃${st.rentIdx}/${T}回🏠`;
   const text = `${head}\n最高1スピン${st.best}コイン\n編成：${top}${its ? `\nお守り：${its}` : ''}\n#ヤチンスピン`;
-  const share = `<a class="btn" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(GAME_URL)}" target="_blank" rel="noopener">𝕏 でポストする</a>`;
+  shareText = text;
+  const share = `<button class="btn" id="eShareImg">𝕏 でポストする</button>`;
   const nextCh = CH && win && CH.id < 4 ? CHAPTERS[CH.id] : null;
   $('#endBtns').innerHTML = (nextCh ? `<button class="btn gold" id="eNext">📖 つぎの話へ：${nextCh.t}</button>` : '') +
     (win && CH && CH.id === 4 ? `<button class="btn gold" id="eEndless">🏮 エンドレスへ</button>` : '') + share +
     `<button class="btn primary" id="eAgain">${CH ? 'この話をもう一回' : st.daily ? 'デイリーにもう一回挑戦' : `もう一回（${D.n}）`}</button><button class="btn" id="eTitle">🏮 タイトルへ</button>`;
+  $('#eShareImg').onclick = () => shareResult();
   if (nextCh) $('#eNext').onclick = () => { $('#ovEnd').classList.remove('show'); startRun(nextCh.diff, { story: nextCh.id, starter: 'basic' }); };
   if (win && CH && CH.id === 4) $('#eEndless').onclick = () => { $('#ovEnd').classList.remove('show'); openStarter('endless'); };
-  $('#eAgain').onclick = () => { $('#ovEnd').classList.remove('show'); startRun(st.diff, st.story ? { story: st.story, starter: 'basic' } : st.daily ? { daily: todayStr() } : { starter: st.starter }); };
+  $('#eAgain').onclick = () => { $('#ovEnd').classList.remove('show'); (st.daily ? startDaily() : startRun(st.diff, st.story ? { story: st.story, starter: 'basic' } : { starter: st.starter })); };
   $('#eTitle').onclick = showTitle;
   $('#ovEnd').classList.add('show');
   checkAch();
@@ -1397,7 +1713,7 @@ function openInv() {
 }
 function updRemove() { const b = $('#bRemove'); b.disabled = !invSel || st.removals <= 0 || !['spin', 'choose', 'item'].includes(st.phase); b.textContent = st.removals > 0 ? '✂️ これを1つ除去' : '✂️ 除去の残りなし'; }
 function removeSel() {
-  if (!invSel || !removeSymbol(st, invSel)) return;
+  if (!invSel || !act(st, 'x:' + invSel)) return;
   save(); renderHUD(); tone(240, 0.1, 'sawtooth', 0.05, -80);
   toast(`${E(invSel)} ${SYM[invSel].n} を1つ除去した${hasItem(st, 'broom') ? '（🧹+8コイン）' : ''}`);
   openInv();
@@ -1464,7 +1780,7 @@ $('#mDex').onclick = () => { $('#ovMenu').classList.remove('show'); openDex('sym
 $$('#dexTabs .tab').forEach(t => t.onclick = () => { dexTab = t.dataset.tab; renderDex(); });
 $('#bMenu').onclick = () => { $('#mRestart').textContent = '🔁 最初からやり直す'; $('#mRestart').dataset.armed = ''; $('#ovMenu').classList.add('show'); };
 $('#mTitle').onclick = () => { save(); showTitle(); };
-$('#mRestart').onclick = e => { const b = e.currentTarget; if (b.dataset.armed) { $('#ovMenu').classList.remove('show'); startRun(st.diff, st.story ? { story: st.story, starter: 'basic' } : st.daily ? { daily: todayStr() } : { starter: st.starter }); } else { b.dataset.armed = '1'; b.textContent = 'もう一度押すと最初から（今のデータは消える）'; } };
+$('#mRestart').onclick = e => { const b = e.currentTarget; if (b.dataset.armed) { $('#ovMenu').classList.remove('show'); (st.daily ? startDaily() : startRun(st.diff, st.story ? { story: st.story, starter: 'basic' } : { starter: st.starter })); } else { b.dataset.armed = '1'; b.textContent = 'もう一度押すと最初から（今のデータは消える）'; } };
 $('#bStory').onclick = () => { audio(); openChapters(); };
 $('#bEndless').onclick = () => {
   audio();
@@ -1474,13 +1790,21 @@ $('#bEndless').onclick = () => {
   if (inProgress(saved) && $('#bEndless').dataset.armed !== '1') { $('#bEndless').dataset.armed = '1'; $('#endlessProg').textContent = 'もう一度タップで開始（今のつづきは消える）'; return; }
   openStarter('endless');
 };
+$('#bRank').onclick = () => openRank(0);
+$('#bInstall').onclick = async () => { if (installEv) { installEv.prompt(); try { await installEv.userChoice; } catch (e) {} installEv = null; updInstall(); } else $('#ovInstall').classList.add('show'); };
+$$('#rkTabs .tab').forEach(t => t.onclick = () => openRank(+t.dataset.ago));
+$('#rkSave').onclick = async () => {
+  const v = $('#rkName').value.trim().slice(0, 12); if (!v) return;
+  rec.rankName = v; saveRec();
+  try { const r = await api('/api/name', { player: playerId(), name: v }); if (r.ok) { $('#rkName').value = r.data.name; rec.rankName = r.data.name; saveRec(); toast('名前を変えました'); loadRank(); } else toast('名前を変えられませんでした'); } catch (e) { toast('つながりませんでした。次に記録を送るときに反映されます'); }
+};
 $('#bDaily').onclick = () => {
   audio();
   if (!modesOpen()) { toast('🔒 ストーリーの最終話をクリアすると解放'); return; }
   const saved = loadSave();
   if (inProgress(saved) && !(saved.daily === todayStr())) { if ($('#bDaily').dataset.armed !== '1') { $('#bDaily').dataset.armed = '1'; $('#dailyProg').textContent = 'もう一度タップで開始（今のつづきは消える）'; return; } }
   if (inProgress(saved) && saved.daily === todayStr()) { st = saved; enterGame(); return; }
-  startRun('normal', { daily: todayStr() });
+  startDaily();
 };
 $('#bContinue').onclick = () => { audio(); const s = loadSave(); if (s) { st = s; enterGame(); } };
 $('#bTutGo').onclick = () => { $('#ovTut').classList.remove('show'); store.set(TUT, 1); audio(); };
