@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ヤチン・スピン — 縁日スロットで家賃を払え</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#16111f; --panel:#251d36; --panel2:#1c1629; --edge:#0b0812; --rim:#41345e; --ink:#f3e9d2; --mute:#b0a3c8; --dim:#7a6e94;
+  --red:#d8433b; --red2:#a32f28; --gold:#f2c14e; --gold2:#b8862a; --good:#7ccf62; --bad:#ff7a6b; --blue:#5ab0e8; --cell:#2c2342; --cell2:#231b36;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background-color:var(--bg);
+  background-image:radial-gradient(#ffffff1a 1px, transparent 1.5px),radial-gradient(#ffd8801a 1px, transparent 1.5px);
+  background-size:46px 46px, 73px 73px; background-position:0 0, 21px 13px;
+  color:var(--ink); font-family:'DotGothic16',monospace; min-height:100vh; letter-spacing:.02em;
+  -webkit-tap-highlight-color:transparent; touch-action:manipulation; user-select:none; -webkit-user-select:none;
+}
+button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulation;letter-spacing:inherit}
+.num{font-family:'DotGothic16',monospace}
+.wrap{max-width:500px;margin:0 auto;padding:6px 12px 28px}
+.hidden{display:none!important}
+.spr{display:inline-block;width:1.3em;height:1.3em;vertical-align:-.3em;background-image:var(--sheet);background-repeat:no-repeat;background-size:1600% 1100%;image-rendering:pixelated;image-rendering:crisp-edges;font-style:normal}
+.px{border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--rim);background:var(--panel)}
+.lanterns{display:flex;justify-content:space-between;font-size:16px;margin:0 -4px;opacity:.95;filter:drop-shadow(0 0 6px #ff6a3d66)}
+.lanterns span:nth-child(odd){transform:translateY(4px)}
+@keyframes bob{50%{transform:translateY(-4px)}}
+@keyframes blink{50%{opacity:.3}}
+@keyframes fade{from{opacity:0}}
+@keyframes pop2{0%{transform:scale(0)}100%{transform:scale(1)}}
+
+/* タイトル */
+.title-logo{text-align:center;margin:20px 0 4px}
+.title-logo .big{font-size:46px;line-height:1.05;color:#ffe2a8;text-shadow:4px 4px 0 #a32f28, 8px 8px 0 #0b0812}
+.title-logo .sub{color:var(--mute);font-size:14px;letter-spacing:.2em;margin-top:12px}
+.title-reels{display:flex;justify-content:center;gap:8px;margin:16px 0 6px}
+.title-reels span{width:52px;height:52px;display:grid;place-items:center;font-size:30px;background:var(--cell);border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--rim),inset 0 -5px 0 2px #0006;animation:bob 2.4s infinite steps(4)}
+.title-reels span:nth-child(2){animation-delay:-.4s}.title-reels span:nth-child(3){animation-delay:-.8s}.title-reels span:nth-child(4){animation-delay:-1.2s}.title-reels span:nth-child(5){animation-delay:-1.6s}
+.continue{width:100%;margin:14px 0 4px;border:3px solid var(--edge);padding:12px;font-size:17px;color:#fff;background:var(--red);box-shadow:inset 0 -5px 0 var(--red2),inset 0 3px 0 #ff8a70}
+.continue small{display:block;font-size:12px;opacity:.9;margin-top:3px}
+.continue:active{transform:translateY(2px)}
+.sec-h{font-size:14px;color:var(--gold);margin:20px 2px 8px;display:flex;align-items:center;gap:6px}
+.diffs{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.diff{position:relative;text-align:left;display:flex;flex-direction:column;justify-content:flex-start;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--rim);background:var(--panel);padding:12px 12px 10px 16px}
+.diff::before{content:"";position:absolute;left:2px;top:2px;bottom:2px;width:5px;background:var(--dc)}
+.diff .dn{font-size:18px;color:var(--dc);line-height:1.1}
+.diff .dj{font-size:12px;color:var(--mute)}
+.diff ul{margin:8px 0 6px;padding-left:14px;font-size:12px;line-height:1.6;color:#e2d8f2}
+.diff .rec{font-size:12px;color:var(--gold)}
+.diff .crown{position:absolute;right:8px;top:6px;font-size:18px}
+.diff.armed{border-color:var(--gold)}
+.diff .warn{font-size:11px;color:var(--gold);margin-top:4px}
+.title-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.tbtn{border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--rim);background:var(--panel2);padding:10px 4px;font-size:14px}
+.tbtn small{display:block;color:var(--mute);font-size:12px;margin-top:3px}
+.title-foot{text-align:center;color:var(--dim);font-size:12px;margin-top:16px;line-height:1.7}
+.mode{width:100%;text-align:left;border:3px solid var(--edge);padding:14px;margin-top:10px;display:flex;gap:12px;align-items:center;position:relative}
+.mode.story{background:#3a1d2c;box-shadow:inset 0 0 0 2px #7a3a4a}
+.mode.daily{background:#1b2a3d;box-shadow:inset 0 0 0 2px #2f5a7a}
+.mode .mi{font-size:34px;flex:none}
+.mode .mt{font-size:20px;line-height:1.2}
+.mode .md{font-size:13px;color:#e2d8f2;margin-top:4px;line-height:1.55}
+.mode .mp{font-size:12px;color:var(--gold);margin-top:5px}
+.mode .go{margin-left:auto;font-size:22px;opacity:.7}
+.chap{display:flex;gap:12px;align-items:center;width:100%;text-align:left;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--rim);background:var(--panel);padding:12px;margin-bottom:8px}
+.chap .ci{font-size:30px;flex:none}
+.chap .cn{font-size:12px;color:var(--mute)}
+.chap .ct{font-size:18px}
+.chap .cd{font-size:12px;color:#d6cce8;margin-top:3px;line-height:1.5}
+.chap .cs{margin-left:auto;font-size:12px;text-align:right;flex:none}
+.chap.lock{opacity:.45}
+.replay{display:flex;flex-wrap:wrap;gap:6px}
+.replay button{border:3px solid var(--edge);background:var(--panel2);padding:6px 10px;font-size:13px}
+.starters{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.starter{text-align:left;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--rim);background:var(--panel2);padding:10px;display:flex;flex-direction:column;gap:4px}
+.starter .se{font-size:26px}
+.starter .sn{font-size:14px}
+.starter .sinv{font-size:16px;letter-spacing:0}
+.starter .sd{font-size:12px;color:#d6cce8;line-height:1.45}
+.starter.lock{opacity:.4}
+.starter.lock .sd{color:var(--gold)}
+.starter.last{box-shadow:inset 0 0 0 2px var(--gold)}
+.okon-say{display:flex;gap:10px;align-items:center;text-align:left;background:var(--panel2);border:3px solid var(--edge);padding:8px 10px;margin:10px 0 4px}
+.okon-say .oe{width:54px;height:54px;object-fit:cover;object-position:top;flex:none;border:2px solid var(--edge);image-rendering:auto}
+.okon-say .ot{font-size:14px;line-height:1.6}
+.okon-say .ot b{display:block;font-size:12px;color:#ff8a5c;font-weight:400}
+.evbox{background:#1b2440;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px #3a5a8a;padding:14px 12px 12px}
+.evbox .eh{display:flex;align-items:center;gap:10px}
+.evbox .ee{font-size:34px}
+.evbox .en{font-size:18px}
+.evbox .ew{font-size:12px;color:var(--mute)}
+.evbox .et{font-size:14px;line-height:1.75;margin:8px 2px 12px;color:#ece4f8}
+.evbox .eo{display:grid;gap:7px}
+.evbox .eo button{text-align:left;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px #3a5a8a;background:#22305a;padding:10px 12px;font-size:14px}
+.evbox .eo button:disabled{opacity:.4}
+/* 会話シーン */
+#scene{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;justify-content:flex-end;color:var(--ink);cursor:pointer;overflow:hidden}
+#scene.show{display:flex}
+#scene .sc-deco{position:absolute;top:9%;left:0;right:0;display:flex;justify-content:center;gap:18px;font-size:30px;animation:bob 3s infinite steps(3)}
+#scene .sc-title{position:absolute;top:30%;left:0;right:0;text-align:center;font-size:26px;color:#ffe2a8;text-shadow:3px 3px 0 #a32f28,6px 6px 0 #0b0812;animation:fade .6s}
+#scene .sc-skip{position:absolute;top:12px;right:12px;border:3px solid var(--edge);background:var(--panel2);color:#fff;padding:6px 12px;font-size:13px;z-index:3}
+#scene .sc-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+#scene .sc-flash.go{animation:flash .5s steps(4)}
+@keyframes flash{0%{opacity:.9}100%{opacity:0}}
+#scene .sc-portrait{align-self:flex-end;margin:0 max(14px,calc(50% - 248px)) -3px 0;width:min(40vw,168px);aspect-ratio:1;z-index:1;background:#14101e;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px #6a5a8a,5px 5px 0 #0009;padding:5px;display:grid;place-items:center;animation:fade .25s steps(3)}
+#scene .sc-portrait img{width:100%;height:100%;object-fit:cover;object-position:50% 20%;display:block}
+#scene .sc-portrait .anon{font-size:64px;color:#3e3259;line-height:1}
+#scene .sc-box{position:relative;margin:0 auto 16px;width:calc(100% - 24px);max-width:520px;background:#14101ef0;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px #6a5a8a;padding:18px 16px 24px;min-height:128px;z-index:2}
+#scene .sc-name{position:absolute;top:-17px;left:12px;background:var(--panel);border:3px solid var(--edge);box-shadow:inset 0 0 0 2px currentColor;padding:2px 12px;font-size:14px}
+#scene .sc-text{font-size:16px;line-height:1.85;min-height:56px;white-space:pre-wrap}
+#scene .sc-text.narr{color:#d6cce8}
+#scene .sc-next{position:absolute;right:14px;bottom:6px;color:var(--gold);font-size:13px;animation:blink 1s infinite steps(1)}
+#scene .sc-input{display:flex;gap:8px;margin-top:8px}
+#scene .sc-input .btn{flex:none;padding:10px 16px}
+#scene .sc-input input{flex:1;min-width:0;font-family:inherit;font-size:17px;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--gold);background:#0f0c18;color:var(--ink);padding:10px 12px;user-select:text;-webkit-user-select:text;border-radius:0}
+
+/* ゲーム画面 */
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px}
+.hleft{display:flex;align-items:center;gap:8px}
+.dbadge{font-size:13px;padding:4px 8px;background:var(--edge);border:2px solid currentColor}
+h1{font-size:18px;margin:0}
+.icons{display:flex;gap:6px}
+.icon{height:36px;min-width:36px;padding:0 6px;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--rim);background:var(--panel2);font-size:16px;display:flex;align-items:center;gap:4px;justify-content:center}
+.icon.on{box-shadow:inset 0 0 0 2px var(--gold)}
+.status{margin:10px 0 8px;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--rim);background:var(--panel);padding:12px 14px}
+.st-top{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--mute)}
+.st-top .tag{background:var(--edge);color:var(--ink);padding:2px 8px}
+.st-main{display:flex;align-items:baseline;gap:8px;margin:6px 0}
+.st-main .have{font-size:36px;line-height:1;color:var(--gold);text-shadow:3px 3px 0 #0b0812}
+.st-main .need{font-size:17px;color:var(--mute)}
+.st-main .verdict{margin-left:auto;font-size:13px;padding:3px 10px;background:var(--edge);color:var(--mute);white-space:nowrap}
+.st-main .verdict.ok{background:#1f4a2a;color:var(--good)}
+.bar{height:12px;background:var(--edge);border:2px solid var(--edge);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:repeating-linear-gradient(90deg,var(--red) 0 8px,#e8573f 8px 10px);transition:width .45s steps(8)}
+.bar i.ok{background:repeating-linear-gradient(90deg,#5aae4a 0 8px,#7ccf62 8px 10px)}
+.st-bottom{display:flex;align-items:center;gap:8px;margin-top:9px;font-size:13px;color:var(--mute);flex-wrap:wrap}
+.pips{display:flex;gap:4px}
+.pips span{width:12px;height:12px;background:#2d2445;border:2px solid var(--edge)}
+.pips span.on{background:var(--red)}
+.pips span.last{animation:blink 1s infinite steps(1)}
+.st-bottom b{color:var(--ink);font-size:15px;font-weight:400}
+.events{display:grid;gap:7px;margin-bottom:8px}
+.ev{display:flex;gap:10px;align-items:center;padding:8px 10px;font-size:13px;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--rim);background:var(--panel2);cursor:pointer}
+.ev .ei{font-size:22px;flex:none}
+.ev .et{flex:1;min-width:0;line-height:1.5}
+.ev .et b{display:block;font-size:12px;color:var(--mute);font-weight:400}
+.ev .qbar{height:6px;background:var(--edge);margin-top:4px;overflow:hidden}
+.ev .qbar i{display:block;height:100%;background:var(--gold)}
+.ev .rw{flex:none;font-size:13px;color:var(--gold);background:#2c2410;border:2px solid var(--edge);padding:3px 6px}
+.ev.done{box-shadow:inset 0 0 0 2px #3f7a4a;background:#16261c}
+.ev.done .rw{color:var(--good);background:#173326}
+.ev.curse{box-shadow:inset 0 0 0 2px #7a3a6a;background:#28142a}
+.ev.curse b{color:#ff9ad0}
+.items-bar{display:flex;align-items:center;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
+.items-bar::-webkit-scrollbar{display:none}
+.items-bar .lbl{font-size:12px;color:var(--mute);flex:none;line-height:1.3}
+.ichip{flex:none;width:38px;height:38px;background:var(--panel2);border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--rim);display:grid;place-items:center;font-size:20px;padding:0}
+.ichip.sel{box-shadow:inset 0 0 0 2px var(--gold)}
+.board-wrap{position:relative;padding:8px;background:#3a1d20;border:3px solid var(--edge);box-shadow:inset 0 0 0 3px #7a3a2a,inset 0 0 0 6px #2a1416}
+.board{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.cell{position:relative;aspect-ratio:1;background:var(--cell);border:3px solid var(--edge);box-shadow:inset 0 -4px 0 #0005,inset 0 2px 0 #ffffff12;display:grid;place-items:center;cursor:pointer}
+.cell.empty{background:#1c1630}
+.cell.empty::after{content:"";width:4px;height:4px;background:#3a3058}
+.cell.blocked{background:repeating-linear-gradient(45deg,#2a2640 0 6px,#221e38 6px 12px)}
+.cell.blocked::after{content:"🌫️";font-size:18px;opacity:.7}
+.cell[data-r="U"]{box-shadow:inset 0 0 0 2px #5aae4a88,inset 0 -4px 0 #0005}
+.cell[data-r="R"]{box-shadow:inset 0 0 0 2px #4a82d8aa,inset 0 -4px 0 #0005}
+.cell[data-r="V"]{box-shadow:inset 0 0 0 2px #f2c14e,inset 0 -4px 0 #0005}
+.cell[data-r="S"]{box-shadow:inset 0 0 0 2px #f59ab888,inset 0 -4px 0 #0005}
+.emo{font-size:clamp(22px,7.4vw,36px);line-height:1;margin-top:-6px}
+.cnt{position:absolute;left:2px;top:1px;font-size:11px;background:var(--edge);padding:0 3px;color:#e2d8f2}
+.val{position:absolute;left:50%;bottom:-4px;transform:translate(-50%,0);font-size:13px;line-height:1;padding:2px 4px 1px;background:var(--edge);color:var(--gold);white-space:nowrap;animation:pop2 .2s steps(3)}
+.val.hi{background:var(--red);color:#fff;box-shadow:0 0 0 2px var(--edge)}
+.val.mega{background:var(--gold);color:#3a1a00;box-shadow:0 0 0 2px var(--edge)}
+.val.zero{color:var(--dim)}
+.val.x{color:#c9b8ff;font-size:12px}
+.cell.ghost .emo{opacity:.3;filter:grayscale(1)}
+.cell.rolling .emo{animation:roll .12s infinite steps(2);opacity:.75}
+@keyframes roll{0%{transform:translateY(-5px)}100%{transform:translateY(5px)}}
+.cell.land .emo{animation:land .24s steps(3)}
+@keyframes land{0%{transform:translateY(-10px)}100%{transform:none}}
+.cell.glow{border-color:var(--gold)!important}
+.cell.eater .emo{animation:chomp .36s steps(4)}
+@keyframes chomp{30%{transform:scale(1.3) rotate(-8deg)}60%{transform:scale(1.1) rotate(6deg)}}
+.cell.eaten .emo{animation:shake .3s steps(4);opacity:.25;filter:grayscale(1)}
+@keyframes shake{25%,75%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
+.cell.grew .emo{animation:grow .5s steps(5)}
+@keyframes grow{40%{transform:scale(1.4);filter:brightness(1.6)}}
+.cell.sel{border-color:#fff!important}
+.cell.nbr{outline:2px dashed var(--gold);outline-offset:-5px}
+.cell.dimmed{opacity:.35}
+.mulb{position:absolute;top:-6px;right:-6px;background:#7a5ac8;color:#fff;font-size:12px;padding:1px 4px;border:2px solid var(--edge);animation:pop2 .2s steps(3);z-index:3}
+.mulb.zero{background:#555}
+.total-pop{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:5}
+.total-pop span{font-size:48px;color:var(--gold);text-shadow:4px 4px 0 #a32f28,8px 8px 0 #0b0812;animation:tot 1.1s steps(8) forwards}
+@keyframes tot{0%{opacity:0;transform:scale(.5)}20%{opacity:1;transform:scale(1.1)}70%{opacity:1;transform:scale(1)}100%{opacity:0;transform:translateY(-14px)}}
+.info{margin-top:10px;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--rim);background:var(--panel2);padding:11px 13px;min-height:74px}
+.info .ttl{display:flex;align-items:center;gap:8px;font-size:15px;flex-wrap:wrap}
+.info .ttl .big{font-size:24px;color:var(--gold);text-shadow:2px 2px 0 #0b0812}
+.info .ttl .sub{color:var(--mute);font-size:12px;margin-left:auto}
+.info .muted{color:var(--mute);font-size:13px;line-height:1.7}
+.hl{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.hl span{background:#2a2244;border:2px solid var(--edge);padding:3px 7px;font-size:13px}
+.hl span b{color:var(--gold);font-weight:400}
+.hl span.it{background:#2c2410}
+.hl span.bad{background:#2a1420}
+.hl span.ok{background:#173326;color:#bff3d9}
+.eq{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:8px}
+.eq span{padding:3px 7px;font-size:13px;background:#2a2244;border:2px solid var(--edge)}
+.eq .plus{background:#1d3b2e;color:#c8f4d8}
+.eq .minus{background:#3b1d2a;color:#ffc4d4}
+.eq .times{background:#2b2350;color:#d5c8ff}
+.eq .res{background:#3a2a10;color:var(--gold);font-size:16px}
+.eq i{font-style:normal;color:var(--dim)}
+.desc{font-size:13px;color:#e2d8f2;line-height:1.7;margin-top:7px}
+.act{margin-top:12px}
+.spin{width:100%;border:3px solid var(--edge);padding:12px 10px 10px;font-size:28px;letter-spacing:.3em;color:#fff;background:var(--red);box-shadow:inset 0 -6px 0 var(--red2),inset 0 3px 0 #ff8a70;text-shadow:3px 3px 0 #7a1a14}
+.spin:active{transform:translateY(3px);box-shadow:inset 0 -2px 0 var(--red2)}
+.spin:disabled{filter:grayscale(.7) brightness(.65);cursor:default}
+.spin small{display:block;font-size:13px;letter-spacing:.04em;opacity:.95;margin-top:4px;text-shadow:none}
+.pickbox{border:3px solid var(--edge);box-shadow:inset 0 0 0 2px #5a4a8a;background:#211a3c;padding:12px 10px 10px}
+.pickbox.itembox{box-shadow:inset 0 0 0 2px #8a6a1e;background:#2a2214}
+.pickbox h3{margin:0 2px 4px;font-size:16px;font-weight:400;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pickbox .lead{color:var(--mute);font-size:13px;margin:0 2px 10px;min-height:0}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.choices.four,.choices.two{grid-template-columns:repeat(2,1fr)}
+.choice{position:relative;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--rim);background:var(--panel);padding:10px 5px 9px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
+.choice:active{transform:translateY(2px)}
+.choice .ce{font-size:34px;line-height:1.2}
+.choice .cn{font-size:14px}
+.choice .cr{font-size:11px}
+.choice .cd{font-size:12px;color:#e6dcf4;line-height:1.55;min-height:3em}
+.choice .syn{margin-top:4px;display:flex;flex-wrap:wrap;justify-content:center;gap:1px;font-size:16px;min-height:20px}
+.choice .syn em{font-style:normal;opacity:.3;filter:grayscale(.8)}
+.choice .syn em.own{opacity:1;filter:none}
+.choice .syn small{font-size:11px;color:var(--mute);align-self:center}
+.choice .badge{position:absolute;top:-10px;left:-4px;transform:none;background:var(--good);color:#06301d;font-size:11px;padding:1px 6px;border:2px solid var(--edge);white-space:nowrap}
+.choice .badge.new{background:#9a7bff;color:#fff;left:auto;right:-6px;transform:none}
+.pick-actions{display:flex;gap:7px;margin-top:9px}
+.btn{flex:1;padding:10px;font-size:15px;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--rim),inset 0 -4px 0 #0006;background:var(--panel)}
+.btn:active{transform:translateY(2px)}
+.btn.primary{background:var(--red);color:#fff;box-shadow:inset 0 -5px 0 var(--red2),inset 0 3px 0 #ff8a70}
+.btn.gold{background:var(--gold);color:#3a2000;box-shadow:inset 0 -5px 0 var(--gold2),inset 0 3px 0 #ffe08a}
+.btn:disabled{opacity:.4;cursor:default}
+.tools{display:flex;gap:8px;margin-top:10px}
+.tool{flex:1;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--rim);background:var(--panel2);padding:8px 6px;font-size:14px;display:flex;align-items:center;justify-content:center;gap:6px}
+.tool em{font-style:normal;color:var(--gold)}
+.tool .tsub{font-size:12px;color:var(--mute)}
+.ov{position:fixed;inset:0;background:#07051099;display:none;align-items:flex-end;justify-content:center;z-index:20}
+.ov.show{display:flex;animation:fade .15s}
+.ov.center{align-items:center}
+.sheet{width:100%;max-width:500px;max-height:88vh;overflow:auto;background:var(--panel);border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--rim);padding:18px 16px 22px}
+.ov.center .sheet{max-width:400px;margin:16px}
+.sheet h2{font-weight:400;font-size:21px;margin:0 0 6px;color:#ffe2a8;text-shadow:2px 2px 0 #0b0812}
+.sheet .lead{color:var(--mute);font-size:14px;margin:0 0 14px;line-height:1.7}
+.actions{display:flex;gap:8px;margin-top:14px}
+.vbtns{display:grid;gap:8px;margin-top:12px}
+.inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:6px}
+.inv-item{position:relative;border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--rim);background:var(--panel2);aspect-ratio:1;display:grid;place-items:center;font-size:26px;padding:0}
+.inv-item .n{position:absolute;right:3px;bottom:1px;font-size:12px;color:var(--gold)}
+.inv-item.sel{box-shadow:inset 0 0 0 2px var(--gold)}
+.detail{margin-top:12px;background:var(--panel2);border:3px solid var(--edge);padding:10px 12px;display:flex;gap:12px;align-items:center;min-height:70px}
+.detail .de{font-size:34px}
+.detail .dd{font-size:13px;color:#e2d8f2;line-height:1.6}
+.tabs{display:flex;gap:6px;margin:4px 0 12px;position:sticky;top:-18px;background:var(--panel);padding:8px 0;z-index:2}
+.tab{flex:1;border:3px solid var(--edge);background:var(--panel2);padding:7px 4px;font-size:13px}
+.tab.on{background:var(--gold);color:#2a1a00}
+.dex{display:grid;gap:6px}
+.dex-h{margin:10px 0 2px;font-size:13px}
+.dex-row{display:flex;gap:10px;align-items:center;background:var(--panel2);border:3px solid var(--edge);padding:7px 10px}
+.dex-row .de{font-size:26px;width:36px;text-align:center;flex:none}
+.dex-row .dn{font-size:14px}
+.dex-row .dd{font-size:12px;color:#d6cce8;line-height:1.55}
+.dex-row.unk{opacity:.5}
+.dex-row.unk .de{filter:brightness(0) invert(.25)}
+.dex-row.got{box-shadow:inset 0 0 0 2px #8a6a1e}
+.progress-line{font-size:13px;color:var(--mute);margin-bottom:6px}
+.sec{font-size:14px;color:var(--gold);margin:16px 0 8px}
+.steps{display:grid;gap:8px}
+.stp{display:flex;gap:12px;align-items:center;background:var(--panel2);border:3px solid var(--edge);padding:10px 12px}
+.stp .si{font-size:28px;flex:none;width:40px;text-align:center}
+.stp b{display:block;font-size:15px;font-weight:400;color:#ffe2a8}
+.stp span{font-size:13px;color:#d6cce8;line-height:1.6}
+.mini-board{display:grid;grid-template-columns:repeat(3,26px);gap:2px;flex:none}
+.mini-board i{width:26px;height:26px;background:var(--cell);display:grid;place-items:center;font-style:normal;font-size:15px;border:2px solid var(--edge)}
+.mini-board i.c{background:#5a2a33}
+.mini-board i.n{outline:2px dashed var(--gold);outline-offset:-4px}
+.big-num{font-size:42px;text-align:center;margin:6px 0;text-shadow:3px 3px 0 #0b0812}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.stat{background:var(--panel2);border:3px solid var(--edge);padding:9px;text-align:center}
+.stat b{display:block;font-size:22px;color:var(--gold);font-weight:400}
+.stat span{font-size:12px;color:var(--mute)}
+a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background:#0f0f14}
+.toasts{position:fixed;left:0;right:0;top:12px;display:flex;flex-direction:column;align-items:center;gap:6px;z-index:58;pointer-events:none}
+.toast{background:var(--panel);border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--gold);color:var(--ink);padding:9px 14px;font-size:14px;animation:toast 2.6s steps(12) forwards;max-width:92vw;text-align:center}
+.toast.ach{box-shadow:inset 0 0 0 2px #9a7bff}
+@keyframes toast{0%{opacity:0;transform:translateY(-10px)}10%,80%{opacity:1;transform:none}100%{opacity:0}}
+
+
+/* シンボルは 32px の絵を 1.5 倍＝48px で表示 */
+.cell .emo .spr, .choice .ce .spr, .inv-item .spr, .detail .de .spr, .dex-row .de .spr, .title-reels span .spr, .starter .se .spr, .evbox .ee .spr {
+  width: min(48px, 12.5vw); height: min(48px, 12.5vw); vertical-align: middle;
+}
+.cell .emo { margin-top: -4px; }
+.dex-row .de { width: 50px; }
+.choice .ce { line-height: 1; min-height: 48px; display: grid; place-items: center; }
+</style>
+<style>:root{--sheet:url(data:image/png;base64,/*__SHEET__*/)}</style>
+</head>
+<body>
+
+<!-- ===== タイトル画面 ===== -->
+<div class="wrap" id="titleScreen">
+  <div class="lanterns"><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span></div>
+  <div class="title-logo">
+    <div class="big">ヤチン・<br>スピン</div>
+    <div class="sub">縁日スロットで家賃を払え</div>
+  </div>
+  <div class="title-reels"><span>🏮</span><span>🦊</span><span>🍡</span><span>🐉</span><span>🎆</span></div>
+  <button class="continue hidden" id="bContinue"></button>
+  <button class="mode story" id="bStory"><span class="mi">📖</span><div><div class="mt">ストーリー</div><div class="md">ばあちゃんのスロット台と、ツケの残った長屋の話。</div><div class="mp" id="storyProg"></div></div><span class="go">›</span></button>
+  <button class="mode daily" id="bDaily"><span class="mi">🎯</span><div><div class="mt">デイリーチャレンジ</div><div class="md" id="dailyDesc"></div><div class="mp" id="dailyProg"></div></div><span class="go">›</span></button>
+  <div class="sec-h">🎲 フリープレイ</div>
+  <div class="diffs" id="diffs"></div>
+  <div class="title-btns">
+    <button class="tbtn" id="tHelp">📖 あそびかた</button>
+    <button class="tbtn" id="tDex">📚 ずかん<small id="tDexN"></small></button>
+    <button class="tbtn" id="tAch">🏅 実績<small id="tAchN"></small></button>
+  </div>
+  <div class="title-foot">シンボル <span id="tSymN"></span>種・アイテム <span id="tItemN"></span>種・できごと <span id="tEvN"></span>種・気まぐれ <span id="tCurseN"></span>種・はじめの荷物 <span id="tStN"></span>種</div>
+</div>
+
+<!-- ===== ゲーム画面 ===== -->
+<div class="wrap hidden" id="gameScreen">
+  <div class="lanterns"><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span></div>
+  <header>
+    <div class="hleft">
+      <button class="icon" id="bMenu" title="メニュー">☰</button>
+      <span class="dbadge" id="dBadge">NORMAL</span>
+    </div>
+    <div class="icons">
+      <button class="icon" id="bFast" title="演出をはやくする">⏩</button>
+      <button class="icon" id="bSound" title="サウンド">🔊</button>
+      <button class="icon" id="bHelp" title="あそびかた">📖</button>
+    </div>
+  </header>
+
+  <section class="status" aria-label="家賃">
+    <div class="st-top"><span>🏠 つぎの家賃</span><span class="tag" id="rentNo">1 / 12 回目</span></div>
+    <div class="st-main">
+      <span class="have num" id="coins">0</span><span class="need num" id="need">/ 25 コイン</span>
+      <span class="verdict" id="verdict">あと25</span>
+    </div>
+    <div class="bar"><i id="rentBar"></i></div>
+    <div class="st-bottom"><span>支払い日まで</span><div class="pips" id="pips"></div><span>あと <b id="spinsLeft">5</b> 回</span></div>
+  </section>
+
+  <div class="events" id="events"></div>
+  <div class="items-bar hidden" id="itemsBar"></div>
+
+  <div class="board-wrap">
+    <div class="board" id="board"></div>
+    <div class="total-pop" id="totalPop"></div>
+  </div>
+
+  <div class="info" id="info"></div>
+  <div class="act" id="act"></div>
+
+  <div class="tools">
+    <button class="tool" id="bInv">🎒 手持ち <em id="invN">5</em><span class="tsub">個</span></button>
+    <button class="tool" id="bTok">🔄 <em id="rrN">1</em>　✂️ <em id="rmN">1</em><span class="tsub">引き直し/除去</span></button>
+  </div>
+</div>
+
+<!-- 会話シーン -->
+<div id="scene"><div class="sc-deco" id="scDeco"></div><div class="sc-title" id="scTitle"></div><div class="sc-flash" id="scFlash"></div>
+  <button class="sc-skip" id="scSkip">スキップ ⏭</button>
+  <div class="sc-portrait" id="scPortrait"></div>
+  <div class="sc-box"><span class="sc-name" id="scName"></span><div class="sc-text" id="scText"></div><div id="scInput"></div><span class="sc-next" id="scNext">▼</span></div>
+</div>
+
+<!-- 話をえらぶ -->
+<div class="ov" id="ovChapters"><div class="sheet">
+  <h2>📖 ストーリー</h2>
+  <p class="lead">話をクリアすると次の話が解放される。物語の中の家賃は、それぞれの難易度と同じルール。</p>
+  <div id="chapList"></div>
+  <div class="sec">🎞️ 思い出（見たシーンをもう一度）</div>
+  <div class="replay" id="replayList"></div>
+  <div class="actions"><button class="btn" data-close>とじる</button></div>
+</div></div>
+
+<!-- はじめの荷物 -->
+<div class="ov" id="ovStarter"><div class="sheet">
+  <h2>🎒 はじめの荷物</h2>
+  <p class="lead" id="starterLead"></p>
+  <div class="starters" id="starterList"></div>
+  <div class="actions"><button class="btn" data-close>もどる</button></div>
+</div></div>
+
+<!-- 家賃 -->
+<div class="ov center" id="ovRent"><div class="sheet" style="text-align:center">
+  <h2>おコンさんが来た</h2>
+  <p class="lead" id="rentLead"></p>
+  <div class="big-num" id="rentBig"></div>
+  <div class="okon-say" id="rentSay"></div>
+  <p class="lead" id="rentAfter" style="margin:0"></p>
+  <div class="actions"><button class="btn primary" id="bPay">家賃を払う</button></div>
+</div></div>
+
+<!-- 手持ち -->
+<div class="ov" id="ovInv"><div class="sheet">
+  <h2>🎒 手持ちのシンボル</h2>
+  <p class="lead" id="invLead"></p>
+  <div class="inv-grid" id="invGrid"></div>
+  <div class="detail" id="invDetail"></div>
+  <div class="actions"><button class="btn" id="bRemove" disabled>✂️ これを1つ除去</button><button class="btn" data-close>とじる</button></div>
+</div></div>
+
+<!-- メニュー -->
+<div class="ov center" id="ovMenu"><div class="sheet">
+  <h2>メニュー</h2>
+  <p class="lead">進み具合は自動で保存されるよ。</p>
+  <div class="vbtns">
+    <button class="btn" id="mTitle">🏮 タイトルへもどる</button>
+    <button class="btn" id="mDex">📚 ずかん・実績</button>
+    <button class="btn" id="mRestart">🔁 この難易度で最初から</button>
+    <button class="btn" data-close>とじる</button>
+  </div>
+</div></div>
+
+<!-- あそびかた -->
+<div class="ov" id="ovHelp"><div class="sheet">
+  <h2>あそびかた</h2>
+  <div class="steps" id="howSteps"></div>
+  <div class="sec">もっと詳しく</div>
+  <div class="steps">
+    <div class="stp"><div class="si">🧿</div><div><b>お守り</b><span>家賃を払うと、おコンさんがおまけを1つくれる。盤面には出ないで、ずっと効く。</span></div></div>
+    <div class="stp"><div class="si">📜</div><div><b>大家の依頼</b><span>2回目の家賃から、ちょっとした頼みごとが来る。片づければ、その場でお礼がもらえる。</span></div></div>
+    <div class="stp"><div class="si">😈</div><div><b>大家の気まぐれ</b><span>HARDから先は、おコンさんの機嫌で妙なルールがつく。四すみを使うな、とか。</span></div></div>
+    <div class="stp"><div class="si">🎒</div><div><b>手持ちと盤面</b><span>台は20マス。手持ちが多すぎると、出番のないシンボルが出てくる。✂️で減らすのも手。</span></div></div>
+    <div class="stp"><div class="si">🍴</div><div><b>食べる・消える</b><span>食べられたシンボルは、手持ちからいなくなる。</span></div></div>
+    <div class="stp"><div class="si">🏘️</div><div><b>横丁のできごと</b><span>支払いのあと、ときどき横丁で何か起きる。どっちに転ぶかは、選び方しだい。</span></div></div>
+    <div class="stp"><div class="si">🎒</div><div><b>はじめの荷物</b><span>フリープレイでは、最初に持っていくシンボルを選べる。話を進めると増える。</span></div></div>
+    <div class="stp"><div class="si">🎯</div><div><b>デイリーチャレンジ</b><span>その日のお題と台の出方は、だれが遊んでも同じ。何回でもやり直せる。</span></div></div>
+    <div class="stp"><div class="si">♾️</div><div><b>エンドレス</b><span>払いきったあとも住みつづけられる。家賃は上がりつづける。</span></div></div>
+  </div>
+  <div class="actions"><button class="btn" data-close>とじる</button></div>
+</div></div>
+
+<!-- ずかん・実績 -->
+<div class="ov" id="ovDex"><div class="sheet">
+  <h2>📚 ずかん・実績</h2>
+  <div class="tabs" id="dexTabs">
+    <button class="tab on" data-tab="sym">シンボル</button>
+    <button class="tab" data-tab="item">アイテム</button>
+    <button class="tab" data-tab="curse">気まぐれ</button>
+    <button class="tab" data-tab="ach">実績</button>
+  </div>
+  <div id="dexBody"></div>
+  <div class="actions"><button class="btn" data-close>とじる</button></div>
+</div></div>
+
+<!-- はじめて -->
+<div class="ov center" id="ovTut"><div class="sheet">
+  <h2 style="text-align:center">よいまつり横丁</h2>
+  <p class="lead" style="text-align:center">台をまわして縁銭をかせぎ、長屋の家賃を払う。それだけ。</p>
+  <div class="steps" id="tutSteps"></div>
+  <div class="actions"><button class="btn primary" id="bTutGo">はじめる</button></div>
+</div></div>
+
+<!-- 結果 -->
+<div class="ov center" id="ovEnd"><div class="sheet" style="text-align:center">
+  <div style="font-size:48px" id="endEmo">🏚️</div>
+  <h2 id="endTitle">家賃が払えなかった…</h2>
+  <p class="lead" id="endLead"></p>
+  <div class="stats" id="endStats"></div>
+  <div class="vbtns" id="endBtns"></div>
+</div></div>
+
+<script>
+/*__ENGINE__*/
+</script>
+<script>
+/*__STORY__*/
+</script>
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+// ---------- ドット絵 ----------
+const SPR = /*__SPRIDX__*/;
+const BUSTS = /*__BUSTS__*/;
+const SPR_ROWS = Math.ceil(Object.keys(SPR.idx).length / SPR.cols);
+function spr(name, extra) {
+  const i = SPR.idx[name]; if (i === undefined) return '';
+  const c = i % SPR.cols, r = Math.floor(i / SPR.cols);
+  return `<i class="spr ${extra || ''}" style="background-position:${(c / (SPR.cols - 1) * 100).toFixed(3)}% ${(r / (SPR_ROWS - 1) * 100).toFixed(3)}%"></i>`;
+}
+const norm = e => e.replace(/️/g, '');
+const EMAP = {};
+Object.keys(SYM).forEach(k => { EMAP[norm(SYM[k].e)] = k; });
+Object.keys(ITEMS).forEach(k => { const e = norm(ITEMS[k].e); if (!EMAP[e]) EMAP[e] = 'i_' + k; });
+Object.keys(CURSES).forEach(k => { const e = norm(CURSES[k].e); if (!EMAP[e]) EMAP[e] = 'c_' + k; });
+const UIMAP = /*__UIMAP__*/;
+Object.keys(UIMAP).forEach(e => { if (!EMAP[norm(e)]) EMAP[norm(e)] = UIMAP[e]; });
+const ERX = /(?:\p{Extended_Pictographic}|[✓])(?:️|‍\p{Extended_Pictographic}️?)*/gu;
+const ERX1 = /\p{Extended_Pictographic}|[✓]/u;
+const escH = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+function toPix(root) {
+  if (!root) return;
+  if (root.nodeType === 3) { swapText(root); return; }
+  if (root.nodeType !== 1 || root.closest('script,style,textarea,input,.nospr')) return;
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+  const list = []; let n;
+  while ((n = w.nextNode())) if (ERX1.test(n.nodeValue)) list.push(n);
+  list.forEach(swapText);
+}
+function swapText(t) {
+  const p = t.parentNode; if (!p || !ERX1.test(t.nodeValue) || (p.closest && p.closest('script,style,textarea,input,.nospr'))) return;
+  const str = t.nodeValue; let html = '', last = 0;
+  str.replace(ERX, (m, off) => { html += escH(str.slice(last, off)); const k = EMAP[norm(m)]; html += k ? spr(k) : ''; last = off + m.length; return m; });
+  html += escH(str.slice(last));
+  const tmp = document.createElement('template'); tmp.innerHTML = html;
+  p.replaceChild(tmp.content, t);
+}
+new MutationObserver(ms => ms.forEach(m => {
+  if (m.type === 'characterData') swapText(m.target);
+  else m.addedNodes.forEach(toPix);
+})).observe(document.body, { childList: true, subtree: true, characterData: true });
+
+const SAVE = 'yachin-spin-save-v3', REC = 'yachin-spin-rec-v3', SET = 'yachin-spin-set-v1', TUT = 'yachin-spin-tut-v3';
+let st = null, busy = false, sel = null, selItem = null;
+let settings = { sound: true, fast: false };
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} },
+};
+const blankRec = () => ({ diff: {}, bestSpin: 0, seen: [], seenItems: [], seenCurses: [], ach: [], spins: 0, quests: 0, runs: 0, story: 0, name: 'ツグミ', scenes: [], daily: {}, events: 0, lastStarter: 'basic' });
+let rec = Object.assign(blankRec(), store.get(REC) || {});
+const E = k => SYM[k].e;
+const SYM_KEYS = Object.keys(SYM), ITEM_KEYS = Object.keys(ITEMS);
+const RARITY_ORDER = ['C', 'U', 'R', 'V', 'S'];
+
+// ---------- 音 ----------
+let ac = null;
+function audio() { if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { ac = null; } } if (ac && ac.state === 'suspended') ac.resume().catch(() => {}); }
+function tone(freq, dur = 0.08, type = 'square', vol = 0.05, slide = 0) {
+  if (!settings.sound || !ac) return;
+  try {
+    const t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, freq + slide), t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dur + 0.02);
+  } catch (e) {}
+}
+const arp = (fs, gap = 70, type = 'square', vol = 0.04, dur = 0.16) => fs.forEach((f, k) => setTimeout(() => tone(f, dur, type, vol), k * gap));
+const sfx = {
+  tick: c => tone(320 + c * 60, 0.05, 'square', 0.035),
+  coin: () => arp([988, 1319], 60, 'square', 0.04, 0.1),
+  chomp: () => tone(180, 0.12, 'sawtooth', 0.05, -100),
+  mul: () => tone(660, 0.1, 'triangle', 0.06, 400),
+  grow: () => arp([523, 784], 70, 'triangle', 0.06, 0.12),
+  boom: () => tone(90, 0.4, 'sawtooth', 0.08, -50),
+  big: () => arp([523, 659, 784, 1047]),
+  mega: () => arp([523, 659, 784, 1047, 1319, 1568], 60),
+  bad: () => arp([392, 330, 262], 140, 'triangle', 0.07, 0.22),
+  pick: () => tone(880, 0.08, 'triangle', 0.06),
+  item: () => arp([660, 880, 1175], 80, 'triangle', 0.06, 0.18),
+  ach: () => arp([784, 988, 1175, 1568], 90, 'triangle', 0.06, 0.2),
+  quest: () => arp([659, 784, 988, 1319], 70, 'square', 0.04, 0.12),
+};
+const sleep = ms => new Promise(r => setTimeout(r, ms * (settings.fast ? 0.4 : 1)));
+
+// ---------- 保存・記録 ----------
+function save() { if (st) store.set(SAVE, { st, UID }); }
+function saveRec() { store.set(REC, rec); }
+function loadSave() {
+  const d = store.get(SAVE);
+  if (d && d.st && Array.isArray(d.st.inv) && d.st.diff && d.st.stats) {
+    const s = d.st;
+    if (s.phase === 'anim') s.phase = s.spinsLeft <= 0 ? 'rent' : 'spin';
+    if (s.phase === 'choose' && !s.choices) s.phase = 'spin';
+    UID = Math.max(d.UID || 1, ...s.inv.map(x => x.id + 1), 1);
+    return s;
+  }
+  return null;
+}
+function inProgress(s) { return s && !['over', 'clear'].includes(s.phase); }
+function seeSym(k) { if (k && !rec.seen.includes(k)) { rec.seen.push(k); saveRec(); } }
+function seeItem(k) { if (k && !rec.seenItems.includes(k)) { rec.seenItems.push(k); saveRec(); } }
+function seeCurse(k) { if (k && !rec.seenCurses.includes(k)) { rec.seenCurses.push(k); saveRec(); } }
+function drec(d) { return rec.diff[d] || (rec.diff[d] = { best: 0, clears: 0, endless: 0 }); }
+
+// ---------- 実績 ----------
+const ACH = [
+  { id: 'first', e: '🎰', n: 'はじめの一回', d: 'はじめて まわす', c: s => s.totalSpins >= 1 },
+  { id: 'rent1', e: '🏠', n: 'はじめての家賃', d: '家賃を1回払う', c: s => s.rentIdx >= 1 },
+  { id: 'clear_easy', e: '🟢', n: 'EASY クリア', d: 'EASYで家賃を全部払う' },
+  { id: 'clear_normal', e: '🔵', n: 'NORMAL クリア', d: 'NORMALで家賃を全部払う' },
+  { id: 'clear_hard', e: '🟠', n: 'HARD クリア', d: 'HARDで家賃を全部払う' },
+  { id: 'clear_super', e: '🔴', n: 'SUPER HARD クリア', d: 'SUPER HARDで家賃を全部払う' },
+  { id: 's50', e: '💴', n: 'いい稼ぎ', d: '1回で50コイン以上', c: (s, r) => r && r.total >= 50 },
+  { id: 's150', e: '💰', n: '大もうけ', d: '1回で150コイン以上', c: (s, r) => r && r.total >= 150 },
+  { id: 's500', e: '🏦', n: '千両役者', d: '1回で500コイン以上', c: (s, r) => r && r.total >= 500 },
+  { id: 's1500', e: '🌋', n: '天井知らず', d: '1回で1500コイン以上', c: (s, r) => r && r.total >= 1500 },
+  { id: 'rich', e: '🤑', n: '大家より金持ち', d: 'もちコインが2000枚以上になる', c: s => s.coins >= 2000 },
+  { id: 'eat15', e: '🍴', n: '食いしんぼう', d: '1回の遊びで合計15回 食べさせる', c: s => s.stats.eats >= 15 },
+  { id: 'eat60', e: '🍽️', n: '大食い大会', d: '1回の遊びで合計60回 食べさせる', c: s => s.stats.eats >= 60 },
+  { id: 'dragon', e: '🐉', n: '昇り龍', d: '🐉りゅう を手に入れる', c: s => s.inv.some(x => x.key === 'dragon') },
+  { id: 'japan5', e: '🗾', n: '名所めぐり', d: '🗾で名所5種をいっぺんにそろえる', c: s => s.stats.flags.includes('japan5') },
+  { id: 'hina', e: '🎎', n: 'ひなまつり', d: '🎎の×3を発動させる', c: s => s.stats.flags.includes('hina') },
+  { id: 'pochi', e: '🧧', n: 'おとしだま', d: '🧧の あたりを引く', c: s => s.stats.flags.includes('pochi') },
+  { id: 'fugu', e: '🐡', n: '毒見役', d: '🐡の毒にあたる', c: s => s.stats.flags.includes('fugu') },
+  { id: 'kusudama', e: '🎊', n: 'おめでとう', d: '🎊くすだまを割る', c: s => s.stats.flags.includes('kusudama') },
+  { id: 'full', e: '🧱', n: 'ぎっしり', d: '盤面20マスをぜんぶ埋める', c: s => s.stats.flags.includes('full') },
+  { id: 'inv50', e: '📦', n: '物持ち', d: '手持ちが50個以上になる', c: s => s.inv.length >= 50 },
+  { id: 'mini', e: '🍃', n: 'ミニマリスト', d: '手持ち10個以下で 5回目の家賃を払う' },
+  { id: 'items6', e: '🧿', n: 'お守りコレクター', d: 'アイテムを6つ持つ', c: s => s.items.length >= 6 },
+  { id: 'items12', e: '👜', n: 'お守りだらけ', d: 'アイテムを12個持つ', c: s => s.items.length >= 12 },
+  { id: 'quest1', e: '📜', n: '大家の頼みごと', d: '依頼をはじめて達成する', c: () => rec.quests >= 1 },
+  { id: 'quest20', e: '🏅', n: '頼れる店子', d: '依頼を通算20回 達成する', c: () => rec.quests >= 20 },
+  { id: 'curse5', e: '😈', n: '気まぐれ慣れ', d: '1回の遊びで 気まぐれを5回のりこえる', c: s => s.stats.curses >= 5 },
+  { id: 'noremove', e: '✋', n: 'ありのまま', d: '✂️除去を使わずに NORMAL以上をクリア' },
+  { id: 'endless3', e: '♾️', n: 'まだまだ住む', d: 'エンドレスで3回 家賃を払う', c: s => s.endless && s.rentIdx - totalRents(s) >= 3 },
+  { id: 'endless10', e: '🏯', n: '長屋の主', d: 'エンドレスで10回 家賃を払う', c: s => s.endless && s.rentIdx - totalRents(s) >= 10 },
+  { id: 'spins300', e: '🔁', n: '常連さん', d: '通算300回 まわす', c: () => rec.spins >= 300 },
+  { id: 'story1', e: '🏠', n: '横丁の店子', d: 'ストーリー第一話をクリア', c: () => rec.story >= 1 },
+  { id: 'story2', e: '🎆', n: 'まつりの立役者', d: 'ストーリー第二話をクリア', c: () => rec.story >= 2 },
+  { id: 'story3', e: '🦊', n: '大家の味方', d: 'ストーリー第三話をクリア', c: () => rec.story >= 3 },
+  { id: 'story4', e: '🏮', n: '千の灯り', d: 'ストーリー最終話をクリア', c: () => rec.story >= 4 },
+  { id: 'daily5', e: '📅', n: '今日の運だめし', d: 'デイリーで家賃を5回払う', c: s => s.daily && s.rentIdx >= 5 },
+  { id: 'dailyclear', e: '🗓️', n: '毎日がまつり', d: 'デイリーをクリアする' },
+  { id: 'event10', e: '🏘️', n: '横丁の顔なじみ', d: 'できごとに通算10回 出会う', c: () => rec.events >= 10 },
+  { id: 'kazan', e: '🌋', n: '大噴火', d: '🌋かざんを噴火させる', c: s => s.stats.flags.includes('kazan') },
+  { id: 's5000', e: '🌠', n: '縁銭長者', d: '1回で5000コイン以上', c: (s, r) => r && r.total >= 5000 },
+  { id: 'starters', e: '🎒', n: '荷物もち', d: 'はじめの荷物を全部 解放する', c: () => Object.keys(STARTERS).every(k => starterOpen(k)) },
+  { id: 'dex40', e: '📗', n: 'ずかん係', d: 'シンボルを40種 見つける', c: () => rec.seen.length >= 40 },
+  { id: 'dexall', e: '📚', n: 'ずかん完成', d: 'シンボルを全種 見つける', c: () => SYM_KEYS.every(k => rec.seen.includes(k)) },
+  { id: 'itemall', e: '🎁', n: 'お守り博士', d: 'アイテムを全種 見つける', c: () => ITEM_KEYS.every(k => rec.seenItems.includes(k)) },
+];
+function unlock(id) {
+  if (rec.ach.includes(id)) return;
+  const a = ACH.find(x => x.id === id); if (!a) return;
+  rec.ach.push(id); saveRec();
+  toast(`🏅 実績解除：${a.e} ${a.n}`, 'ach'); sfx.ach();
+}
+function checkAch(res) { if (!st) return; ACH.forEach(a => { if (a.c && !rec.ach.includes(a.id)) { try { if (a.c(st, res)) unlock(a.id); } catch (e) {} } }); }
+
+// ---------- 音以外の共通 ----------
+let toastQ = Promise.resolve();
+function toast(msg, cls) {
+  toastQ = toastQ.then(() => new Promise(r => {
+    let box = $('#toasts'); if (!box) { box = document.createElement('div'); box.id = 'toasts'; box.className = 'toasts'; document.body.appendChild(box); }
+    while (box.children.length >= 3) box.firstChild.remove();
+    const t = document.createElement('div'); t.className = 'toast' + (cls ? ' ' + cls : ''); t.textContent = msg; box.appendChild(t);
+    setTimeout(() => t.remove(), 2700); setTimeout(r, 250);
+  }));
+}
+function symRow(k) { const d = SYM[k], r = RARITY[d.r]; return `<div class="de">${d.e}</div><div><div class="dn">${d.n} <span style="color:${r.color};font-size:11px">${r.name}</span>　<span style="color:var(--gold);font-size:11px">基本 ${d.v}</span></div><div class="dd">${d.d}</div></div>`; }
+function itemRow(k) { const d = ITEMS[k], r = ITEM_RARITY[d.r]; return `<div class="de">${d.e}</div><div><div class="dn">${d.n} <span style="color:${r.color};font-size:11px">${r.name}</span></div><div class="dd">${d.d}</div></div>`; }
+function garlands() { $$('.garland.g').forEach(g => { g.innerHTML = ''; for (let k = 0; k < 13; k++) { const s = document.createElement('span'); s.style.left = (2 + k * 7.8) + '%'; s.style.top = (2 + Math.sin(k / 12 * Math.PI) * 7) + 'px'; g.appendChild(s); } }); }
+
+const fillName = t => String(t).replace(/\{name\}/g, rec.name || 'ツグミ').replace(/\{rent\}/g, st ? st.rent : 25);
+function starterOpen(k) {
+  const u = STARTERS[k].unlock; if (!u) return true;
+  if (u.story) return rec.story >= u.story;
+  if (u.ach) return rec.ach.includes(u.ach);
+  return true;
+}
+function starterCond(k) {
+  const u = STARTERS[k].unlock; if (!u) return '';
+  if (u.story) return `ストーリー${['', '第一話', '第二話', '第三話', '最終話'][u.story]}をクリアで解放`;
+  const a = ACH.find(x => x.id === u.ach); return a ? `実績「${a.n}」で解放` : '';
+}
+const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+
+// =========================================================
+// 会話シーン
+// =========================================================
+let scene = null;
+function playScene(ids, done) {
+  ids = (Array.isArray(ids) ? ids : [ids]).filter(id => SCENES[id]);
+  const lines = []; ids.forEach(id => { lines.push(...SCENES[id]); if (!rec.scenes.includes(id)) rec.scenes.push(id); });
+  saveRec();
+  if (!lines.length) { done && done(); return; }
+  scene = { lines, i: -1, done, typing: null, full: '', waitInput: false };
+  $('#scTitle').textContent = ''; $('#scDeco').innerHTML = ''; $('#scPortrait').innerHTML = '';
+  $('#scene').classList.add('show');
+  nextLine();
+}
+window.playScene = (...a) => playScene(...a);
+function setBg(k) { const b = BGS[k] || BGS.yokocho; $('#scene').style.background = b.g; $('#scDeco').innerHTML = b.d.map(n => spr(n)).join(''); }
+function nextLine() {
+  if (!scene || scene.waitInput) return;
+  if (scene.typing) { clearInterval(scene.typing); scene.typing = null; $('#scText').textContent = scene.full; $('#scNext').style.display = ''; return; }
+  scene.i++;
+  const L = scene.lines[scene.i];
+  if (!L) { endScene(); return; }
+  if (L.bg) setBg(L.bg);
+  if (L.fx === 'flash') { const f = $('#scFlash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); tone(1200, 0.3, 'triangle', 0.05, -600); }
+  if (L.cmd === 'name') { askName(); return; }
+  if (L.title) {
+    $('#scTitle').textContent = L.title; sfx.big();
+    $('#scName').style.display = 'none'; $('#scPortrait').style.visibility = 'hidden';
+    $('#scText').className = 'sc-text narr'; $('#scText').textContent = ''; $('#scNext').style.display = ''; $('#scInput').innerHTML = '';
+    return;
+  }
+  if (!L.who) { nextLine(); return; }
+  $('#scTitle').textContent = '';
+  const C = CHARS[L.who] || CHARS.narr;
+  const nm = L.anon ? '？？？' : fillName(C.n);
+  $('#scName').textContent = nm; $('#scName').style.display = nm ? '' : 'none'; $('#scName').style.color = C.c || '#fff';
+  $('#scPortrait').innerHTML = L.anon ? '<span class="anon">？</span>' : C.img ? `<img src="${BUSTS[C.img + '_' + (L.f || 'n')] || BUSTS[C.img + '_n']}" alt="">` : ''; $('#scPortrait').style.visibility = (C.img || L.anon) ? 'visible' : 'hidden';
+  $('#scPortrait').style.animation = 'none'; void $('#scPortrait').offsetWidth; $('#scPortrait').style.animation = '';
+  const txt = $('#scText'); txt.className = 'sc-text' + (L.who === 'narr' ? ' narr' : '');
+  scene.full = fillName(L.t); txt.textContent = ''; $('#scNext').style.display = 'none'; $('#scInput').innerHTML = '';
+  let k = 0;
+  scene.typing = setInterval(() => {
+    k += settings.fast ? 3 : 1; txt.textContent = scene.full.slice(0, k);
+    if (k % 3 === 0 && L.who !== 'narr') tone(L.who === 'okon' ? 520 : L.who === 'maneki' ? 880 : 660, 0.02, 'square', 0.015);
+    if (k >= scene.full.length) { clearInterval(scene.typing); scene.typing = null; $('#scNext').style.display = ''; }
+  }, 28);
+}
+function askName() {
+  scene.waitInput = true;
+  $('#scName').textContent = 'マネキ'; $('#scName').style.display = ''; $('#scName').style.color = 'var(--gold)';
+  $('#scPortrait').innerHTML = `<img src="${BUSTS.maneki_s}" alt="">`; $('#scPortrait').style.visibility = 'visible';
+  $('#scText').textContent = '名を言うてみい。ツグミでよければ、そのまま決定。（あとからは変えられない）'; $('#scNext').style.display = 'none';
+  $('#scInput').innerHTML = `<div class="sc-input"><input id="scNameIn" maxlength="8" value="${(rec.name || 'ツグミ').replace(/"/g, '')}"><button class="btn primary" id="scNameOk" style="flex:none">決定</button></div>`;
+  const ok = () => { const v = $('#scNameIn').value.trim().slice(0, 8); rec.name = v || 'ツグミ'; saveRec(); scene.waitInput = false; $('#scInput').innerHTML = ''; nextLine(); };
+  $('#scNameOk').onclick = e => { e.stopPropagation(); ok(); };
+  $('#scNameIn').onclick = e => e.stopPropagation();
+  $('#scNameIn').onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') ok(); };
+  setTimeout(() => { try { $('#scNameIn').focus(); } catch (e) {} }, 50);
+}
+function endScene() {
+  if (!scene) return;
+  if (scene.typing) clearInterval(scene.typing);
+  const d = scene.done; scene = null;
+  $('#scene').classList.remove('show');
+  d && d();
+}
+$('#scene').addEventListener('click', () => { audio(); nextLine(); });
+$('#scSkip').onclick = e => {
+  e.stopPropagation(); if (!scene) return;
+  const rest = scene.lines.slice(scene.i + 1);
+  if (rest.some(l => l.cmd === 'name') || (scene.lines[scene.i] && scene.lines[scene.i].cmd === 'name' && scene.waitInput)) {
+    const idx = scene.lines.findIndex((l, j) => j > scene.i && l.cmd === 'name');
+    if (scene.waitInput) return;
+    if (idx >= 0) { if (scene.typing) { clearInterval(scene.typing); scene.typing = null; } scene.i = idx - 1; nextLine(); return; }
+  }
+  endScene();
+};
+
+// =========================================================
+// タイトル
+// =========================================================
+let armedDiff = null;
+function showTitle() {
+  $('#gameScreen').classList.add('hidden'); $('#titleScreen').classList.remove('hidden');
+  $$('.ov').forEach(o => o.classList.remove('show'));
+  const saved = loadSave();
+  const cont = $('#bContinue');
+  if (inProgress(saved)) {
+    const D = DIFFS[saved.diff];
+    cont.innerHTML = `▶ つづきから<small>${D.n}・家賃 ${saved.endless ? '♾️' : ''}${saved.rentIdx + 1}回目・もちコイン ${saved.coins}</small>`;
+    cont.classList.remove('hidden');
+  } else cont.classList.add('hidden');
+  armedDiff = null; renderDiffs(saved); $('#bDaily').dataset.armed = '';
+  $('#tDexN').textContent = `${rec.seen.length}/${SYM_KEYS.length}`;
+  $('#tAchN').textContent = `${rec.ach.length}/${ACH.length}`;
+  $('#tSymN').textContent = SYM_KEYS.length; $('#tItemN').textContent = ITEM_KEYS.length; $('#tCurseN').textContent = Object.keys(CURSES).length;
+  $('#tEvN').textContent = Object.keys(EVENTS).length; $('#tStN').textContent = Object.keys(STARTERS).length;
+  $('#storyProg').textContent = rec.story >= 4 ? '👑 全話クリア！ 思い出を見返せる' : rec.story ? `${CHAPTERS[rec.story - 1].n}までクリア・つぎは「${CHAPTERS[rec.story].t}」` : 'まずはここから！';
+  const td = todayStr(), dp = dailyPreview(td), dr = rec.daily[td];
+  $('#dailyDesc').innerHTML = `${td}　お題：${CURSES[dp.curse].e}${CURSES[dp.curse].n}・${STARTERS[dp.starter].e}${STARTERS[dp.starter].n}・${ITEMS[dp.item].e}${ITEMS[dp.item].n}`;
+  $('#dailyProg').textContent = dr ? `今日の最高：家賃 ${dr.best}回${dr.clear ? '・クリア👑' : ''}` : '今日はまだ挑戦していない';
+  setRng(null);
+  window.scrollTo(0, 0);
+}
+let dailyCache = {};
+function dailyPreview(td) {
+  if (dailyCache[td]) return dailyCache[td];
+  const keep = UID; const tmp = newDaily(td); setRng(null); UID = keep;
+  return dailyCache[td] = { curse: tmp.fixedCurse, starter: tmp.starter, item: tmp.items.find(k => k !== STARTERS[tmp.starter].item) || tmp.items[0] };
+}
+function renderDiffs(saved) {
+  $('#diffs').innerHTML = Object.entries(DIFFS).map(([k, D]) => {
+    const r = drec(k);
+    const recTxt = r.clears ? `👑 クリア ${r.clears}回${r.endless ? `・♾️${r.endless}` : ''}` : r.best ? `最高 ${r.best}/${D.rents}回` : 'まだ遊んでない';
+    const warn = armedDiff === k ? '<div class="warn">もう一度タップで開始（今のつづきは消える）</div>' : '';
+    return `<button class="diff ${armedDiff === k ? 'armed' : ''}" data-d="${k}" style="--dc:${D.color}">${r.clears ? '<span class="crown">👑</span>' : ''}
+      <div class="dn">${D.n}</div><div class="dj">${D.jp}</div><ul>${D.desc.map(x => `<li>${x}</li>`).join('')}</ul><div class="rec">${recTxt}</div>${warn}</button>`;
+  }).join('');
+  $$('.diff').forEach(b => b.onclick = () => {
+    audio();
+    const k = b.dataset.d;
+    if (inProgress(saved) && armedDiff !== k) { armedDiff = k; renderDiffs(saved); return; }
+    openStarter(k);
+  });
+}
+function openStarter(diff) {
+  const D = DIFFS[diff];
+  $('#starterLead').innerHTML = `<b style="color:${D.color}">${D.n}</b> ではじめる。最初に持っていくシンボルをえらぼう。`;
+  $('#starterList').innerHTML = Object.entries(STARTERS).map(([k, S]) => {
+    const open = starterOpen(k);
+    return `<button class="starter ${open ? '' : 'lock'} ${rec.lastStarter === k && open ? 'last' : ''}" data-k="${k}" ${open ? '' : 'disabled'}>
+      <span class="se">${open ? S.e : '🔒'}</span><span class="sn">${open ? S.n : '？？？'}</span>
+      <span class="sinv">${open ? S.inv.map(x => E(x)).join('') + (S.item ? ' + ' + ITEMS[S.item].e : '') : ''}</span>
+      <span class="sd">${open ? S.d : starterCond(k)}</span></button>`;
+  }).join('');
+  $$('#starterList .starter').forEach(b => b.onclick = () => { if (b.disabled) return; rec.lastStarter = b.dataset.k; saveRec(); $('#ovStarter').classList.remove('show'); startRun(diff, { starter: b.dataset.k }); });
+  $('#ovStarter').classList.add('show');
+}
+function startRun(diff, opt) {
+  opt = opt || {};
+  setRng(null);
+  st = opt.daily ? newDaily(opt.daily) : newGame(diff, opt);
+  rec.runs++; saveRec();
+  sel = null; selItem = null;
+  if (st.itemChoices) st.itemChoices.forEach(seeItem);
+  save();
+  const go = () => { enterGame(); if (!store.get(TUT)) $('#ovTut').classList.add('show'); };
+  if (opt.story) {
+    const ch = CHAPTERS[opt.story - 1];
+    const ids = (opt.story === 1 && !rec.scenes.includes('prologue')) ? ['prologue', ch.intro] : [ch.intro];
+    playScene(ids, go);
+  } else go();
+}
+function openChapters() {
+  $('#chapList').innerHTML = CHAPTERS.map(ch => {
+    const open = rec.story >= ch.id - 1, done = rec.story >= ch.id, D = DIFFS[ch.diff];
+    return `<button class="chap ${open ? '' : 'lock'}" data-c="${ch.id}" ${open ? '' : 'disabled'}><span class="ci">${open ? spr(ch.icon) : '🔒'}</span>
+      <div><div class="cn">${ch.n}　<span style="color:${D.color}">${D.n}</span></div><div class="ct">${open ? ch.t : '？？？'}</div><div class="cd">${open ? ch.d : '前の話をクリアすると解放'}</div></div>
+      <span class="cs" style="color:${done ? 'var(--gold)' : 'var(--mute)'}">${done ? '👑<br>クリア' : open ? 'あそぶ ›' : ''}</span></button>`;
+  }).join('');
+  $$('#chapList .chap').forEach(b => b.onclick = () => {
+    if (b.disabled) return;
+    const saved = loadSave();
+    if (inProgress(saved) && b.dataset.armed !== '1') { b.dataset.armed = '1'; b.querySelector('.cs').innerHTML = 'もう一度<br>タップで開始<br><small>今のつづきは消える</small>'; return; }
+    $('#ovChapters').classList.remove('show');
+    const ch = CHAPTERS[+b.dataset.c - 1];
+    startRun(ch.diff, { story: ch.id, starter: 'basic' });
+  });
+  const names = SCENE_NAMES;
+  const seen = Object.keys(names).filter(k => rec.scenes.includes(k));
+  $('#replayList').innerHTML = seen.length ? seen.map(k => `<button data-s="${k}">${names[k]}</button>`).join('') : '<span class="muted" style="font-size:12px">まだ見たシーンはない</span>';
+  $$('#replayList button').forEach(b => b.onclick = () => playScene(b.dataset.s));
+  $('#ovChapters').classList.add('show');
+}
+function enterGame() {
+  $('#titleScreen').classList.add('hidden'); $('#gameScreen').classList.remove('hidden');
+  const D = DIFFS[st.diff];
+  setRng(st.daily ? seededRng(st) : null);
+  $('#dBadge').textContent = st.story ? `📖 ${CHAPTERS[st.story - 1].n}` : st.daily ? `🎯 デイリー` : D.n; $('#dBadge').style.color = D.color;
+  if (st.phase === 'item' && (!st.itemChoices || !st.itemChoices.length)) prepItems();
+  renderAll();
+  if (st.phase === 'rent') openRent();
+  else if (st.phase === 'over') showEnd(false);
+  else if (st.phase === 'clear') showEnd(true);
+  window.scrollTo(0, 0);
+}
+
+// =========================================================
+// 盤面
+// =========================================================
+function buildBoard() {
+  const b = $('#board'); b.innerHTML = '';
+  for (let i = 0; i < N; i++) {
+    const c = document.createElement('div'); c.className = 'cell empty'; c.dataset.i = i;
+    c.innerHTML = '<span class="emo"></span>';
+    c.addEventListener('click', ev => { ev.stopPropagation(); selectCell(i); });
+    b.appendChild(c);
+  }
+}
+function cntLabel(s) {
+  if (!s) return '';
+  const d = SYM[s.key];
+  if (d.grow) return `${s.c || 0}/${d.grow}`;
+  if (s.key === 'firework') return `${s.c || 0}/5`;
+  if (s.key === 'kakigori') return `${s.c || 0}/3`;
+  if (d.store) return `+${s.c || 0}`;
+  return '';
+}
+function valChip(det) {
+  if (!det) return '';
+  if (det.eatenBy) return `<span class="val x">🍴${E(det.eatenBy)}</span>`;
+  const cls = det.value >= 100 ? 'mega' : det.value >= 10 ? 'hi' : det.value === 0 ? 'zero' : '';
+  return `<span class="val ${cls}">+${det.value}${det.vanish ? '💨' : ''}</span>`;
+}
+function blockedSet() { return new Set(st.curse === 'fog' ? [0, W - 1, W * (H - 1), N - 1] : []); }
+function renderBoard() {
+  const cells = $('#board').children, blk = blockedSet();
+  for (let i = 0; i < N; i++) {
+    const c = cells[i], alive = st.board && st.board[i], det = st.last && st.last.detail[i];
+    c.className = 'cell'; c.querySelectorAll('.cnt,.val,.mulb').forEach(x => x.remove());
+    const key = alive ? alive.key : det ? det.key : null;
+    c.querySelector('.emo').textContent = key ? E(key) : '';
+    c.dataset.r = key ? SYM[key].r : '';
+    if (!key) { c.classList.add(blk.has(i) ? 'blocked' : 'empty'); continue; }
+    if (!alive) c.classList.add('ghost');
+    const lab = cntLabel(alive);
+    if (lab) c.insertAdjacentHTML('beforeend', `<span class="cnt">${lab}</span>`);
+    c.insertAdjacentHTML('beforeend', valChip(det));
+  }
+  applySel();
+}
+function applySel() {
+  const cells = $('#board').children, nb = sel !== null ? neighbors(sel) : [];
+  for (let i = 0; i < N; i++) {
+    cells[i].classList.toggle('sel', i === sel);
+    cells[i].classList.toggle('nbr', nb.includes(i));
+    cells[i].classList.toggle('dimmed', sel !== null && i !== sel && !nb.includes(i));
+  }
+}
+function selectCell(i) {
+  if (busy) return;
+  const has = (st.board && st.board[i]) || (st.last && st.last.detail[i]);
+  sel = (sel === i || !has) ? null : i; selItem = null;
+  applySel(); renderInfo(); renderItemsBar();
+}
+document.addEventListener('click', e => {
+  if ((sel !== null || selItem) && !e.target.closest('.cell') && !e.target.closest('.info') && !e.target.closest('.ichip') && !e.target.closest('.ov') && !e.target.closest('.ev')) {
+    sel = null; selItem = null; if (st) { applySel(); renderInfo(); renderItemsBar(); }
+  }
+});
+
+// =========================================================
+// 情報パネル
+// =========================================================
+function srcLabel(p) {
+  if (p.ate) return `${E(p.ate)}を食べた`;
+  if (p.src && SYM[p.src]) return `${E(p.src)}から`;
+  return p.src || '';
+}
+function groupParts(parts) {
+  const m = new Map();
+  parts.forEach(p => { const l = srcLabel(p); const g = m.get(l) || { label: l, n: 0, k: 0 }; g.n += p.n; g.k++; m.set(l, g); });
+  return [...m.values()];
+}
+function renderInfo() {
+  const box = $('#info');
+  if (selItem) {
+    const it = ITEMS[selItem] || CURSES[selItem];
+    if (ITEMS[selItem]) box.innerHTML = `<div class="ttl"><span style="font-size:22px">${it.e}</span>${it.n}<span style="color:${ITEM_RARITY[it.r].color};font-size:11px">お守り・${ITEM_RARITY[it.r].name}</span></div><div class="desc">${it.d}</div>`;
+    return;
+  }
+  if (sel !== null) {
+    const alive = st.board && st.board[sel], det = st.last && st.last.detail[sel];
+    const key = alive ? alive.key : det.key, d = SYM[key], r = RARITY[d.r];
+    let eq = '';
+    if (det && det.eatenBy) eq = `<div class="eq"><span>${E(det.eatenBy)} に食べられた</span><i>→</i><span class="res">0</span><span style="background:none;border:0;color:var(--mute);font-weight:700">手持ちから消えた</span></div>`;
+    else if (det && det.key === key || det && det.vanish) {
+      eq = `<div class="eq"><span>基本 ${det.base}</span>` +
+        groupParts(det.parts).map(g => `<i>${g.n < 0 ? '−' : '+'}</i><span class="${g.n < 0 ? 'minus' : 'plus'}">${g.label} ${g.n < 0 ? g.n : '+' + g.n}${g.k > 1 ? ` <small style="opacity:.7">(${g.k}つ分)</small>` : ''}</span>`).join('') +
+        det.muls.map(m => `<i>×</i><span class="times">${SYM[m.src] ? E(m.src) : m.src} ×${m.m}</span>`).join('') +
+        `<i>=</i><span class="res">${det.value}</span></div>` +
+        (det.vanish ? `<div class="desc" style="color:var(--bad)">💨 ${typeof det.vanish === 'string' ? det.vanish : 'きえた'}ので手持ちからなくなった</div>` : '');
+    } else if (det && det.key !== key) {
+      eq = `<div class="eq"><span>${E(det.key)}→${E(key)} に変わった</span><i>/</i><span>今回</span><span class="res">${det.value}</span></div>`;
+    }
+    box.innerHTML = `<div class="ttl"><span style="font-size:22px">${d.e}</span>${d.n}<span style="color:${r.color};font-size:11px">${r.name}</span><span class="sub">点線＝となりのマス</span></div>${eq}<div class="desc">${d.d}</div>`;
+    return;
+  }
+  if (!st.last) {
+    box.innerHTML = st.phase === 'item'
+      ? `<div class="ttl">🎁 おコンさんのおまけ</div><div class="muted">入居祝いだとさ。ずっと効くお守りを、ひとつ持っていける。</div>`
+      : `<div class="ttl">まずは、まわす</div><div class="muted">並んだシンボルが、それぞれ縁銭になる。となり（ななめも）同士で効くものがある。</div>`;
+    return;
+  }
+  const L = st.last;
+  const combos = L.detail.map((d, i) => ({ d, i })).filter(x => x.d && !x.d.eatenBy && (x.d.parts.some(p => p.n > 0) || x.d.muls.length))
+    .sort((a, b) => b.d.value - a.d.value).slice(0, 4);
+  const eaten = L.detail.filter(d => d && d.eatenBy);
+  const chips = combos.map(({ d }) => {
+    const why = [...d.parts.filter(p => p.n > 0).map(srcLabel), ...d.muls.map(m => `${SYM[m.src] ? E(m.src) : m.src}×${m.m}`)];
+    return `<span>${E(d.key)} <b>+${d.value}</b> <small style="color:var(--mute)">${[...new Set(why)].slice(0, 2).join('・')}</small></span>`;
+  });
+  (L.bonuses || []).forEach(b => chips.push(`<span class="${b.v[0] === '-' ? 'bad' : 'it'}">${b.e} ${b.n} <b>${b.v}</b></span>`));
+  if (eaten.length) chips.push(`<span>🍴 ${eaten.map(d => E(d.key)).join('')} が食べられた</span>`);
+  L.detail.filter(d => d && d.vanish).forEach(d => chips.push(`<span>💨 ${E(d.key)} ${typeof d.vanish === 'string' ? d.vanish : 'きえた'}</span>`));
+  (L.changes || []).forEach(ch => chips.push(`<span>${ch.magic ? '🦝 化けた' : '✨ 育った'} ${E(ch.from)}→${E(ch.to)}</span>`));
+  if (L.born && L.born.length) chips.push(`<span>🎁 ${L.born.map(b => E(b.key)).join('')} が手持ちに入った</span>`);
+  if (L.purged && L.purged.length) chips.push(`<span>🥷 手持ちの${L.purged.map(E).join('')}を消した</span>`);
+  if (L.questDone) chips.unshift(`<span class="ok">📜 依頼達成！ ${st.quest.reward.txt}</span>`);
+  const boardNote = L.bonuses && L.bonuses.length ? `<span class="sub">盤面 ${L.boardTotal}＋アイテムなど</span>` : '<span class="sub">マスをタップで内訳</span>';
+  box.innerHTML = `<div class="ttl">今回の稼ぎ <span class="big">+${L.total}</span>${boardNote}</div>` +
+    (chips.length ? `<div class="hl">${chips.join('')}</div>` : `<div class="muted" style="margin-top:6px">となり同士は、今回は知らんぷり。</div>`);
+}
+
+// =========================================================
+// 家賃・依頼・お守り
+// =========================================================
+function renderHUD(coinsOverride) {
+  const coins = coinsOverride !== undefined ? coinsOverride : st.coins;
+  const ok = coins >= st.rent, T = totalRents(st);
+  $('#coins').textContent = coins;
+  $('#need').textContent = `/ ${st.rent} コイン`;
+  $('#verdict').textContent = ok ? '払える' : `あと ${st.rent - coins}`;
+  $('#verdict').classList.toggle('ok', ok);
+  $('#rentBar').style.width = Math.min(100, coins / st.rent * 100) + '%';
+  $('#rentBar').classList.toggle('ok', ok);
+  $('#rentNo').textContent = st.endless ? `♾️ エンドレス ${st.rentIdx - T + 1}回目` : `${Math.min(st.rentIdx + 1, T)} / ${T} 回目`;
+  const left = Math.max(0, st.spinsLeft);
+  $('#spinsLeft').textContent = left;
+  $('#pips').innerHTML = Array.from({ length: st.spinsMax }, (_, k) => `<span class="${k < left ? 'on' : ''} ${k === 0 && left === 1 ? 'last' : ''}"></span>`).join('');
+  $('#invN').textContent = st.inv.length;
+  $('#rrN').textContent = st.curse === 'seal' ? '🔒' : st.rerolls; $('#rmN').textContent = st.removals;
+  $('#bFast').classList.toggle('on', settings.fast);
+  $('#bSound').textContent = settings.sound ? '🔊' : '🔇';
+}
+function renderEvents() {
+  const box = $('#events'); let h = '';
+  const q = st.quest;
+  if (q) {
+    const prog = q.type === 'lean' ? `いま ${st.inv.length}個` : `${Math.min(q.progress, q.target)} / ${q.target}`;
+    const pct = q.type === 'lean' ? (st.inv.length <= q.target ? 100 : Math.max(0, 100 - (st.inv.length - q.target) * 8)) : Math.min(100, q.progress / q.target * 100);
+    h += `<div class="ev ${q.done ? 'done' : ''}"><span class="ei">${q.done ? '✅' : '📜'}</span><div class="et"><b>大家の依頼${q.done ? '（達成！）' : ''}</b>${q.txt}${q.done ? '' : `<div class="qbar"><i style="width:${pct}%"></i></div>`}</div><span class="rw">${q.done ? '受取済 ' : ''}${q.reward.txt}</span></div>`;
+  }
+  if (st.curse) {
+    const c = CURSES[st.curse]; seeCurse(st.curse);
+    h += `<div class="ev curse"><span class="ei">${c.e}</span><div class="et"><b>😈 大家の気まぐれ：${c.n}</b>${c.d}</div></div>`;
+  }
+  box.innerHTML = h; box.classList.toggle('hidden', !h);
+}
+function renderItemsBar() {
+  const bar = $('#itemsBar');
+  if (!st.items.length) { bar.classList.add('hidden'); return; }
+  bar.classList.remove('hidden');
+  bar.innerHTML = `<span class="lbl">お守り<br>${st.items.length}</span>` + st.items.map(k => `<button class="ichip ${selItem === k ? 'sel' : ''}" data-k="${k}" title="${ITEMS[k].n}">${ITEMS[k].e}</button>`).join('');
+  $$('#itemsBar .ichip').forEach(b => b.onclick = ev => { ev.stopPropagation(); selItem = selItem === b.dataset.k ? null : b.dataset.k; sel = null; applySel(); renderInfo(); renderItemsBar(); });
+}
+
+// =========================================================
+// アクション欄
+// =========================================================
+function symCard(k, idx) {
+  const d = SYM[k], r = RARITY[d.r];
+  const own = new Set(st.inv.map(s => s.key));
+  const ps = partners(k), wild = d.likes && d.likes.includes('*');
+  const hit = ps.some(p => own.has(p));
+  let syn;
+  if (wild) syn = '<small>となり全部に効く</small>';
+  else if (ps.length) syn = ps.slice(0, 7).map(p => `<em class="${own.has(p) ? 'own' : ''}">${E(p)}</em>`).join('') + (d.hint ? `<small style="width:100%">${d.hint}</small>` : '');
+  else syn = `<small>${d.hint || '単体で働く'}</small>`;
+  const isNew = !rec.seen.includes(k);
+  return `<button class="choice" data-k="${k}" style="${d.r !== 'C' ? `border-color:${r.color}99;` : ''}${d.r === 'V' ? `box-shadow:0 0 18px ${r.color}55` : ''}">
+    ${hit && !wild ? '<span class="badge">手持ちと相性◎</span>' : ''}${isNew ? '<span class="badge new">NEW</span>' : ''}
+    <div class="ce">${d.e}</div><div class="cn">${d.n}</div>
+    <div class="cr" style="color:${r.color}">${r.name}・基本${d.v}</div>
+    <div class="cd">${d.d}</div><div class="syn">${syn}</div></button>`;
+}
+function itemCard(k, idx) {
+  const d = ITEMS[k], r = ITEM_RARITY[d.r], isNew = !rec.seenItems.includes(k);
+  return `<button class="choice" data-k="${k}" style="${d.r !== 'C' ? `border-color:${r.color}aa;` : ''}${d.r === 'R' ? `box-shadow:0 0 18px ${r.color}55` : ''}">
+    ${isNew ? '<span class="badge new">NEW</span>' : ''}
+    <div class="ce">${d.e}</div><div class="cn">${d.n}</div>
+    <div class="cr" style="color:${r.color}">${r.name}</div>
+    <div class="cd">${d.d}</div></button>`;
+}
+function renderAct() {
+  const act = $('#act');
+  if (st.phase === 'item' && st.itemChoices && st.itemChoices.length) {
+    act.innerHTML = `<div class="pickbox itembox"><h3>🎁 おまけを、ひとつ${st.itemPicks > 1 ? `<span style="color:var(--gold);font-size:12px">（あと${st.itemPicks}つ）</span>` : ''}</h3>
+      <p class="lead">お守りは盤面に出ないで、ずっと効く。</p>
+      <div class="choices">${st.itemChoices.map(itemCard).join('')}</div>
+      <div class="pick-actions"><button class="btn" id="bSkipItem">いらない</button></div></div>`;
+    $$('#act .choice').forEach(b => b.onclick = () => pickItem(b.dataset.k));
+    $('#bSkipItem').onclick = () => pickItem(null);
+    st.itemChoices.forEach(seeItem);
+    return;
+  }
+  if (st.phase === 'event' && st.event && EVENTS[st.event]) {
+    const ev = EVENTS[st.event], C = ev.who ? CHARS[ev.who] : null;
+    act.innerHTML = `<div class="evbox"><div class="eh"><span class="ee">${ev.e}</span><div><div class="ew">横丁のできごと</div><div class="en">${ev.n}</div></div></div>
+      <div class="et">${ev.txt}</div><div class="eo">${ev.opts.map((o, i) => `<button data-i="${i}" ${o.can && !o.can(st) ? 'disabled' : ''}>${i + 1}. ${o.l(st)}</button>`).join('')}</div></div>`;
+    $$('#act .eo button').forEach(b => b.onclick = () => chooseEvent(+b.dataset.i));
+    return;
+  }
+  if (st.phase === 'choose' && st.choices) {
+    const n = st.choices.length;
+    act.innerHTML = `<div class="pickbox"><h3>ひとつ、持っていく</h3>
+      <p class="lead">${st.spinsLeft <= 0 ? 'このあと、支払い。' : '色つきの小さい絵は、もう持っている相性の相手。'}</p>
+      <div class="choices ${n === 4 ? 'four' : n === 2 ? 'two' : ''}">${st.choices.map(symCard).join('')}</div>
+      <div class="pick-actions"><button class="btn" id="bReroll" ${canReroll(st) ? '' : 'disabled'}>${st.curse === 'seal' ? '🔒 引き直し封印中' : `🔄 引き直す（残り${st.rerolls}）`}</button><button class="btn" id="bSkip">いらない</button></div></div>`;
+    $$('#act .choice').forEach(b => b.onclick = () => pick(b.dataset.k));
+    $('#bReroll').onclick = reroll; $('#bSkip').onclick = () => pick(null);
+    st.choices.forEach(seeSym);
+    return;
+  }
+  const left = st.spinsLeft;
+  const sub = left === 1 ? '支払い前の、最後の一回' : `支払いまで あと${left}回`;
+  act.innerHTML = `<button class="spin" id="bSpin" ${st.phase !== 'spin' || busy ? 'disabled' : ''}>まわす<small>${sub}</small></button>`;
+  $('#bSpin').onclick = doSpin;
+}
+function renderAll() { renderBoard(); renderHUD(); renderEvents(); renderItemsBar(); renderInfo(); renderAct(); }
+
+// =========================================================
+// 演出
+// =========================================================
+async function animateSpin(res, coinsBefore) {
+  sel = null; selItem = null;
+  const cells = $$('.cell'), blk = new Set(res.blocked);
+  cells.forEach((c, i) => { c.className = blk.has(i) ? 'cell blocked' : 'cell rolling'; c.querySelectorAll('.cnt,.val,.mulb').forEach(x => x.remove()); c.dataset.r = ''; if (blk.has(i)) c.querySelector('.emo').textContent = ''; });
+  const pool = [...new Set(st.inv.map(s => s.key).concat(res.keys.filter(Boolean)))].map(E);
+  const timer = setInterval(() => cells.forEach(c => { if (c.classList.contains('rolling')) c.querySelector('.emo').textContent = Math.random() < 0.3 ? '' : pool[Math.floor(Math.random() * pool.length)]; }), 65);
+  for (let col = 0; col < W; col++) {
+    await sleep(col === 0 ? 420 : 140);
+    for (let row = 0; row < H; row++) {
+      const i = row * W + col, c = cells[i], k = res.keys[i];
+      if (blk.has(i)) continue;
+      c.classList.remove('rolling'); if (!k) c.classList.add('empty');
+      void c.offsetWidth; c.classList.add('land');
+      c.querySelector('.emo').textContent = k ? E(k) : '';
+      c.dataset.r = k ? SYM[k].r : '';
+    }
+    sfx.tick(col);
+  }
+  clearInterval(timer);
+  await sleep(200);
+
+  const eats = res.ev.filter(e => e.t === 'eat');
+  for (const e of eats.slice(0, 10)) {
+    cells[e.a].classList.remove('eater'); void cells[e.a].offsetWidth; cells[e.a].classList.add('eater', 'glow');
+    cells[e.b].classList.add('eaten'); sfx.chomp();
+    await sleep(eats.length > 5 ? 140 : 260);
+  }
+  eats.slice(10).forEach(e => cells[e.b].classList.add('eaten'));
+  const links = res.ev.filter(e => e.t === 'link');
+  if (links.length) { links.forEach(e => { cells[e.a].classList.add('glow'); cells[e.b].classList.add('glow'); }); tone(740, 0.08, 'triangle', 0.05); await sleep(320); }
+  const mulTo = {};
+  res.ev.filter(e => e.t === 'mul' && !res.dead[e.b]).forEach(e => { mulTo[e.b] = (mulTo[e.b] || 1) * e.m; cells[e.a].classList.add('glow'); });
+  const mulKeys = Object.keys(mulTo);
+  if (mulKeys.length) { mulKeys.forEach(j => { const b = document.createElement('span'); b.className = 'mulb' + (mulTo[j] === 0 ? ' zero' : ''); b.textContent = '×' + mulTo[j]; cells[j].appendChild(b); }); sfx.mul(); await sleep(380); }
+  res.ev.filter(e => e.t === 'boom').forEach(e => { cells[e.a].classList.add('glow'); sfx.boom(); });
+  const magic = res.ev.filter(e => e.t === 'magic' || e.t === 'spawn');
+  if (magic.length) { magic.forEach(e => { if (cells[e.a]) cells[e.a].classList.add('glow'); if (e.b !== undefined) cells[e.b].classList.add('glow'); }); sfx.grow(); await sleep(260); }
+
+  res.detail.forEach((d, i) => { if (d) cells[i].insertAdjacentHTML('beforeend', valChip(d)); });
+  sfx.coin();
+  await sleep(350);
+  const steps = 14;
+  for (let k = 1; k <= steps; k++) { renderHUD(Math.round(coinsBefore + res.total * k / steps)); await sleep(26); }
+  if (res.total >= 40) {
+    $('#totalPop').innerHTML = `<span>+${res.total}</span>`; (res.total >= 300 ? sfx.mega : sfx.big)();
+    setTimeout(() => $('#totalPop').innerHTML = '', 1150); await sleep(700);
+  }
+  await sleep(250);
+  cells.forEach(c => c.classList.remove('glow', 'eater'));
+  if (res.changes.length) sfx.grow();
+  renderBoard();
+  res.changes.forEach(ch => cells[ch.i].classList.add('grew'));
+}
+
+// =========================================================
+// 進行
+// =========================================================
+async function doSpin() {
+  if (busy || st.phase !== 'spin') return;
+  busy = true; audio();
+  const before = st.coins;
+  const res = spin(st);
+  st.last.questDone = res.questDone;
+  st.phase = 'anim'; renderHUD(before); renderAct();
+  $('#info').innerHTML = '<div class="ttl" style="color:var(--mute)">まわしてる…</div>';
+  rec.bestSpin = Math.max(rec.bestSpin, res.total); rec.spins++;
+  if (res.questDone) rec.quests++;
+  res.keys.forEach(k => k && seeSym(k)); res.born.forEach(b => seeSym(b.key));
+  saveRec();
+  await animateSpin(res, before);
+  rollChoices(st); st.phase = 'choose'; save();
+  busy = false; renderAll();
+  if (res.questDone) { sfx.quest(); toast(`📜 依頼達成！ 報酬 ${st.quest.reward.txt}`); }
+  checkAch(res);
+  if (window.innerHeight < 900) $('#act').scrollIntoView({ behavior: 'smooth', block: 'end' });
+}
+function pick(k) {
+  if (st.phase !== 'choose') return;
+  if (k) { st.inv.push(mk(k)); sfx.pick(); toast(`${E(k)} ${SYM[k].n} を手持ちに追加した`); seeSym(k); }
+  st.choices = null;
+  if (rentDue(st)) { st.phase = 'rent'; save(); renderAll(); openRent(); }
+  else { st.phase = 'spin'; save(); renderAll(); }
+  checkAch();
+}
+function reroll() { if (st.phase !== 'choose' || !canReroll(st)) return; st.rerolls--; rollChoices(st); save(); renderHUD(); renderAct(); tone(600, 0.06, 'square', 0.04); }
+function afterItems() { st.itemChoices = null; st.phase = st.event ? 'event' : 'spin'; }
+function prepItems() {
+  if (st.itemPicks <= 0) { afterItems(); return; }
+  rollItems(st);
+  if (!st.itemChoices.length) { st.itemPicks = 0; afterItems(); }
+}
+function chooseEvent(i) {
+  if (st.phase !== 'event') return;
+  const r = runEvent(st, i); if (!r) return;
+  rec.events++; saveRec();
+  (r.got || []).forEach(seeSym);
+  sfx.item(); toast(r.msg);
+  if (st.itemPicks > 0) { st.phase = 'item'; prepItems(); } else st.phase = 'spin';
+  save(); renderAll(); checkAch();
+}
+function pickItem(k) {
+  if (st.phase !== 'item') return;
+  if (k) { addItem(st, k); sfx.item(); toast(`${ITEMS[k].e} ${ITEMS[k].n} を手に入れた`); seeItem(k); }
+  st.itemPicks = Math.max(0, st.itemPicks - 1);
+  st.itemChoices = null;
+  if (st.itemPicks > 0) { st.phase = 'item'; prepItems(); } else afterItems();
+  save(); renderAll(); checkAch();
+}
+function openRent() {
+  const ok = st.coins >= st.rent;
+  $('#rentLead').textContent = ok ? `${st.rentIdx + 1}回目の家賃です。` : 'コインが足りない…！';
+  $('#rentBig').innerHTML = `<span style="color:${ok ? 'var(--good)' : 'var(--bad)'}">${st.coins}</span> <span style="color:var(--mute);font-size:22px">/ ${st.rent}</span>`;
+  const T = totalRents(st), last = !st.endless && st.rentIdx + 1 >= T;
+  $('#rentAfter').textContent = ok ? (last ? 'これで、最後の家賃。' : `払っても ${st.coins - st.rent} 残る。おまけ付き。`) : `${st.rent - st.coins} 足りない。`;
+  $('#bPay').textContent = ok ? '家賃を払う' : '結果を見る';
+  const kind = !ok ? 'fail' : st.coins >= st.rent * 3 ? 'rich' : st.coins < st.rent * 1.2 ? 'tight' : 'ok';
+  const lines = RENT_LINES[kind];
+  $('#rentSay').innerHTML = `<img class="oe" src="${BUSTS['okon_' + ({ fail: 'x', rich: 's', tight: 'o' }[kind] || 'n')]}" alt=""><div class="ot"><b>おコン</b>${fillName(lines[Math.floor(Math.random() * lines.length)])}</div>`;
+  $('#ovRent').classList.add('show');
+}
+function pay() {
+  if (st.phase !== 'rent') return;
+  audio();
+  const before = st.rentIdx;
+  const info = payRent(st);
+  $('#ovRent').classList.remove('show');
+  if (info.questDone) { rec.quests++; toast(`📜 依頼達成！ 報酬 ${st.quest.reward.txt}`); }
+  const r = st.daily ? { best: 0, clears: 0, endless: 0 } : drec(st.diff);
+  if (st.daily) { const d = rec.daily[st.daily] || (rec.daily[st.daily] = { best: 0, clear: false }); d.best = Math.max(d.best, st.rentIdx); }
+  if (!info.ok) {
+    r.best = Math.max(r.best, st.rentIdx); saveRec(); st.phase = 'over'; sfx.bad(); save(); renderAll();
+    if (st.story) playScene(CHAPTERS[st.story - 1].over, () => showEnd(false)); else showEnd(false);
+    return;
+  }
+  r.best = Math.max(r.best, Math.min(st.rentIdx, totalRents(st)));
+  if (st.endless) r.endless = Math.max(r.endless || 0, st.rentIdx - totalRents(st));
+  if (before + 1 === 5 && st.inv.length <= 10) unlock('mini');
+  saveRec();
+  if (st.phase === 'clear') {
+    r.clears++; if (st.daily) rec.daily[st.daily].clear = true;
+    saveRec(); unlock('clear_' + st.diff);
+    if (st.daily) unlock('dailyclear');
+    if (st.stats.removed === 0 && st.diff !== 'easy') unlock('noremove');
+    sfx.mega(); save(); renderAll();
+    if (st.story) {
+      const ch = CHAPTERS[st.story - 1];
+      const firstClear = rec.story < ch.id;
+      rec.story = Math.max(rec.story, ch.id); saveRec();
+      playScene(ch.id === 4 ? [ch.end, 'epilogue'] : ch.end, () => { showEnd(true); if (firstClear && ch.id < 4) setTimeout(() => toast(`📖 ${CHAPTERS[ch.id].n}「${CHAPTERS[ch.id].t}」が解放された！`), 400); checkAch(); });
+    } else showEnd(true);
+    return;
+  }
+  st.phase = 'item'; prepItems(); save(); renderAll();
+  if (st.story && !st.endless) { const mid = CHAPTERS[st.story - 1].mids[st.rentIdx]; if (mid && !scene) playScene(mid); }
+  sfx.coin(); toast('家賃を払った！ 🔄+1　✂️+1' + (info.bonus.length ? '　' + info.bonus.join(' ') : ''));
+  if (st.curse) setTimeout(() => toast(`😈 大家の気まぐれ：${CURSES[st.curse].e} ${CURSES[st.curse].n}`), 300);
+  checkAch();
+}
+function showEnd(win) {
+  const D = DIFFS[st.diff], T = totalRents(st);
+  const CH = st.story ? CHAPTERS[st.story - 1] : null;
+  $('#endEmo').textContent = win ? (CH ? CH.e : '🎆') : '🏚️';
+  $('#endTitle').textContent = win ? (CH ? `${CH.n}「${CH.t}」クリア！` : st.daily ? `デイリー クリア！` : `${D.n} クリア！`) : '家賃が払えなかった…';
+  $('#endLead').textContent = win ? '払いきった。おコンさんが、ちょっとだけ笑った。' : st.endless ? `払いきったあと、さらに ${st.rentIdx - T}回。` : `${st.rentIdx}回目で、追い出し。`;
+  $('#endStats').innerHTML = [
+    ['払った家賃', st.endless ? `${T}+${st.rentIdx - T}` : `${Math.min(st.rentIdx, T)}/${T}`], ['最高の1スピン', st.best],
+    ['合計スピン', st.totalSpins], ['合計かせぎ', st.totalEarned],
+    ['アイテム', st.items.length], ['依頼の達成', st.stats.quests],
+  ].map(([a, b]) => `<div class="stat"><b>${b}</b><span>${a}</span></div>`).join('');
+  const top = Object.entries(st.inv.reduce((m, s) => (m[s.key] = (m[s.key] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k]) => E(k)).join('');
+  const its = st.items.slice(0, 6).map(k => ITEMS[k].e).join('');
+  const label = CH ? `ストーリー${CH.n}` : st.daily ? `デイリー${st.daily}` : D.n;
+  const head = st.daily ? `ヤチン・スピン【デイリー ${st.daily}】家賃${Math.min(st.rentIdx, T)}/${T}回${win ? '👑' : ''}` : CH && win ? `ヤチン・スピン【${label}「${CH.t}」】クリア🏮` : win ? `ヤチン・スピン【${D.n}】クリア🎆` : st.endless ? `ヤチン・スピン【${D.n}】エンドレス${st.rentIdx - T}回♾️` : `ヤチン・スピン【${D.n}】家賃${st.rentIdx}/${T}回🏠`;
+  const text = `${head}\n最高1スピン${st.best}コイン\n編成：${top}${its ? `\nお守り：${its}` : ''}\n#ヤチンスピン`;
+  const share = `<a class="btn" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">𝕏 でポストする</a>`;
+  const nextCh = CH && win && CH.id < 4 ? CHAPTERS[CH.id] : null;
+  $('#endBtns').innerHTML = (nextCh ? `<button class="btn gold" id="eNext">📖 つぎの話へ：${nextCh.t}</button>` : '') +
+    (win ? `<button class="btn ${nextCh ? '' : 'gold'}" id="eEndless">♾️ エンドレスで続ける</button>` : '') + share +
+    `<button class="btn primary" id="eAgain">${CH ? 'この話をもう一回' : st.daily ? 'デイリーにもう一回挑戦' : `もう一回（${D.n}）`}</button><button class="btn" id="eTitle">🏮 タイトルへ</button>`;
+  if (nextCh) $('#eNext').onclick = () => { $('#ovEnd').classList.remove('show'); startRun(nextCh.diff, { story: nextCh.id, starter: 'basic' }); };
+  if (win) $('#eEndless').onclick = () => { goEndless(st); save(); $('#ovEnd').classList.remove('show'); renderAll(); toast('♾️ エンドレス開始！ 家賃はどんどん上がる'); };
+  $('#eAgain').onclick = () => { $('#ovEnd').classList.remove('show'); startRun(st.diff, st.story ? { story: st.story, starter: 'basic' } : st.daily ? { daily: todayStr() } : { starter: st.starter }); };
+  $('#eTitle').onclick = showTitle;
+  $('#ovEnd').classList.add('show');
+  checkAch();
+}
+
+// =========================================================
+// 手持ち
+// =========================================================
+let invSel = null;
+function openInv() {
+  invSel = null;
+  const counts = st.inv.reduce((m, s) => (m[s.key] = (m[s.key] || 0) + 1, m), {});
+  const keys = Object.keys(counts).sort((a, b) => SYM_KEYS.indexOf(a) - SYM_KEYS.indexOf(b));
+  const room = N - (st.curse === 'fog' ? 4 : 0);
+  $('#invLead').innerHTML = `${st.inv.length}個持っている。盤面は${room}マス${st.inv.length > room ? `なので、<b style="color:var(--gold)">毎回ランダムに${room}個だけ</b>出る` : 'なので、全部が毎回出る'}。<br>✂️除去の残り：${st.removals}回${hasItem(st, 'broom') ? '（🧹除去するたび+8コイン）' : ''}`;
+  $('#invGrid').innerHTML = keys.map(k => `<button class="inv-item" data-k="${k}" style="border-color:${SYM[k].r === 'C' ? '' : RARITY[SYM[k].r].color + '88'}">${E(k)}<span class="n">×${counts[k]}</span></button>`).join('');
+  $$('#invGrid .inv-item').forEach(b => b.onclick = () => { invSel = b.dataset.k; $$('#invGrid .inv-item').forEach(x => x.classList.toggle('sel', x === b)); $('#invDetail').innerHTML = symRow(invSel); updRemove(); });
+  $('#invDetail').innerHTML = '<div class="dd" style="color:var(--mute)">シンボルをタップすると説明が出る。いらないものは除去できる。</div>';
+  updRemove(); $('#ovInv').classList.add('show');
+}
+function updRemove() { const b = $('#bRemove'); b.disabled = !invSel || st.removals <= 0 || !['spin', 'choose', 'item'].includes(st.phase); b.textContent = st.removals > 0 ? '✂️ これを1つ除去' : '✂️ 除去の残りなし'; }
+function removeSel() {
+  if (!invSel || !removeSymbol(st, invSel)) return;
+  save(); renderHUD(); tone(240, 0.1, 'sawtooth', 0.05, -80);
+  toast(`${E(invSel)} ${SYM[invSel].n} を1つ除去した${hasItem(st, 'broom') ? '（🧹+8コイン）' : ''}`);
+  openInv();
+}
+
+// =========================================================
+// ずかん・実績
+// =========================================================
+let dexTab = 'sym';
+function openDex(tab) { dexTab = tab || dexTab; renderDex(); $('#ovDex').classList.add('show'); }
+function renderDex() {
+  $$('#dexTabs .tab').forEach(t => t.classList.toggle('on', t.dataset.tab === dexTab));
+  const body = $('#dexBody'); let h = '';
+  if (dexTab === 'sym') {
+    h = `<div class="progress-line">見つけた：${rec.seen.length} / ${SYM_KEYS.length}種　（候補に出たり盤面に出たりすると記録される）</div>`;
+    h += RARITY_ORDER.map(r => {
+      const ks = SYM_KEYS.filter(k => SYM[k].r === r);
+      return `<div class="dex-h" style="color:${RARITY[r].color}">${RARITY[r].name}（${ks.filter(k => rec.seen.includes(k)).length}/${ks.length}）</div><div class="dex">` +
+        ks.map(k => rec.seen.includes(k) ? `<div class="dex-row">${symRow(k)}</div>` : `<div class="dex-row unk"><div class="de">${E(k)}</div><div><div class="dn">？？？</div><div class="dd">まだ見つけていない</div></div></div>`).join('') + '</div>';
+    }).join('');
+  } else if (dexTab === 'item') {
+    h = `<div class="progress-line">見つけた：${rec.seenItems.length} / ${ITEM_KEYS.length}種</div>`;
+    h += ['C', 'U', 'R'].map(r => {
+      const ks = ITEM_KEYS.filter(k => ITEMS[k].r === r);
+      return `<div class="dex-h" style="color:${ITEM_RARITY[r].color}">${ITEM_RARITY[r].name}（${ks.filter(k => rec.seenItems.includes(k)).length}/${ks.length}）</div><div class="dex">` +
+        ks.map(k => rec.seenItems.includes(k) ? `<div class="dex-row">${itemRow(k)}</div>` : `<div class="dex-row unk"><div class="de">${ITEMS[k].e}</div><div><div class="dn">？？？</div><div class="dd">まだ見つけていない</div></div></div>`).join('') + '</div>';
+    }).join('');
+  } else if (dexTab === 'curse') {
+    const ks = Object.keys(CURSES);
+    h = `<div class="progress-line">出会った：${rec.seenCurses.length} / ${ks.length}種　（HARD・SUPER HARDで出てくる）</div><div class="dex">` +
+      ks.map(k => rec.seenCurses.includes(k) ? `<div class="dex-row"><div class="de">${CURSES[k].e}</div><div><div class="dn">${CURSES[k].n}</div><div class="dd">${CURSES[k].d}</div></div></div>` : `<div class="dex-row unk"><div class="de">${CURSES[k].e}</div><div><div class="dn">？？？</div><div class="dd">まだ出会っていない</div></div></div>`).join('') + '</div>';
+  } else {
+    h = `<div class="progress-line">解除：${rec.ach.length} / ${ACH.length}　・通算 ${rec.spins}回まわした・依頼 ${rec.quests}回達成</div><div class="dex">` +
+      ACH.map(a => { const got = rec.ach.includes(a.id); return `<div class="dex-row ${got ? 'got' : 'unk'}"><div class="de" style="${got ? '' : 'filter:none'}">${got ? a.e : '🔒'}</div><div><div class="dn">${got ? '🏅 ' : ''}${a.n}</div><div class="dd">${a.d}</div></div></div>`; }).join('') + '</div>';
+  }
+  body.innerHTML = h;
+}
+
+// =========================================================
+// 説明
+// =========================================================
+const HOW = [
+  { si: '🎰', b: 'まわす', s: '手持ちのシンボルが5×4の台にばらまかれて、それぞれ縁銭になる。' },
+  { mini: true, b: 'となりと組む', s: 'まわり8マス（ななめも）のシンボルと効き合う。🍡のとなりに🍵、みたいに。' },
+  { si: '🎁', b: 'ひとつ持っていく', s: 'まわすたびに候補から1つ選んで、手持ちを育てる。' },
+  { si: '🏠', b: '家賃を払う', s: '決まった回数まわしたら、おコンさんが取り立てに来る。足りなければ追い出し。' },
+];
+function stepsHTML() {
+  return HOW.map(h => `<div class="stp">${h.mini ? `<div class="mini-board"><i class="n">🍵</i><i class="n"></i><i class="n">🐰</i><i class="n"></i><i class="c">🍡</i><i class="n"></i><i class="n"></i><i class="n">🍵</i><i class="n"></i></div>` : `<div class="si">${h.si}</div>`}<div><b>${h.b}</b><span>${h.s}</span></div></div>`).join('');
+}
+
+// =========================================================
+// イベント
+// =========================================================
+$('#bPay').onclick = pay;
+$('#bInv').onclick = openInv;
+$('#bTok').onclick = openInv;
+$('#bRemove').onclick = removeSel;
+$('#bHelp').onclick = () => $('#ovHelp').classList.add('show');
+$('#tHelp').onclick = () => $('#ovHelp').classList.add('show');
+$('#tDex').onclick = () => openDex('sym');
+$('#tAch').onclick = () => openDex('ach');
+$('#mDex').onclick = () => { $('#ovMenu').classList.remove('show'); openDex('sym'); };
+$$('#dexTabs .tab').forEach(t => t.onclick = () => { dexTab = t.dataset.tab; renderDex(); });
+$('#bMenu').onclick = () => { $('#mRestart').textContent = '🔁 この難易度で最初から'; $('#mRestart').dataset.armed = ''; $('#ovMenu').classList.add('show'); };
+$('#mTitle').onclick = () => { save(); showTitle(); };
+$('#mRestart').onclick = e => { const b = e.currentTarget; if (b.dataset.armed) { $('#ovMenu').classList.remove('show'); startRun(st.diff, st.story ? { story: st.story, starter: 'basic' } : st.daily ? { daily: todayStr() } : { starter: st.starter }); } else { b.dataset.armed = '1'; b.textContent = 'もう一度押すと最初から（今のデータは消える）'; } };
+$('#bStory').onclick = () => { audio(); openChapters(); };
+$('#bDaily').onclick = () => {
+  audio(); const saved = loadSave();
+  if (inProgress(saved) && !(saved.daily === todayStr())) { if ($('#bDaily').dataset.armed !== '1') { $('#bDaily').dataset.armed = '1'; $('#dailyProg').textContent = 'もう一度タップで開始（今のつづきは消える）'; return; } }
+  if (inProgress(saved) && saved.daily === todayStr()) { st = saved; enterGame(); return; }
+  startRun('normal', { daily: todayStr() });
+};
+$('#bContinue').onclick = () => { audio(); const s = loadSave(); if (s) { st = s; enterGame(); } };
+$('#bTutGo').onclick = () => { $('#ovTut').classList.remove('show'); store.set(TUT, 1); audio(); };
+$('#bSound').onclick = () => { settings.sound = !settings.sound; audio(); store.set(SET, settings); renderHUD(); };
+$('#bFast').onclick = () => { settings.fast = !settings.fast; store.set(SET, settings); renderHUD(); toast(settings.fast ? '演出はやめ ON' : '演出はやめ OFF'); };
+$$('[data-close]').forEach(b => b.onclick = () => b.closest('.ov').classList.remove('show'));
+['#ovInv', '#ovHelp', '#ovDex', '#ovMenu'].forEach(s => $(s).addEventListener('click', e => { if (e.target === $(s)) $(s).classList.remove('show'); }));
+document.addEventListener('keydown', e => {
+  if (scene) { if ((e.code === 'Space' || e.code === 'Enter') && !scene.waitInput) { e.preventDefault(); nextLine(); } return; }
+  if (e.repeat || !st || $('#gameScreen').classList.contains('hidden')) return;
+  if (st.phase === 'event' && !$('.ov.show')) { const n = ['Digit1', 'Digit2', 'Digit3'].indexOf(e.code); if (n >= 0) chooseEvent(n); return; }
+  if ($('.ov.show:not(#ovRent)')) return;
+  const num = ['Digit1', 'Digit2', 'Digit3', 'Digit4'].indexOf(e.code);
+  if ((e.code === 'Space' || e.code === 'Enter') && st.phase === 'spin') { e.preventDefault(); doSpin(); }
+  else if (st.phase === 'choose') {
+    if (num >= 0 && st.choices[num]) pick(st.choices[num]);
+    else if (e.code === 'KeyS') pick(null);
+    else if (e.code === 'KeyR') reroll();
+  } else if (st.phase === 'item') {
+    if (num >= 0 && st.itemChoices && st.itemChoices[num]) pickItem(st.itemChoices[num]);
+    else if (e.code === 'KeyS') pickItem(null);
+  } else if (st.phase === 'rent' && (e.code === 'Space' || e.code === 'Enter')) { e.preventDefault(); pay(); }
+});
+
+// ---------- 起動 ----------
+Object.assign(settings, store.get(SET) || {});
+toPix(document.body); buildBoard();
+$('#howSteps').innerHTML = stepsHTML(); $('#tutSteps').innerHTML = stepsHTML();
+showTitle();
+})();
+</script>
+</body>
+</html>
