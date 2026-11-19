@@ -101,9 +101,9 @@ img.convert('RGB').save(os.path.join(OUT, 'v13_3_items.png'), optimize=True)
 
 # ---- 4枚目：コンボが育つ ----
 img = base(); y = header(img, 'コンボが決まるたびに 育つ', None)
-COMBOS = [(['tea', 'dango'], 'お茶 × だんご', 'だんごの価値がずっと＋'), (['cat', 'goldfish'], 'ねこ × 金魚', '食べるたびにずっと＋'),
-          (['kappa', 'kyuri'], 'かっぱ × きゅうり', '食べるたびにずっと＋'), (['kotatsu', 'mikan'], 'こたつ × みかん', 'こたつがずっと＋'),
-          (['daruma', 'shishi'], 'だるま × ししまい', '縁起物でぐんぐん'), (['susuki', 'moon'], 'すすき × おつきさま', '月夜にずっと＋')]
+COMBOS = [(['tea', 'dango'], 'お茶 × だんご', 'だんごが育つ'), (['cat', 'goldfish'], 'ねこ × 金魚', '食べるたびに育つ'),
+          (['kappa', 'kyuri'], 'かっぱ × きゅうり', '食べるたびに育つ'), (['kotatsu', 'mikan'], 'こたつ × みかん', 'こたつが育つ'),
+          (['daruma', 'shishi'], 'だるま × ししまい', '縁起物の数だけ育つ'), (['susuki', 'moon'], 'すすき × おつきさま', '月夜に育つ')]
 cols, cw, ch = 3, 390, 190; x0 = (W - cols * cw) // 2
 for n, (ks, name, desc) in enumerate(COMBOS):
     x, yy = x0 + (n % cols) * cw + 10, y + 10 + (n // cols) * ch
