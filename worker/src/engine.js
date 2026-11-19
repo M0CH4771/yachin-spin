@@ -76,8 +76,9 @@ const SYM = {
               act(c, i) { c.nb(i).forEach(j => c.add(i, 2, j)); } },
 
   dragon:   { e: '🐉', n: 'りゅう', r: 'V', v: 15, d: '15コイン。ただただ強い' },
-  oni:      { e: '👹', n: 'おに', r: 'V', v: 0, p: 0, likes: ['*'], d: 'となりのシンボルを全部食べる（手持ちから消える）。1つにつき +12',
-              act(c, i) { c.nb(i).forEach(j => c.eat(i, j, 12)); } },
+  oni:      { e: '👹', n: 'おに', r: 'V', v: 0, p: 0, likes: ['*'], d: 'となりのシンボルを全部食べる（手持ちから消える）。1つにつき +12。となりに🫘があると、食べる前に追い払われる',
+              // となりにまめがいると、食べる前に追い払われる（盤面の位置に関係なく、まめが勝つ）
+              act(c, i) { const nb = c.nb(i); if (nb.some(j => c.key(j) === 'mame')) return; nb.forEach(j => c.eat(i, j, 12)); } },
   rainbow:  { e: '🌈', n: 'にじ', r: 'V', v: 0, p: 1, likes: ['*'], d: '盤面のすべてのシンボルに +1',
               act(c, i) { c.all().forEach(j => c.add(j, 1, i)); } },
 
