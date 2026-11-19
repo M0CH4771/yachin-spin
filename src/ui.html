@@ -48,7 +48,7 @@ button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulatio
 .num{font-family:'DotGothic16',monospace}
 .wrap{max-width:500px;margin:0 auto;padding:6px 12px 28px}
 .hidden{display:none!important}
-.spr{display:inline-block;width:1.3em;height:1.3em;vertical-align:-.3em;background-image:var(--sheet);background-repeat:no-repeat;background-size:1600% 1100%;image-rendering:pixelated;image-rendering:crisp-edges;font-style:normal}
+.spr{display:inline-block;width:1.3em;height:1.3em;vertical-align:-.3em;background-image:var(--sheet);background-repeat:no-repeat;background-size:calc(var(--sheet-cols,16) * 100%) calc(var(--sheet-rows,11) * 100%);image-rendering:pixelated;image-rendering:crisp-edges;font-style:normal}
 .px{border:3px solid var(--edge);box-shadow:inset 0 0 0 2px var(--rim);background:var(--panel)}
 .lanterns{display:flex;justify-content:space-between;font-size:16px;margin:0 -4px;opacity:.95;filter:drop-shadow(0 0 6px #ff6a3d66)}
 .lanterns span:nth-child(odd){transform:translateY(4px)}
@@ -639,6 +639,7 @@ const $$ = s => [...document.querySelectorAll(s)];
 const SPR = /*__SPRIDX__*/;
 const BUSTS = /*__BUSTS__*/;
 const SPR_ROWS = Math.ceil(Object.keys(SPR.idx).length / SPR.cols);
+document.documentElement.style.setProperty('--sheet-cols', SPR.cols); document.documentElement.style.setProperty('--sheet-rows', SPR_ROWS);   // シートの大きさは絵の数で変わる
 function spr(name, extra) {
   const i = SPR.idx[name]; if (i === undefined) return '';
   const c = i % SPR.cols, r = Math.floor(i / SPR.cols);
@@ -729,6 +730,12 @@ function loadSave() {
   const d = store.get(SAVE);
   if (d && d.st && Array.isArray(d.st.inv) && d.st.diff && d.st.stats) {
     const s = d.st;
+    // なくなったシンボル（Ver.1.2 で外した ふうりん・すずむし・すいか など）は 🪙小銭 に置きかえる
+    const fix = k => SYM[k] ? k : 'coin';
+    s.inv.forEach(x => { x.key = fix(x.key); });
+    if (Array.isArray(s.choices)) s.choices = [...new Set(s.choices.map(fix))];
+    if (Array.isArray(s.board)) s.board.forEach(x => { if (x) x.key = fix(x.key); });
+    if (s.last && Array.isArray(s.last.detail)) s.last.detail.forEach(x => { if (x && x.key) x.key = fix(x.key); });
     if (s.phase === 'anim') s.phase = s.spinsLeft <= 0 ? 'rent' : 'spin';
     if (s.phase === 'choose' && !s.choices) s.phase = 'spin';
     UID = Math.max(d.UID || 1, ...s.inv.map(x => x.id + 1), 1);
@@ -737,6 +744,7 @@ function loadSave() {
   return null;
 }
 function inProgress(s) { return s && !['over', 'clear'].includes(s.phase); }
+const seenCount = () => rec.seen.filter(k => SYM[k]).length;   // なくなったシンボルは数えない
 function seeSym(k) { if (k && !rec.seen.includes(k)) { rec.seen.push(k); saveRec(); } }
 function seeItem(k) { if (k && !rec.seenItems.includes(k)) { rec.seenItems.push(k); saveRec(); } }
 function seeCurse(k) { if (k && !rec.seenCurses.includes(k)) { rec.seenCurses.push(k); saveRec(); } }
@@ -785,7 +793,7 @@ const ACH = [
   { id: 'kazan', e: '🌋', n: '大噴火', d: '🌋かざんを噴火させる', c: s => s.stats.flags.includes('kazan') },
   { id: 's5000', e: '🌠', n: '縁銭長者', d: '1回で5000コイン以上', c: (s, r) => r && r.total >= 5000 },
   { id: 'starters', e: '🎒', n: '荷物もち', d: 'はじめの荷物を全部 解放する', c: () => Object.keys(STARTERS).every(k => starterOpen(k)) },
-  { id: 'dex40', e: '📗', n: 'ずかん係', d: 'シンボルを40種 見つける', c: () => rec.seen.length >= 40 },
+  { id: 'dex40', e: '📗', n: 'ずかん係', d: 'シンボルを40種 見つける', c: () => seenCount() >= 40 },
   { id: 'dexall', e: '📚', n: 'ずかん完成', d: 'シンボルを全種 見つける', c: () => SYM_KEYS.every(k => rec.seen.includes(k)) },
   { id: 'itemall', e: '🎁', n: 'お守り博士', d: 'アイテムを全種 見つける', c: () => ITEM_KEYS.every(k => rec.seenItems.includes(k)) },
 ];
@@ -957,7 +965,7 @@ function showTitle() {
     cont.classList.remove('hidden');
   } else cont.classList.add('hidden');
   armedDiff = null; $('#bDaily').dataset.armed = ''; $('#bEndless').dataset.armed = '';
-  $('#tDexN').textContent = `${rec.seen.length}/${SYM_KEYS.length}`;
+  $('#tDexN').textContent = `${seenCount()}/${SYM_KEYS.length}`;
   $('#tAchN').textContent = `${rec.ach.length}/${ACH.length}`;
   $('#tSymN').textContent = SYM_KEYS.length; $('#tItemN').textContent = ITEM_KEYS.length; $('#tCurseN').textContent = Object.keys(CURSES).length;
   $('#tEvN').textContent = Object.keys(EVENTS).length; $('#tStN').textContent = Object.keys(STARTERS).length;
@@ -1572,6 +1580,22 @@ const GAME_URL = 'https://m0ch4771.github.io/yachin-spin/';
 // 更新情報（新しいものを上に足していく。rank: true の行はランキングのサーバーがあるときだけ出す）
 // =========================================================
 const NEWS = [
+  { v: '1.2', date: '2026年11月19日', secs: [
+    ['シンボルが100種類に', [
+      'あたらしいシンボルを14種類追加：やたい・金魚すくい・ぼんおどり・かっぱ・きゅうり・すすき・だるま・たまや・みかん・こたつ・ししまい・いなりずし・きつねび・からかさおばけ',
+      'ふうりん・すずむし・すいかは横丁から引っこしました（持っていた分は🪙小銭になります）',
+    ]],
+    ['コンボが育つように', [
+      'となりの相方で稼ぐシンボルが、コンボが決まるたびに価値もずっと育つように：だんご・うさぎ（最大+8）、おすし、はちみつ、てんとうむし、ちょうちょ、みかづき',
+      '食べるシンボルも、食べるたびに価値が育つように：ねこ、きつね、ねずみ、すずめ、へび、かっぱ',
+      'にわとりは、となりの🥚🐣で育ち、となりの🥚が50%でかえるように',
+      'かどまつが盤面の🪙を ×2 に。つぼは消えた数1つにつき +2 に',
+    ]],
+    ['作り直し', [
+      'たぬき：となりのシンボルを、手持ちでいちばん多いシンボルに化かすように（コンボを増やす役に）',
+      'しゃてき：となりでいちばん安いシンボルを撃ち落として、価値×8を獲得するように（育てたものを撃たない）',
+    ]],
+  ] },
   { v: '1.1', date: '2026年11月19日', secs: [
     ['あたらしく遊べること', [
       'オートを追加。「まわす」の上のボタンで自動でまわします。長押しで、止める条件（次の家賃まで／ゲーム終了まで／1回の稼ぎが目標額になるまで）と、お守りを自動で取るかどうかを選べます',
@@ -1973,7 +1997,7 @@ function renderDex() {
   $$('#dexTabs .tab').forEach(t => t.classList.toggle('on', t.dataset.tab === dexTab));
   const body = $('#dexBody'); let h = '';
   if (dexTab === 'sym') {
-    h = `<div class="progress-line">見つけた：${rec.seen.length} / ${SYM_KEYS.length}種　（候補に出たり盤面に出たりすると記録される）</div>`;
+    h = `<div class="progress-line">見つけた：${seenCount()} / ${SYM_KEYS.length}種　（候補に出たり盤面に出たりすると記録される）</div>`;
     h += RARITY_ORDER.map(r => {
       const ks = SYM_KEYS.filter(k => SYM[k].r === r);
       return `<div class="dex-h" style="color:${RARITY[r].color}">${RARITY[r].name}（${ks.filter(k => rec.seen.includes(k)).length}/${ks.length}）</div><div class="dex">` +

@@ -46,6 +46,7 @@ for (const mode of ['random', 'smart']) {
     res.push(st.rentIdx);
   }
   res.sort((a, b) => a - b); const q = p => res[Math.min(res.length - 1, Math.floor(res.length * p))];
-  console.log(`${date} ${mode.padEnd(6)} 中央値 ${q(.5)}  上位25% ${q(.75)}  上位10% ${q(.9)}  上位1% ${q(.99)}  最高 ${res[res.length - 1]}`);
+  const f0 = res.filter(x => x === 0).length / res.length * 100;
+  console.log(`${date} ${mode.padEnd(6)} 最初の家賃で負け ${f0.toFixed(1)}%  中央値 ${q(.5)}  上位25% ${q(.75)}  上位10% ${q(.9)}  上位1% ${q(.99)}  最高 ${res[res.length - 1]}`);
 }
 console.log('再生の不一致', mismatch);
