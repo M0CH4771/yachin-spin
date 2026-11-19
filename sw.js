@@ -1,6 +1,6 @@
 // ヤチンスピン：オフラインでも起動できるようにするキャッシュ
 // ゲーム本体（index.html）はネットを優先して、更新がすぐ届くようにする。画像は一度読んだらキャッシュを使う
-const VERSION = 'v2';
+const VERSION = 'v3';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'favicon.png', 'icons/icon-192.png', 'icons/icon-512.png', 'bg/festival.jpg'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open('core-' + VERSION).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
