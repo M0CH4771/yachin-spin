@@ -264,6 +264,14 @@ h1{font-size:18px;margin:0}
 .auto-run.active{background:#243c31;color:#c8f4d8;border-color:#49765b}
 .auto-run small{display:block;margin-top:3px;color:var(--mute);font-size:12px}
 .auto-run:disabled{opacity:.55;cursor:default}
+.auto-modes{display:grid;gap:8px}
+.auto-mode{display:flex;gap:9px;align-items:flex-start;padding:11px 9px;border:2px solid var(--edge);background:var(--panel2);cursor:pointer}
+.auto-mode input{accent-color:var(--gold);margin:3px 0 0;flex:none}
+.auto-mode b{display:block;font-size:14px;font-weight:400}
+.auto-mode small{display:block;margin-top:3px;color:var(--mute);font-size:12px;line-height:1.5}
+.auto-threshold{display:flex;align-items:center;gap:8px;margin:0 0 4px 28px;font-size:14px}
+.auto-threshold input{width:132px;padding:7px;border:2px solid var(--edge);background:#110e1d;color:var(--ink);font:inherit}
+.auto-threshold input:disabled{opacity:.45}
 .pickbox{border:3px solid var(--edge);box-shadow:inset 0 0 0 2px #5a4a8a;background:#211a3c;padding:12px 10px 10px}
 .pickbox.itembox{box-shadow:inset 0 0 0 2px #8a6a1e;background:#2a2214}
 .pickbox h3{margin:0 2px 4px;font-size:16px;font-weight:400;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
@@ -473,6 +481,19 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
   <div class="actions"><button class="btn" data-close>もどる</button></div>
 </div></div>
 
+<!-- オート設定 -->
+<div class="ov center" id="ovAuto"><div class="sheet">
+  <h2>🏠 オートの停止条件</h2>
+  <p class="lead">長押しで設定できます。イベントや会話が始まると、選択のため一時停止します。</p>
+  <div class="auto-modes">
+    <label class="auto-mode"><input type="radio" name="autoMode" value="rent"><span><b>次の家賃画面まで</b><small>家賃を払う前に停止します。</small></span></label>
+    <label class="auto-mode"><input type="radio" name="autoMode" value="end"><span><b>ゲーム終了まで</b><small>家賃を自動で払い、クリアまたはゲームオーバーまで進みます。</small></span></label>
+    <label class="auto-mode"><input type="radio" name="autoMode" value="target"><span><b>1回の稼ぎが目標額以上になるまで</b><small>家賃を自動で払いながら続け、1回の稼ぎが目標額に達したら停止します。</small></span></label>
+    <div class="auto-threshold"><label for="autoThreshold">目標額</label><input id="autoThreshold" type="number" min="1" step="1000" inputmode="numeric"><span>コイン</span></div>
+  </div>
+  <div class="actions"><button class="btn" data-close>キャンセル</button><button class="btn primary" id="bAutoStart">この条件で開始</button></div>
+</div></div>
+
 <!-- 家賃 -->
 <div class="ov center" id="ovRent"><div class="sheet" style="text-align:center">
   <h2>おコンさんが来た</h2>
@@ -629,8 +650,8 @@ new MutationObserver(ms => ms.forEach(m => {
 })).observe(document.body, { childList: true, subtree: true, characterData: true });
 
 const SAVE = 'yachin-spin-save-v3', REC = 'yachin-spin-rec-v3', SET = 'yachin-spin-set-v1', TUT = 'yachin-spin-tut-v3';
-let st = null, busy = false, sel = null, selItem = null, autoUntilRent = false, autoRunId = 0;
-let settings = { sound: true, fast: false };
+let st = null, busy = false, sel = null, selItem = null, autoRunning = false, autoRunId = 0, autoLongPressTimer = null, autoLongPressTriggered = false;
+let settings = { sound: true, fast: false, autoMode: 'rent', autoThreshold: 1000000 };
 const store = {
   get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
@@ -671,7 +692,7 @@ const sfx = {
   ach: () => arp([784, 988, 1175, 1568], 90, 'triangle', 0.06, 0.2),
   quest: () => arp([659, 784, 988, 1319], 70, 'square', 0.04, 0.12),
 };
-const animationSpeed = () => autoUntilRent ? 0.16 : settings.fast ? 0.4 : 1;
+const animationSpeed = () => autoRunning ? 0.16 : settings.fast ? 0.4 : 1;
 const sleep = ms => new Promise(r => setTimeout(r, Math.max(1, ms * animationSpeed())));
 
 // ---------- 保存・記録 ----------
@@ -1218,36 +1239,90 @@ function itemCard(k, idx) {
     <div class="cr" style="color:${r.color}">${r.name}</div>
     <div class="cd">${d.d}</div></button>`;
 }
+function autoModeKey() {
+  return ['rent', 'end', 'target'].includes(settings.autoMode) ? settings.autoMode : 'rent';
+}
+function autoModeLabel() {
+  if (autoModeKey() === 'end') return 'ゲーム終了まで（家賃は自動払い）';
+  if (autoModeKey() === 'target') return '1回の稼ぎが' + Number(settings.autoThreshold || 1000000).toLocaleString('ja-JP') + 'コイン以上で停止';
+  return '次の家賃まで';
+}
 function autoControlHTML() {
   const canStart = ['spin', 'choose', 'item'].includes(st.phase);
-  const label = autoUntilRent ? '⏹ オート停止' : st.phase === 'event' ? 'イベント選択後に再開' : canStart ? '🏠 次の家賃までオート' : 'スピン中…';
-  const note = autoUntilRent ? '家賃の画面で停止します' : st.phase === 'event' ? 'できごとを選んだあと再開できます' : canStart ? '候補・おまけは「いらない」を選択します' : 'スピンが終わると使えます';
-  return `<button class="auto-run ${autoUntilRent ? 'active' : ''}" id="bAuto" ${!canStart && !autoUntilRent ? 'disabled' : ''}>${label}<small>${note}</small></button>`;
+  const label = autoRunning ? '⏹ オート停止' : st.phase === 'event' ? 'イベント選択後に再開' : canStart ? '🏠 ' + autoModeLabel() : 'スピン中…';
+  const note = autoRunning ? '停止条件：' + autoModeLabel() : st.phase === 'event' ? 'できごとを選んだあとタップで再開' : canStart ? 'タップで開始・長押しで停止条件を設定' : 'スピンが終わると使えます';
+  return '<button class="auto-run ' + (autoRunning ? 'active' : '') + '" id="bAuto" ' + (!canStart && !autoRunning ? 'disabled' : '') + '>' + label + '<small>' + note + '</small></button>';
 }
 function stopAuto(message) {
-  const wasRunning = autoUntilRent;
-  autoUntilRent = false; autoRunId++;
+  const wasRunning = autoRunning;
+  autoRunning = false; autoRunId++;
   if (st) renderAct();
   if (wasRunning && message) toast(message);
 }
-function toggleAuto() {
-  if (autoUntilRent) { stopAuto('オートを停止しました'); return; }
-  if (!st || !['spin', 'choose', 'item'].includes(st.phase)) return;
-  autoUntilRent = true;
+function startAuto() {
+  if (!st || !['spin', 'choose', 'item', 'anim'].includes(st.phase)) return;
+  autoRunning = true;
   const runId = ++autoRunId;
-  renderAct(); toast('次の家賃までオートで進めます');
+  renderAct(); toast('オート開始：' + autoModeLabel());
   runAutoUntilRent(runId);
 }
+function toggleAuto() {
+  if (autoRunning) { stopAuto('オートを停止しました'); return; }
+  startAuto();
+}
+function openAutoSettings() {
+  if (autoRunning) stopAuto();
+  const mode = autoModeKey();
+  $$('input[name="autoMode"]').forEach(input => { input.checked = input.value === mode; });
+  $('#autoThreshold').value = Math.max(1, Math.floor(Number(settings.autoThreshold) || 1000000));
+  $('#autoThreshold').disabled = mode !== 'target';
+  $('#ovAuto').classList.add('show');
+}
+function startAutoFromSettings() {
+  const mode = document.querySelector('input[name="autoMode"]:checked')?.value || 'rent';
+  const target = Number($('#autoThreshold').value);
+  if (mode === 'target' && (!Number.isFinite(target) || target < 1)) {
+    toast('目標額は1コイン以上で入力してください');
+    $('#autoThreshold').focus(); return;
+  }
+  if (!st || !['spin', 'choose', 'item', 'anim'].includes(st.phase)) {
+    $('#ovAuto').classList.remove('show');
+    toast('この画面からはオートを開始できません'); return;
+  }
+  settings.autoMode = mode;
+  if (mode === 'target') settings.autoThreshold = Math.floor(target);
+  store.set(SET, settings);
+  $('#ovAuto').classList.remove('show');
+  startAuto();
+}
 async function runAutoUntilRent(runId) {
-  while (autoUntilRent && runId === autoRunId && st) {
-    if (st.phase === 'spin') { await doSpin(); continue; }
+  while (autoRunning && runId === autoRunId && st) {
+    if (scene) { stopAuto('会話が始まったため一時停止しました。終わったら再開できます'); return; }
+    if (st.phase === 'spin') {
+      await doSpin();
+      if (!autoRunning || runId !== autoRunId) return;
+      if (autoModeKey() === 'target' && st.last && st.last.total >= Number(settings.autoThreshold)) {
+        stopAuto('今回の稼ぎが目標額に達しました'); return;
+      }
+      continue;
+    }
     if (st.phase === 'choose') { pick(null); continue; }
     if (st.phase === 'item') { pickItem(null); continue; }
-    if (st.phase === 'event') { stopAuto('横丁のできごとで停止しました。選択後に再開できます'); return; }
-    if (st.phase === 'rent' || st.phase === 'over' || st.phase === 'clear') { stopAuto(); return; }
+    if (st.phase === 'event') { stopAuto('横丁のできごとで一時停止しました。選択後に再開できます'); return; }
+    if (st.phase === 'rent') {
+      if (autoModeKey() === 'rent') { stopAuto(); return; }
+      pay();
+      if (scene) { stopAuto('会話が始まったため一時停止しました。終わったら再開できます'); return; }
+      continue;
+    }
+    if (st.phase === 'over' || st.phase === 'clear') { stopAuto(); return; }
     if (busy) { await sleep(50); continue; }
     stopAuto(); return;
   }
+}
+function clearAutoLongPress() {
+  if (autoLongPressTimer) clearTimeout(autoLongPressTimer);
+  autoLongPressTimer = null;
 }
 
 function renderAct() {
@@ -1292,7 +1367,7 @@ function renderAll() { renderBoard(); renderHUD(); renderEvents(); renderItemsBa
 // =========================================================
 async function animateSpin(res, coinsBefore) {
   sel = null; selItem = null;
-  if (autoUntilRent) {
+  if (autoRunning) {
     $('#totalPop').innerHTML = '';
     renderBoard(); renderHUD(st.coins);
     await new Promise(resolve => requestAnimationFrame(resolve));
@@ -1860,7 +1935,24 @@ function stepsHTML() {
 // =========================================================
 // イベント
 // =========================================================
-$('#act').addEventListener('click', e => { if (e.target.closest('#bAuto')) toggleAuto(); });
+$('#act').addEventListener('pointerdown', e => {
+  const b = e.target.closest('#bAuto');
+  if (!b || b.disabled) return;
+  autoLongPressTriggered = false; clearAutoLongPress();
+  autoLongPressTimer = setTimeout(() => { autoLongPressTriggered = true; openAutoSettings(); }, 550);
+});
+$('#act').addEventListener('pointerup', clearAutoLongPress);
+$('#act').addEventListener('pointercancel', () => { clearAutoLongPress(); autoLongPressTriggered = false; });
+$('#act').addEventListener('contextmenu', e => { if (e.target.closest('#bAuto')) e.preventDefault(); });
+$('#act').addEventListener('click', e => {
+  if (!e.target.closest('#bAuto')) return;
+  if (autoLongPressTriggered) { e.preventDefault(); e.stopPropagation(); autoLongPressTriggered = false; return; }
+  toggleAuto();
+});
+$('#ovAuto').addEventListener('change', e => {
+  if (e.target.name === 'autoMode') $('#autoThreshold').disabled = e.target.value !== 'target';
+});
+$('#bAutoStart').onclick = startAutoFromSettings;
 $('#bPay').onclick = pay;
 $('#bInv').onclick = openInv;
 $('#bTok').onclick = openInv;
@@ -1871,7 +1963,7 @@ $('#tDex').onclick = () => openDex('sym');
 $('#tAch').onclick = () => openDex('ach');
 $('#mDex').onclick = () => { $('#ovMenu').classList.remove('show'); openDex('sym'); };
 $$('#dexTabs .tab').forEach(t => t.onclick = () => { dexTab = t.dataset.tab; renderDex(); });
-$('#bMenu').onclick = () => { if (autoUntilRent) stopAuto('オートを停止しました'); $('#mRestart').textContent = '🔁 最初からやり直す'; $('#mRestart').dataset.armed = ''; $('#ovMenu').classList.add('show'); };
+$('#bMenu').onclick = () => { if (autoRunning) stopAuto('オートを停止しました'); $('#mRestart').textContent = '🔁 最初からやり直す'; $('#mRestart').dataset.armed = ''; $('#ovMenu').classList.add('show'); };
 $('#mTitle').onclick = () => { save(); showTitle(); };
 $('#mRestart').onclick = e => { const b = e.currentTarget; if (b.dataset.armed) { $('#ovMenu').classList.remove('show'); (st.daily ? startDaily() : startRun(st.diff, st.story ? { story: st.story, starter: 'basic' } : { starter: st.starter })); } else { b.dataset.armed = '1'; b.textContent = 'もう一度押すと最初から（今のデータは消える）'; } };
 $('#bStory').onclick = () => { audio(); openChapters(); };
@@ -1904,7 +1996,7 @@ $('#bTutGo').onclick = () => { $('#ovTut').classList.remove('show'); store.set(T
 $('#bSound').onclick = () => { settings.sound = !settings.sound; audio(); store.set(SET, settings); renderHUD(); };
 $('#bFast').onclick = () => { settings.fast = !settings.fast; store.set(SET, settings); renderHUD(); toast(settings.fast ? '演出はやめ ON' : '演出はやめ OFF'); };
 $$('[data-close]').forEach(b => b.onclick = () => b.closest('.ov').classList.remove('show'));
-['#ovInv', '#ovHelp', '#ovDex', '#ovMenu'].forEach(s => $(s).addEventListener('click', e => { if (e.target === $(s)) $(s).classList.remove('show'); }));
+['#ovInv', '#ovHelp', '#ovDex', '#ovMenu', '#ovAuto'].forEach(s => $(s).addEventListener('click', e => { if (e.target === $(s)) $(s).classList.remove('show'); }));
 document.addEventListener('keydown', e => {
   if (scene) { if ((e.code === 'Space' || e.code === 'Enter') && !scene.waitInput) { e.preventDefault(); nextLine(); } return; }
   if (e.repeat || !st || $('#gameScreen').classList.contains('hidden')) return;
