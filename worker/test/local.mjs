@@ -62,8 +62,9 @@ for (const [pid, name] of players) {
 }
 // 途中のようす（リアルタイム）
 {
-  const s = await call('POST', '/api/start', { player: 'dddddddddddddddd-4', name: 'とちゅう' });
-  const st = bot(s.data.day, s.data.seed);
+  // テスト用のボットが家賃3回より前に負けた回は使わない（途中のようすを見るため）
+  let s, st;
+  do { s = await call('POST', '/api/start', { player: 'dddddddddddddddd-4', name: 'とちゅう' }); st = bot(s.data.day, s.data.seed); } while (st.rentIdx < 3);
   const cut = st.log.indexOf('$', st.log.indexOf('$') + 1) + 1;   // 家賃を2回払ったところまで
   const f = await sync('dddddddddddddddd-4', s.data.run, st.log.slice(0, cut));
   check('途中まで送ると、払った回数がそのまま入る', f.status === 200 && !f.data.over && f.data.rents === 2);
