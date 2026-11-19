@@ -6,7 +6,7 @@
 <title>ヤチンスピン — 縁日スロットで家賃を払え</title>
 <meta name="description" content="ばあちゃんのスロット台と、ツケの残った長屋の話。スロットをまわして縁銭を稼ぎ、妖怪の横丁で家賃を払いつづけるブラウザゲーム。">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="ヤチンスピン">
+<meta property="og:site_name" content="よいまつり横丁">
 <meta property="og:title" content="ヤチンスピン — 縁日スロットで家賃を払え">
 <meta property="og:description" content="ばあちゃんのスロット台と、ツケの残った長屋の話。スロットをまわして縁銭を稼ぎ、妖怪の横丁で家賃を払いつづけるブラウザゲーム。">
 <meta property="og:url" content="https://m0ch4771.github.io/yachin-spin/">
@@ -59,6 +59,8 @@ button{font-family:inherit;color:inherit;cursor:pointer;touch-action:manipulatio
 
 /* タイトル */
 .title-logo{text-align:center;margin:20px 0 4px}
+.title-logo .series{display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;letter-spacing:.3em;color:#ffd696;text-shadow:2px 2px 0 #78201e;margin-bottom:10px}
+.title-logo .series::before,.title-logo .series::after{content:'';width:26px;height:3px;background:#ffd696;box-shadow:2px 2px 0 #78201e}
 .title-logo .big{font-size:46px;line-height:1.05;color:#ffe2a8;text-shadow:4px 4px 0 #a32f28, 8px 8px 0 #0b0812}
 .title-logo .sub{color:var(--mute);font-size:14px;letter-spacing:.2em;margin-top:12px}
 .title-reels{display:flex;justify-content:center;gap:8px;margin:16px 0 6px}
@@ -403,6 +405,7 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
 <div class="wrap" id="titleScreen">
   <div class="lanterns"><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span><span>🏮</span></div>
   <div class="title-logo">
+    <div class="series">よいまつり横丁</div>
     <div class="big">ヤチン<br>スピン</div>
     <div class="sub">縁日スロットで家賃を払え</div>
   </div>
@@ -3105,6 +3108,7 @@ async function makeResultImage(S) {
   for (let k = 0; k < 12; k++) drawSpr(ctx, img, 'lantern', 18 + k * 99, 8 + Math.round(Math.sin(k / 11 * Math.PI) * 10), 40);
   const R = resultInfo(S);
   // 左：タイトルと記録
+  txt(ctx, '― よいまつり横丁 ―', 58, 76, 20, '#ffd696');
   txt(ctx, 'ヤチンスピン', 56, 128, 54, '#ffe2a8');
   txt(ctx, R.mode, 58, 186, 30, R.color);
   txt(ctx, R.big, 54, 286, 84, '#f2c14e');
@@ -3132,7 +3136,7 @@ async function makeResultImage(S) {
     txt(ctx, 'お守り', 740, yb + 30, 20, '#b0a3c8');
     S.items.slice(0, 8).forEach((k, j) => drawSpr(ctx, img, 'i_' + k, 740 + (j % 8) * 52, yb + 44, 44));
   }
-  txt(ctx, '#ヤチンスピン　m0ch4771.github.io/yachin-spin', W - 50, H - 16, 20, '#e2d8f2', 'right');
+  txt(ctx, '#ヤチンスピン #よいまつり横丁　m0ch4771.github.io/yachin-spin', W - 50, H - 16, 20, '#e2d8f2', 'right');
   return await new Promise(ok => c.toBlob(ok, 'image/png'));
 }
 function intentUrl(text) { return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(GAME_URL)}`; }
@@ -3140,7 +3144,7 @@ async function shareResult() {
   const S = st, btn = $('#eShareImg'), label = btn ? btn.innerHTML : '';
   if (S.daily) {
     const r = S.rank && S.rank.result, top = Object.entries(S.inv.reduce((m, s) => (m[s.key] = (m[s.key] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k]) => E(k)).join('');
-    shareText = `ヤチンスピン【デイリー ${S.daily}】\n家賃${S.rentIdx}回🎯${r && r.rank ? `今日の${r.rank}位/${r.total}人` : ''}\nお題：${CURSES[S.fixedCurse].n}\n編成：${top}\n#ヤチンスピン`;
+    shareText = `ヤチンスピン【デイリー ${S.daily}】\n家賃${S.rentIdx}回🎯${r && r.rank ? `今日の${r.rank}位/${r.total}人` : ''}\nお題：${CURSES[S.fixedCurse].n}\n編成：${top}\n#ヤチンスピン #よいまつり横丁`;
   }
   const mobile = matchMedia('(pointer: coarse)').matches && navigator.canShare;
   const win = mobile ? null : window.open('', '_blank');   // ポップアップ止めにかからないよう、先にひらいておく
@@ -3225,7 +3229,7 @@ function showEndEndless() {
     ['合計かせぎ', st.totalEarned], ['アイテム', st.items.length], ['依頼の達成', st.stats.quests],
   ].map(([a, b]) => `<div class="stat"><b>${b}</b><span>${a}</span></div>`).join('');
   const top = Object.entries(st.inv.reduce((m, s) => (m[s.key] = (m[s.key] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k]) => E(k)).join('');
-  const text = `ヤチンスピン【エンドレス】\n家賃${n}回・第${sg}段まで住んだ🏮${isNew ? '（自己ベスト）' : ''}\n最高1スピン${st.best}コイン\n編成：${top}\n#ヤチンスピン`;
+  const text = `ヤチンスピン【エンドレス】\n家賃${n}回・第${sg}段まで住んだ🏮${isNew ? '（自己ベスト）' : ''}\n最高1スピン${st.best}コイン\n編成：${top}\n#ヤチンスピン #よいまつり横丁`;
   shareText = text;
   $('#endBtns').innerHTML = `<button class="btn gold" id="eShareImg">𝕏 で記録をポストする</button>` +
     `<button class="btn primary" id="eAgain">もう一回（エンドレス）</button><button class="btn" id="eTitle">🏮 タイトルへ</button>`;
@@ -3252,7 +3256,7 @@ function showEnd(win) {
   const its = st.items.slice(0, 6).map(k => ITEMS[k].e).join('');
   const label = CH ? `ストーリー${CH.n}` : st.daily ? `デイリー${st.daily}` : D.n;
   const head = st.daily ? `ヤチンスピン【デイリー ${st.daily}】家賃${Math.min(st.rentIdx, T)}/${T}回${win ? '👑' : ''}` : CH && win ? `ヤチンスピン【${label}「${CH.t}」】クリア🏮` : win ? `ヤチンスピン【${D.n}】クリア🎆` : st.endless ? `ヤチンスピン【${D.n}】エンドレス${st.rentIdx - T}回♾️` : `ヤチンスピン【${D.n}】家賃${st.rentIdx}/${T}回🏠`;
-  const text = `${head}\n最高1スピン${st.best}コイン\n編成：${top}${its ? `\nお守り：${its}` : ''}\n#ヤチンスピン`;
+  const text = `${head}\n最高1スピン${st.best}コイン\n編成：${top}${its ? `\nお守り：${its}` : ''}\n#ヤチンスピン #よいまつり横丁`;
   shareText = text;
   const share = `<button class="btn" id="eShareImg">𝕏 でポストする</button>`;
   const nextCh = CH && win && CH.id < 4 ? CHAPTERS[CH.id] : null;
