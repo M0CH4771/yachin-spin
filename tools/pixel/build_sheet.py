@@ -9,6 +9,7 @@ import sprites_fix
 import sprites_fix2
 import sprites_fix3
 import sprites_fix4
+import sprites_fix5
 names = list(SP.keys())
 cols = 16
 rows = (len(names) + cols - 1) // cols

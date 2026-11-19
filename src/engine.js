@@ -197,11 +197,11 @@ const SYM = {
               act(c, i) { const n = new Set(c.all().map(j => c.key(j)).filter(k => JAPAN.has(k))).size; c.add(i, n * 12, '名所の数'); if (n >= 5) c.flag('japan5'); } },
   // ===== 追加（Ver.1.2） =====
   yatai:    { e: '🛖', n: 'やたい', r: 'U', v: 1, p: 2, likes: FOODL, d: 'となりの食べ物すべての稼ぎを ×2',
-              act(c, i) { c.nb(i).forEach(j => { if (FOOD.has(c.key(j))) c.mul(j, 2, i); }); } },
+              act(c, i) { const m = c.has('noren') ? 3 : 2; c.nb(i).forEach(j => { if (FOOD.has(c.key(j))) c.mul(j, m, i); }); } },
   kingyosukui: { e: '🥅', n: '金魚すくい', r: 'U', v: 1, p: 1, likes: ['goldfish'], d: 'となりの🐟 1匹につき +1。となりに🐟がいると、🐟を1匹すくって手持ちに追加',
               act(c, i) { const f = c.nb(i).filter(j => c.key(j) === 'goldfish'); f.forEach(j => c.add(i, 1, j)); if (f.length) c.spawn('goldfish', i); } },
   bonodori: { e: '💃', n: 'ぼんおどり', r: 'R', v: 2, p: 1, likes: ['*'], hint: '同じものを集める', d: '盤面でいちばん多いシンボル全部に、その数だけ +（5つなら それぞれ +5）',
-              act(c, i) { const m = {}; c.all().forEach(j => { const k = c.key(j); if (k !== 'bonodori') m[k] = (m[k] || 0) + 1; }); let top = null; for (const k in m) if (!top || m[k] > m[top]) top = k; if (top && m[top] >= 2) c.all().forEach(j => { if (c.key(j) === top) c.add(j, m[top], i); }); } },
+              act(c, i) { const m = {}; c.all().forEach(j => { const k = c.key(j); if (k !== 'bonodori') m[k] = (m[k] || 0) + 1; }); let top = null; for (const k in m) if (!top || m[k] > m[top]) top = k; if (top && m[top] >= 2) c.all().forEach(j => { if (c.key(j) === top) c.add(j, m[top] * (c.has('bachi') ? 2 : 1), i); }); } },
   kyuri:    { e: '🥒', n: 'きゅうり', r: 'C', v: 1, likes: ['kappa'], d: 'ただの1コイン。かっぱの大好物。' },
   kappa:    { e: '🧌', n: 'かっぱ', r: 'U', v: 1, p: 0, store: true, likes: ['kyuri'], d: 'となりの🥒を食べる。1本につき +6、価値もずっと +2',
               act(c, i, s) { c.nb(i).forEach(j => { if (c.key(j) === 'kyuri') { c.eat(i, j, 6); s.c = (s.c || 0) + 2; } }); } },
@@ -286,6 +286,26 @@ const ITEMS = {
   crown:    { e: '👑', n: 'おうかん', r: 'R', d: 'レアとベリーレアのシンボルの稼ぎ +3', board: c => c.all().forEach(j => { const r = SYM[c.key(j)].r; if (r === 'R' || r === 'V') c.add(j, 3, '👑おうかん'); }) },
   compass:  { e: '🧭', n: 'らしんばん', r: 'R', d: 'まんなか6マスにいるシンボルの稼ぎ +2', board: c => c.all().forEach(j => { if (CENTER.has(j)) c.add(j, 2, '🧭らしんばん'); }) },
   wand:     { e: '🪄', n: 'まほうのつえ', r: 'R', d: 'まわすたびに、ランダムなシンボル1つの稼ぎ ×3', board: c => { const a = c.all(); if (a.length) c.mul(a[Math.floor(rnd() * a.length)], 3, '🪄つえ'); } },
+  // ===== 追加（Ver.1.3） =====
+  keito:    { e: '🧶', n: 'けいと', r: 'C', d: '🐱ねこと🛋こたつの稼ぎが +3', board: c => forKeys(c, new Set(['cat', 'kotatsu']), j => c.add(j, 3, '🧶けいと')) },
+  hyotan:   { e: '🫙', n: 'ひょうたん', r: 'C', d: '🧌かっぱの稼ぎが +4', board: c => forKeys(c, new Set(['kappa']), j => c.add(j, 4, '🫙ひょうたん')) },
+  aburaage: { e: '🧈', n: 'あぶらあげ', r: 'C', d: '🦊きつねと🥟いなりずしの稼ぎが +3', board: c => forKeys(c, new Set(['fox', 'inari']), j => c.add(j, 3, '🧈あぶらあげ')) },
+  hachimaki:{ e: '🎽', n: 'はちまき', r: 'C', d: '縁起物（🎍🧧🎎🎊🔨🪆🦁）の稼ぎが +2', board: c => forKeys(c, ENGI, j => c.add(j, 2, '🎽はちまき')) },
+  nukadoko: { e: '🥗', n: 'ぬかどこ', r: 'C', d: '🥒きゅうりと🍊みかんの稼ぎが +3', board: c => forKeys(c, new Set(['kyuri', 'mikan']), j => c.add(j, 3, '🥗ぬかどこ')) },
+  chawan:   { e: '🍚', n: 'ちゃわん', r: 'C', d: '🍙おにぎりと🥟いなりずしと🌾いなほの稼ぎが +2', board: c => forKeys(c, new Set(['onigiri', 'inari', 'rice']), j => c.add(j, 2, '🍚ちゃわん')) },
+
+  noren:    { e: '🚪', n: 'のれん', r: 'U', d: '🛖やたいの倍率が ×2 → ×3 になる' },
+  kingyobachi:{ e: '🫧', n: 'きんぎょばち', r: 'U', d: '🐟金魚の稼ぎが ×2', board: c => forKeys(c, new Set(['goldfish']), j => c.mul(j, 2, '🫧きんぎょばち')) },
+  bachi:    { e: '🔱', n: 'たいこのばち', r: 'U', d: '💃ぼんおどりで増える稼ぎが 2倍になる' },
+  emaki:    { e: '🌃', n: 'ひゃっきやこう絵巻', r: 'U', d: 'ようかい（👻👹👺🦝🦊🧌🔥☂）の稼ぎが +3', board: c => forKeys(c, YOKAI, j => c.add(j, 3, '🌃絵巻')) },
+  kintsugi: { e: '🥣', n: 'きんつぎ', r: 'U', d: '消えた・食べられたシンボル 1つにつき、手持ちの🏺つぼの価値がずっと +1',
+              flat: (st, R) => { if (R.gone) st.inv.forEach(x => { if (x.key === 'tsubo') x.c = (x.c || 0) + R.gone; }); return 0; } },
+  fude:     { e: '🖌', n: 'ふで', r: 'U', d: '🪆だるまの稼ぎが ×2（目が入る）', board: c => forKeys(c, new Set(['daruma']), j => c.mul(j, 2, '🖌ふで')) },
+
+  omikoshi: { e: '🛕', n: 'おみこし', r: 'R', d: '盤面でいちばん多い種類のシンボルの稼ぎが ×2',
+              board: c => { const m = {}; c.all().forEach(j => { const k = c.key(j); m[k] = (m[k] || 0) + 1; }); let top = null; for (const k in m) if (!top || m[k] > m[top]) top = k; if (top && m[top] >= 2) c.all().forEach(j => { if (c.key(j) === top) c.mul(j, 2, '🛕おみこし'); }); } },
+  tamatebako:{ e: '🧰', n: 'たまてばこ', r: 'R', d: '育つシンボル（価値がずっと増えるもの）の稼ぎが ×2', board: c => c.all().forEach(j => { if (SYM[c.key(j)].store) c.mul(j, 2, '🎁たまてばこ'); }) },
+  kumade:   { e: '🪮', n: 'くまで', r: 'R', d: '盤面の縁起物 1つにつき、その回の稼ぎ ×1.15（最大 ×2）', mult: (st, R) => R.engi ? Math.min(2, Math.pow(1.15, R.engi)) : 1 },
 };
 const ITEM_RARITY = { C: { name: 'ふつう', color: '#c9d1dc' }, U: { name: 'いいもの', color: '#5fd99b' }, R: { name: 'お宝', color: '#ffb547' } };
 
@@ -675,6 +695,7 @@ function spin(st) {
     kinds: new Set(alive.map(j => ctx.key(j))).size,
     foods: alive.filter(j => FOOD.has(ctx.key(j))).length,
     lanterns: alive.filter(j => ctx.key(j) === 'lantern').length,
+    engi: alive.filter(j => ENGI.has(ctx.key(j))).length,
     offBoard: Math.max(0, st.inv.length - pool.length),
   };
   const bonuses = [];
