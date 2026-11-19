@@ -1219,10 +1219,10 @@ function itemCard(k, idx) {
     <div class="cd">${d.d}</div></button>`;
 }
 function autoControlHTML() {
-  const blocked = ['event', 'rent', 'over', 'clear'].includes(st.phase);
-  const label = autoUntilRent ? '⏹ オート停止' : st.phase === 'event' ? 'イベント選択後に再開' : '🏠 次の家賃までオート';
-  const note = autoUntilRent ? '家賃の画面で停止します' : st.phase === 'event' ? 'できごとを選んだあと再開できます' : '候補・おまけは「いらない」を選択します';
-  return `<button class="auto-run ${autoUntilRent ? 'active' : ''}" id="bAuto" ${blocked && !autoUntilRent ? 'disabled' : ''}>${label}<small>${note}</small></button>`;
+  const canStart = ['spin', 'choose', 'item'].includes(st.phase);
+  const label = autoUntilRent ? '⏹ オート停止' : st.phase === 'event' ? 'イベント選択後に再開' : canStart ? '🏠 次の家賃までオート' : 'スピン中…';
+  const note = autoUntilRent ? '家賃の画面で停止します' : st.phase === 'event' ? 'できごとを選んだあと再開できます' : canStart ? '候補・おまけは「いらない」を選択します' : 'スピンが終わると使えます';
+  return `<button class="auto-run ${autoUntilRent ? 'active' : ''}" id="bAuto" ${!canStart && !autoUntilRent ? 'disabled' : ''}>${label}<small>${note}</small></button>`;
 }
 function stopAuto(message) {
   const wasRunning = autoUntilRent;
@@ -1292,7 +1292,13 @@ function renderAll() { renderBoard(); renderHUD(); renderEvents(); renderItemsBa
 // =========================================================
 async function animateSpin(res, coinsBefore) {
   sel = null; selItem = null;
-  const cells = $$('.cell'), blk = new Set(res.blocked);
+  if (autoUntilRent) {
+    $('#totalPop').innerHTML = '';
+    renderBoard(); renderHUD(st.coins);
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    return;
+  }
+  const cells = $('.cell'), blk = new Set(res.blocked);
   cells.forEach((c, i) => { c.className = blk.has(i) ? 'cell blocked' : 'cell rolling'; c.querySelectorAll('.cnt,.val,.mulb').forEach(x => x.remove()); c.dataset.r = ''; if (blk.has(i)) c.querySelector('.emo').textContent = ''; });
   const pool = [...new Set(st.inv.map(s => s.key).concat(res.keys.filter(Boolean)))].map(E);
   const timer = setInterval(() => cells.forEach(c => { if (c.classList.contains('rolling')) c.querySelector('.emo').textContent = Math.random() < 0.3 ? '' : pool[Math.floor(Math.random() * pool.length)]; }), 65);
