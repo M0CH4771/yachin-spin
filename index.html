@@ -266,6 +266,7 @@ h1{font-size:18px;margin:0}
 .auto-run small{display:block;margin-top:3px;color:var(--mute);font-size:12px}
 .auto-run:disabled{opacity:.55;cursor:default}
 .auto-modes{display:grid;gap:8px}
+.auto-sub{margin:14px 0 8px;font-size:15px;font-weight:400;color:var(--gold)}
 .auto-mode{display:flex;gap:9px;align-items:flex-start;padding:11px 9px;border:2px solid var(--edge);background:var(--panel2);cursor:pointer}
 .auto-mode input{accent-color:var(--gold);margin:3px 0 0;flex:none}
 .auto-mode b{display:block;font-size:14px;font-weight:400}
@@ -484,13 +485,19 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
 
 <!-- オート設定 -->
 <div class="ov center" id="ovAuto"><div class="sheet">
-  <h2>🏠 オートの停止条件</h2>
+  <h2>🏠 オートの設定</h2>
   <p class="lead">長押しで設定できます。イベントや会話が始まると、選択のため一時停止します。</p>
+  <h3 class="auto-sub">⏹ 止める条件</h3>
   <div class="auto-modes">
     <label class="auto-mode"><input type="radio" name="autoMode" value="rent"><span><b>次の家賃画面まで</b><small>家賃を払う前に停止します。</small></span></label>
     <label class="auto-mode"><input type="radio" name="autoMode" value="end"><span><b>ゲーム終了まで</b><small>家賃を自動で払い、クリアまたはゲームオーバーまで進みます。</small></span></label>
     <label class="auto-mode"><input type="radio" name="autoMode" value="target"><span><b>1回の稼ぎが目標額以上になるまで</b><small>家賃を自動で払いながら続け、1回の稼ぎが目標額に達したら停止します。</small></span></label>
     <div class="auto-threshold"><label for="autoThreshold">目標額</label><input id="autoThreshold" type="number" min="1" step="1000" inputmode="numeric"><span>コイン</span></div>
+  </div>
+  <h3 class="auto-sub">🎁 おまけ（お守り）が出たとき</h3>
+  <div class="auto-modes">
+    <label class="auto-mode"><input type="radio" name="autoItem" value="pick"><span><b>自動で選んで取る</b><small>候補のうち、いちばんレアなもの（お宝 → いいもの → ふつう）を取ります。</small></span></label>
+    <label class="auto-mode"><input type="radio" name="autoItem" value="skip"><span><b>取らない</b><small>いつも「いらない」を選びます。</small></span></label>
   </div>
   <div class="actions"><button class="btn" data-close>キャンセル</button><button class="btn primary" id="bAutoStart">この条件で開始</button></div>
 </div></div>
@@ -2000,7 +2007,7 @@ new MutationObserver(ms => ms.forEach(m => {
 
 const SAVE = 'yachin-spin-save-v3', REC = 'yachin-spin-rec-v3', SET = 'yachin-spin-set-v1', TUT = 'yachin-spin-tut-v3';
 let st = null, busy = false, sel = null, selItem = null, autoRunning = false, autoRunId = 0, autoLongPressTimer = null, autoLongPressTriggered = false;
-let settings = { sound: true, fast: false, autoMode: 'rent', autoThreshold: 1000000 };
+let settings = { sound: true, fast: false, autoMode: 'rent', autoThreshold: 1000000, autoItem: 'skip' };
 const store = {
   get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
@@ -2591,6 +2598,12 @@ function itemCard(k, idx) {
 function autoModeKey() {
   return ['rent', 'end', 'target'].includes(settings.autoMode) ? settings.autoMode : 'rent';
 }
+const autoItemKey = () => settings.autoItem === 'pick' ? 'pick' : 'skip';
+// オートで取るおまけ：いちばんレアなもの（同じなら左）
+function autoItemChoice() {
+  const order = { R: 3, U: 2, C: 1 }, c = st.itemChoices || [];
+  return c.reduce((best, k) => (!best || (order[ITEMS[k].r] || 0) > (order[ITEMS[best].r] || 0)) ? k : best, null);
+}
 function autoModeLabel() {
   if (autoModeKey() === 'end') return 'ゲーム終了まで（家賃は自動払い）';
   if (autoModeKey() === 'target') return '1回の稼ぎが' + Number(settings.autoThreshold || 1000000).toLocaleString('ja-JP') + 'コイン以上で停止';
@@ -2599,7 +2612,8 @@ function autoModeLabel() {
 function autoControlHTML() {
   const canStart = ['spin', 'choose', 'item'].includes(st.phase);
   const label = autoRunning ? '⏹ オート停止' : st.phase === 'event' ? 'イベント選択後に再開' : canStart ? '🏠 ' + autoModeLabel() : 'スピン中…';
-  const note = autoRunning ? '停止条件：' + autoModeLabel() : st.phase === 'event' ? 'できごとを選んだあとタップで再開' : canStart ? 'タップで開始・長押しで停止条件を設定' : 'スピンが終わると使えます';
+  const itemNote = '・お守り：' + (autoItemKey() === 'pick' ? '自動で取る' : '取らない');
+  const note = autoRunning ? '停止条件：' + autoModeLabel() + itemNote : st.phase === 'event' ? 'できごとを選んだあとタップで再開' : canStart ? 'タップで開始・長押しで設定' + itemNote : 'スピンが終わると使えます';
   return '<button class="auto-run ' + (autoRunning ? 'active' : '') + '" id="bAuto" ' + (!canStart && !autoRunning ? 'disabled' : '') + '>' + label + '<small>' + note + '</small></button>';
 }
 function stopAuto(message) {
@@ -2625,6 +2639,7 @@ function openAutoSettings() {
   $$('input[name="autoMode"]').forEach(input => { input.checked = input.value === mode; });
   $('#autoThreshold').value = Math.max(1, Math.floor(Number(settings.autoThreshold) || 1000000));
   $('#autoThreshold').disabled = mode !== 'target';
+  $$('input[name="autoItem"]').forEach(input => { input.checked = input.value === autoItemKey(); });
   $('#ovAuto').classList.add('show');
 }
 function startAutoFromSettings() {
@@ -2639,6 +2654,7 @@ function startAutoFromSettings() {
     toast('この画面からはオートを開始できません'); return;
   }
   settings.autoMode = mode;
+  settings.autoItem = document.querySelector('input[name="autoItem"]:checked')?.value === 'pick' ? 'pick' : 'skip';
   if (mode === 'target') settings.autoThreshold = Math.floor(target);
   store.set(SET, settings);
   $('#ovAuto').classList.remove('show');
@@ -2656,7 +2672,7 @@ async function runAutoUntilRent(runId) {
       continue;
     }
     if (st.phase === 'choose') { pick(null); continue; }
-    if (st.phase === 'item') { pickItem(null); continue; }
+    if (st.phase === 'item') { pickItem(autoItemKey() === 'pick' ? autoItemChoice() : null); continue; }
     if (st.phase === 'event') { stopAuto('横丁のできごとで一時停止しました。選択後に再開できます'); return; }
     if (st.phase === 'rent') {
       if (autoModeKey() === 'rent') { stopAuto(); return; }
