@@ -671,7 +671,8 @@ const sfx = {
   ach: () => arp([784, 988, 1175, 1568], 90, 'triangle', 0.06, 0.2),
   quest: () => arp([659, 784, 988, 1319], 70, 'square', 0.04, 0.12),
 };
-const sleep = ms => new Promise(r => setTimeout(r, ms * (settings.fast ? 0.4 : 1)));
+const animationSpeed = () => autoUntilRent ? 0.16 : settings.fast ? 0.4 : 1;
+const sleep = ms => new Promise(r => setTimeout(r, Math.max(1, ms * animationSpeed())));
 
 // ---------- 保存・記録 ----------
 function save() { if (st) store.set(SAVE, { st, UID }); }
@@ -1334,7 +1335,7 @@ async function animateSpin(res, coinsBefore) {
   for (let k = 1; k <= steps; k++) { renderHUD(Math.round(coinsBefore + res.total * k / steps)); await sleep(26); }
   if (res.total >= 40) {
     $('#totalPop').innerHTML = `<span>+${res.total}</span>`; (res.total >= 300 ? sfx.mega : sfx.big)();
-    setTimeout(() => $('#totalPop').innerHTML = '', 1150); await sleep(700);
+    setTimeout(() => $('#totalPop').innerHTML = '', Math.max(40, 1150 * animationSpeed())); await sleep(700);
   }
   await sleep(250);
   cells.forEach(c => c.classList.remove('glow', 'eater'));
