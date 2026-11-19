@@ -266,6 +266,14 @@ h1{font-size:18px;margin:0}
 .auto-run small{display:block;margin-top:3px;color:var(--mute);font-size:12px}
 .auto-run:disabled{opacity:.55;cursor:default}
 .auto-modes{display:grid;gap:8px}
+.newsbtn{background:#2a2140;box-shadow:inset 0 0 0 2px var(--rim);position:relative}
+.newsbtn .newsv{font-size:12px;color:var(--mute);margin-left:6px}
+.newdot{display:inline-block;margin-left:8px;padding:0 5px;background:#d8402f;color:#fff;font-size:11px;vertical-align:2px}
+.news-ver{margin:14px 0 4px;font-size:17px;color:var(--gold)}
+.news-ver small{font-size:12px;color:var(--mute);margin-left:6px}
+.news-sec{margin:10px 0 4px;font-size:14px;color:#9fd0ff}
+.news-list{margin:0;padding-left:1.2em;font-size:13px;line-height:1.75;color:#e2d8f2}
+.news-list li{margin:2px 0}
 .auto-sub{margin:14px 0 8px;font-size:15px;font-weight:400;color:var(--gold)}
 .auto-mode{display:flex;gap:9px;align-items:flex-start;padding:11px 9px;border:2px solid var(--edge);background:var(--panel2);cursor:pointer}
 .auto-mode input{accent-color:var(--gold);margin:3px 0 0;flex:none}
@@ -409,6 +417,7 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
     <button class="tbtn" id="tDex">📚 ずかん<small id="tDexN"></small></button>
     <button class="tbtn" id="tAch">🏅 実績<small id="tAchN"></small></button>
   </div>
+  <button class="rankbtn newsbtn" id="bNews">📰 更新情報<span class="newsv" id="newsV"></span><span class="newdot hidden" id="newsDot">NEW</span></button>
   <button class="rankbtn hidden" id="bInstall" style="background:#2a2140;box-shadow:inset 0 0 0 2px var(--rim)">📲 ホーム画面に追加（アプリのように遊べる）</button>
   <div class="title-foot">シンボル <span id="tSymN"></span>種・アイテム <span id="tItemN"></span>種・できごと <span id="tEvN"></span>種・気まぐれ <span id="tCurseN"></span>種・はじめの荷物 <span id="tStN"></span>種</div>
 </div>
@@ -481,6 +490,13 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
   <p class="lead" id="starterLead"></p>
   <div class="starters" id="starterList"></div>
   <div class="actions"><button class="btn" data-close>もどる</button></div>
+</div></div>
+
+<!-- 更新情報 -->
+<div class="ov" id="ovNews"><div class="sheet">
+  <h2>📰 更新情報</h2>
+  <div id="newsBody"></div>
+  <div class="actions"><button class="btn" data-close>とじる</button></div>
 </div></div>
 
 <!-- オート設定 -->
@@ -947,7 +963,7 @@ function showTitle() {
   $('#dailyDesc').innerHTML = `${td}　お題：${CURSES[dp.curse].e}${CURSES[dp.curse].n}・${STARTERS[dp.starter].e}${STARTERS[dp.starter].n}・${ITEMS[dp.item].e}${ITEMS[dp.item].n}`;
   $('#dailyProg').textContent = dr ? `今日の自己ベスト：家賃 ${dr.best}回${dr.rank ? `・${dr.rank}位` : ''}` : '今日はまだ挑戦していない';
   $('#bRank').classList.toggle('hidden', !RANK_API);
-  updInstall();
+  updInstall(); updNewsBtn();
   const open = modesOpen();
   $('#bEndless').classList.toggle('lock', !open); $('#bDaily').classList.toggle('lock', !open);
   $('#endlessIcon').textContent = open ? '🏮' : '🔒'; $('#dailyIcon').textContent = open ? '🎯' : '🔒';
@@ -1550,6 +1566,45 @@ function pay() {
 const GAME_URL = 'https://m0ch4771.github.io/yachin-spin/';
 
 // =========================================================
+// 更新情報（新しいものを上に足していく。rank: true の行はランキングのサーバーがあるときだけ出す）
+// =========================================================
+const NEWS = [
+  { v: '1.1', date: '2026年11月19日', secs: [
+    ['あたらしく遊べること', [
+      'オートを追加。「まわす」の上のボタンで自動でまわします。長押しで、止める条件（次の家賃まで／ゲーム終了まで／1回の稼ぎが目標額になるまで）と、お守りを自動で取るかどうかを選べます',
+      '結果を画像つきで 𝕏 にポストできるように。最後の盤面・手持ち・お守りが1枚の画像になります',
+      'デイリーチャレンジのルールを変更。その日のお題（気まぐれ・はじめの荷物・最初のおまけ）は全員同じで、そのあとの出方は毎回ちがいます。家賃を払えるかぎり続き、何回払えたかが記録になります',
+      { rank: true, t: 'デイリーランキングを開始。家賃を払うたびに順位が変わり、挑戦中の人も見えます。上位の人の手持ちとお守りものぞけます' },
+      'ホーム画面に追加できるように。アプリのように開けて、電波がなくても起動できます',
+    ]],
+    ['ストーリー', [
+      '会話の場面に背景のイラストを追加',
+      '物語の見どころに挿絵15枚を追加。ストーリーの画面から、見た挿絵をもう一度見られます',
+      'はじまりの場面で、スロット台のレバーを自分で引けるように',
+    ]],
+    ['見た目・遊びやすさ', [
+      'ドット絵を47種類描き直し。すいか・だんご・はなび・さくら・サイコロ・いぬ（柴犬）・たこ・おばけ・すずむし・お守りなど、ぱっと見て何かわかるように',
+      '除去のとき、同じシンボルが何個かあれば、いちばん稼ぎの少ないものから消えるように。消える前に、その稼ぎが見えます（にんじゃが消すものも同じ基準に）',
+      'まわしたあと、画面がいちばん下まで自動でスクロールするように',
+    ]],
+    ['不具合の修正', [
+      'おにとまめがとなりに並んだとき、位置によっては、おにがまめを食べてしまっていたのを修正（必ずまめがおにを追い払います）',
+      '名前を決める入力欄の見た目がくずれていたのを修正',
+      '一部のアイコンが表示されていなかったのを修正',
+    ]],
+  ] },
+  { v: '1.0', date: '2026年11月18日', secs: [['公開', ['ヤチンスピンを公開しました']]] },
+];
+function renderNews() {
+  $('#newsBody').innerHTML = NEWS.map(n => `<div class="news-ver">Ver.${n.v}<small>${n.date}</small></div>` +
+    n.secs.map(([t, items]) => {
+      const li = items.filter(x => typeof x === 'string' || !x.rank || RANK_API).map(x => `<li>${escH(typeof x === 'string' ? x : x.t)}</li>`).join('');
+      return li ? `<div class="news-sec">${escH(t)}</div><ul class="news-list">${li}</ul>` : '';
+    }).join('')).join('');
+}
+function updNewsBtn() { $('#newsV').textContent = `Ver.${NEWS[0].v}`; $('#newsDot').classList.toggle('hidden', rec.newsSeen === NEWS[0].v); }
+
+// =========================================================
 // デイリーランキング（サーバーは worker/。操作を少しずつ送って、サーバーで確かめてもらう）
 // =========================================================
 // ランキングサーバーの URL。空のあいだはランキングなしで遊べる（記録は端末に残る）
@@ -1993,6 +2048,7 @@ $('#bEndless').onclick = () => {
   openStarter('endless');
 };
 $('#bRank').onclick = () => openRank(0);
+$('#bNews').onclick = () => { renderNews(); $('#ovNews').classList.add('show'); rec.newsSeen = NEWS[0].v; saveRec(); updNewsBtn(); };
 $('#bInstall').onclick = async () => { if (installEv) { installEv.prompt(); try { await installEv.userChoice; } catch (e) {} installEv = null; updInstall(); } else $('#ovInstall').classList.add('show'); };
 $$('#rkTabs .tab').forEach(t => t.onclick = () => openRank(+t.dataset.ago));
 $('#rkSave').onclick = async () => {
@@ -2013,7 +2069,7 @@ $('#bTutGo').onclick = () => { $('#ovTut').classList.remove('show'); store.set(T
 $('#bSound').onclick = () => { settings.sound = !settings.sound; audio(); store.set(SET, settings); renderHUD(); };
 $('#bFast').onclick = () => { settings.fast = !settings.fast; store.set(SET, settings); renderHUD(); toast(settings.fast ? '演出はやめ ON' : '演出はやめ OFF'); };
 $$('[data-close]').forEach(b => b.onclick = () => b.closest('.ov').classList.remove('show'));
-['#ovInv', '#ovHelp', '#ovDex', '#ovMenu', '#ovAuto'].forEach(s => $(s).addEventListener('click', e => { if (e.target === $(s)) $(s).classList.remove('show'); }));
+['#ovInv', '#ovHelp', '#ovDex', '#ovMenu', '#ovAuto', '#ovNews'].forEach(s => $(s).addEventListener('click', e => { if (e.target === $(s)) $(s).classList.remove('show'); }));
 document.addEventListener('keydown', e => {
   if (scene) { if ((e.code === 'Space' || e.code === 'Enter') && !scene.waitInput) { e.preventDefault(); nextLine(); } return; }
   if (e.repeat || !st || $('#gameScreen').classList.contains('hidden')) return;
