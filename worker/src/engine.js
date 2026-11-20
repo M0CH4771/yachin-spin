@@ -376,7 +376,7 @@ const BASE_RENTS = [
   { rent: 1100, spins: 9 }, { rent: 1400, spins: 10 }, { rent: 1750, spins: 10 },
   { rent: 2150, spins: 10 }, { rent: 2700, spins: 11 },
 ];
-const RENT_ACCEL = 0;   // 家賃の加速（今はなし。上げるなら 0.001 など）
+const RENT_ACCEL = 0.0001;   // 家賃の加速：13回目から数えて m 回目は、1回ごとの倍率に ×10^(0.0001m) を上乗せ
 function baseRent(idx, growth) {
   if (idx < BASE_RENTS.length) return BASE_RENTS[idx];
   const last = BASE_RENTS[BASE_RENTS.length - 1];
