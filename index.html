@@ -1003,12 +1003,12 @@ const BASE_RENTS = [
   { rent: 1100, spins: 9 }, { rent: 1400, spins: 10 }, { rent: 1750, spins: 10 },
   { rent: 2150, spins: 10 }, { rent: 2700, spins: 11 },
 ];
-const RENT_ACCEL = 0.004;
+const RENT_ACCEL = 0.002;
 function baseRent(idx, growth) {
   if (idx < BASE_RENTS.length) return BASE_RENTS[idx];
   const last = BASE_RENTS[BASE_RENTS.length - 1];
   const m = idx - BASE_RENTS.length + 1;
-  // 長く続くほど、上がり方そのものが少しずつ大きくなる（1回ごとの倍率が ×10^(0.004m) ずつ上乗せ）
+  // 長く続くほど、上がり方そのものが少しずつ大きくなる（1回ごとの倍率が ×10^(0.002m) ずつ上乗せ）
   return { rent: Math.round(last.rent * Math.pow(growth || 1.3, m) * Math.pow(10, RENT_ACCEL * m * m / 2)), spins: 11 };
 }
 const round5 = x => Math.max(5, Math.round(x / 5) * 5);
