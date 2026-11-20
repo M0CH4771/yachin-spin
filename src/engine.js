@@ -85,8 +85,11 @@ const SYM = {
               act(c, i) { c.all().forEach(j => c.add(j, 1, i)); } },
 
   // ===== 追加シンボル =====
-  oden:     { e: '🍢', n: 'おでん', r: 'C', v: 1, p: 1, store: true, likes: FOODL.concat(['yatai']), d: 'となりの食べ物 1つにつき +1、育つ（+1）。となりに🛖があると、今の育ちが ×2',
-              act(c, i, s) { const f = c.nb(i).filter(j => FOOD.has(c.key(j))); f.forEach(j => c.add(i, 1, j)); if (f.length) c.grow(s, f.length); if (c.nb(i).some(j => c.key(j) === 'yatai')) s.c = (s.c || 0) * 2; } },
+  oden:     { e: '🍢', n: 'おでん', r: 'C', v: 1, p: 4, store: true, likes: FOODL.concat(['yatai']), d: 'となりの食べ物を鍋に入れて煮込む（食べる）。1つにつき +1、その稼ぎ（育った分も）だけ育つ。となりに🛖があれば、煮込んだスピンは今の育ちが ×2',
+              act(c, i, s) {
+                let n = 0; c.nb(i).forEach(j => { const k = c.key(j); if (FOOD.has(k) && k !== 'oden') { const v = c.base(j); c.eat(i, j, 1); c.grow(s, v); n++; } });
+                if (n && c.nb(i).some(j => c.key(j) === 'yatai')) s.c = (s.c || 0) * 2;
+              } },
   yakiimo:  { e: '🍠', n: 'やきいも', r: 'C', v: 1, p: 1, store: true, hint: '出るたび育つ', d: '盤面に出るたび育つ（+1、最大+5）',
               act(c, i, s) { if ((s.c || 0) < 5) s.c = (s.c || 0) + 1; } },
   kakigori: { e: '🍧', n: 'かきごおり', r: 'C', v: 4, p: 1, hint: '期間限定', d: '4コイン。でも盤面に3回出ると溶けてなくなる',
