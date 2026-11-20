@@ -758,7 +758,7 @@ function drec(d) { return rec.diff[d] || (rec.diff[d] = { best: 0, clears: 0, en
 // ---------- 実績 ----------
 const ACH = [
   { id: 'first', e: '🎰', n: 'はじめの一回', d: 'はじめて まわす', c: s => s.totalSpins >= 1 },
-  { id: 'kanst', e: '♾️', n: 'カンスト', d: '所持縁銭が、表示できる最大までたどりつく', c: s => s.phase === 'kanst' },
+  { id: 'kanst', e: '♾️', n: 'カンスト', d: '所持縁銭が表示できる最大までたどりつくか、家賃を千回払う', c: s => s.phase === 'kanst' },
   { id: 'rent1', e: '🏠', n: 'はじめての家賃', d: '家賃を1回払う', c: s => s.rentIdx >= 1 },
   { id: 'stage2', e: '🏮', n: '二段目', d: 'エンドレス(?)で第2段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 2 },
   { id: 'stage4', e: '🎆', n: '四段目', d: 'エンドレス(?)で第4段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 4 },
@@ -1517,7 +1517,7 @@ function kanstEnd() {
   stopAuto && stopAuto();
   unlock('kanst'); sfx.mega(); save(); renderAll();
   if (st.daily) rankSync();
-  playScene(['kanst', 'kanst2', 'kanst3', 'kanst4', 'kanst5', 'kanst6', 'kanst7'], () => showEnd(true));
+  playScene([st.kanstBy === 'sen' ? 'kanst_sen' : 'kanst', 'kanst2', 'kanst3', 'kanst4', 'kanst5', 'kanst6', 'kanst7'], () => showEnd(true));
 }
 function scrollGameToBottom() {
   requestAnimationFrame(() => {
@@ -1630,7 +1630,7 @@ const NEWS = [
       '「むずかしい」「ちょうむずかしい」の家賃を少し上げました（コンボが伸びやすくなったぶん）',
     ]],
     ['カンスト', [
-      '所持縁銭が、表示できる最大まで届いてしまったら…… 番外のエンディング「カンスト」が見られます（実績もあり）',
+      '所持縁銭が表示できる最大まで届くか、家賃を千回払いきったら…… 番外のエンディングが見られます（実績もあり）',
     ]],
     ['表示', [
       '大きい数は 万・億・兆・京・垓…無量大数 まで、和式の単位で短く表示するように（12,345 = 1.23万、3億4100万 = 3.41億）',
@@ -1842,7 +1842,9 @@ function txt(ctx, s, x, y, size, color, align) {
   ctx.fillStyle = color; ctx.fillText(s, x, y);
 }
 function resultInfo(S) {
-  if (S.phase === 'kanst') return { mode: '番外エンディング', color: '#ffd36a', big: 'カンスト', sub: '永代店子になった', extra: `家賃 ${S.rentIdx}回で到達`, kanst: true };
+  if (S.phase === 'kanst') return S.kanstBy === 'sen'
+    ? { mode: '番外エンディング', color: '#ffd36a', big: '千回目の家賃', sub: '永代店子になった', extra: `最高の1スピン ${fmtN(S.best)}`, kanst: true }
+    : { mode: '番外エンディング', color: '#ffd36a', big: 'カンスト', sub: '永代店子になった', extra: `家賃 ${S.rentIdx}回で到達`, kanst: true };
   const D = DIFFS[S.diff], T = totalRents(S), CH = S.story ? CHAPTERS[S.story - 1] : null;
   if (S.daily) {
     const r = S.rank && S.rank.result;
@@ -1874,7 +1876,7 @@ async function makeResultImage(S) {
   let y = 336;
   if (R.sub) { txt(ctx, R.sub, 58, y, 30, '#f3e9d2'); y += 44; }
   if (R.extra) { txt(ctx, R.extra, 58, y, 34, '#7ccf62'); y += 46; }
-  const sumLine = R.kanst ? '所持縁銭：カンスト（表示できる最大）' : `最高の1スピン ${fmtN(S.best)}コイン・合計 ${fmtN(S.totalEarned)}コイン`;
+  const sumLine = R.kanst ? (S.kanstBy === 'sen' ? '家賃を千回、払いきった' : '所持縁銭：カンスト（表示できる最大）') : `最高の1スピン ${fmtN(S.best)}コイン・合計 ${fmtN(S.totalEarned)}コイン`;
   txt(ctx, sumLine.length > 46 ? `最高の1スピン ${fmtN(S.best)}コイン` : sumLine, 58, y + 4, 22, '#b0a3c8');
   // 右：最後の盤面（カンストのときは挿絵）
   const cs = 76, bx = W - 56 - cs * 5, by = 72;
@@ -1895,7 +1897,7 @@ async function makeResultImage(S) {
     const cell = S.board && S.board[i];
     if (cell) drawSpr(ctx, img, cell.key, x + 8, yy + 8, cs - 16);
   }
-  txt(ctx, R.kanst ? '番外「カンスト」' : '最後の盤面', bx + cs * 2.5, by + cs * 4 + 40, 20, '#b0a3c8', 'center');
+  txt(ctx, R.kanst ? (S.kanstBy === 'sen' ? '番外「千回目の家賃」' : '番外「カンスト」') : '最後の盤面', bx + cs * 2.5, by + cs * 4 + 40, 20, '#b0a3c8', 'center');
   // 下：編成とお守り
   const counts = Object.entries(S.inv.reduce((m, s) => (m[s.key] = (m[s.key] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]).slice(0, 9);
   const yb = 470;
@@ -2011,9 +2013,11 @@ function showEndEndless() {
 }
 function showEnd(win) {
   if (st.phase === 'kanst') {
-    showEndInner(win); $('#endEmo').textContent = '♾️'; $('#endTitle').textContent = 'カンスト！ 永代店子になった';
+    showEndInner(win); $('#endEmo').textContent = '♾️'; $('#endTitle').textContent = st.kanstBy === 'sen' ? '千回目の家賃！ 永代店子になった' : 'カンスト！ 永代店子になった';
     const mode = st.daily ? `デイリー ${st.daily}` : isEndlessMode(st) ? 'エンドレス(?)' : DIFFS[st.diff].n;
-    shareText = `ヤチンスピン【番外エンディング：カンスト】\n所持縁銭が数えきれなくなって、横丁の「永代店子」になった♾️🏮\n${mode}・家賃${st.rentIdx}回で到達\n#ヤチンスピン #よいまつり横丁`;
+    shareText = st.kanstBy === 'sen'
+      ? `ヤチンスピン【番外エンディング：千回目の家賃】\n家賃を千回払いきって、横丁の「永代店子」になった🏮\n${mode}・最高1スピン${fmtN(st.best)}コイン\n#ヤチンスピン #よいまつり横丁`
+      : `ヤチンスピン【番外エンディング：カンスト】\n所持縁銭が数えきれなくなって、横丁の「永代店子」になった♾️🏮\n${mode}・家賃${st.rentIdx}回で到達\n#ヤチンスピン #よいまつり横丁`;
     const b = $('#eShareImg'); if (b) b.innerHTML = '𝕏 でエンディングをポストする';
     return;
   }

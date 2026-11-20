@@ -379,6 +379,7 @@ function baseRent(idx, growth) {
   return { rent: Math.round(last.rent * Math.pow(growth || 1.3, m) * Math.pow(10, RENT_ACCEL * m * m / 2)), spins: 11 };
 }
 const round5 = x => Math.max(5, Math.round(x / 5) * 5);
+const KANST_RENTS = 1000;                                       // この回数の家賃を払ったら、番外エンディング
 const MAXC = Number.MAX_VALUE;                                  // 表示できる最大（カンスト）
 const capN = x => (x > 0 ? Math.min(x, MAXC) : 0);              // 0〜最大におさめる（NaN は 0）
 const pickOne = a => a[Math.floor(rnd() * a.length)];
@@ -877,6 +878,7 @@ function payRent(st) {
   if (hasItem(st, 'yoyo')) { st.rerolls++; info.bonus.push('🪀🔄+1'); }
   if (hasItem(st, 'scroll')) { st.removals++; info.bonus.push('📜✂️+1'); }
   st.rentIdx++;
+  if (st.rentIdx >= KANST_RENTS && (st.endless || totalRents(st) === Infinity)) { info.kanst = true; st.kanstBy = 'sen'; st.phase = 'kanst'; return info; }   // 千回払ったら番外エンディング
   if (!st.endless && st.rentIdx >= totalRents(st)) { st.phase = 'clear'; return info; }
   startPeriod(st);
   st.itemPicks++;
