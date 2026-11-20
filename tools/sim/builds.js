@@ -14,7 +14,7 @@ const BUILDS = {
   'てんぐ（倍がけ）': ['tengu'],
   'ねこ＋さかな': ['cat', 'goldfish', 'sushi'],
   'りゅう': ['dragon'],
-  'お茶＋だんご＋うさぎ': ['tea', 'dango', 'rabbit', 'moon'],
+  'お茶＋だんご＋うさぎ＋みかづき': ['tea', 'dango', 'rabbit', 'mikazuki'],
   'にわとり＋たまご': ['chicken', 'egg', 'chick', 'basket'],
   'はち＋はちみつ': ['bee', 'honey', 'bear'],
   'いなほ＋ねずみ・すずめ': ['rice', 'mouse', 'sparrow', 'sun'],
@@ -25,10 +25,13 @@ const BUILDS = {
   'きつね＋きつねび＋いなり': ['fox', 'kitsunebi', 'inari', 'onigiri'],
   'ようかい（からかさ）': ['karakasa', 'ghost', 'tanuki', 'fox', 'kappa'],
   'たまや＋はなび': ['tamaya', 'firework'],
-  'すすき＋おつきさま': ['susuki', 'moon', 'sun'],
+  'すすき＋みかづき': ['susuki', 'mikazuki', 'sun'],
   'ぼんおどり＋同じもの': ['bonodori', 'coin'],
   '金魚すくい＋さかな': ['kingyosukui', 'goldfish', 'koi', 'sushi', 'cat'],
-  '小銭＋かどまつ': ['coin', 'kadomatsu', 'purse', 'soroban'],
+  '小銭＋かどまつ＋がまぐち': ['coin', 'kadomatsu', 'purse', 'soroban'],
+  'すずめ＋ねずみ＋へび': ['rice', 'mouse', 'sparrow', 'snake', 'sun'],
+  'ちょうちょ＋さくら': ['butterfly', 'sakura'],
+  'てんとう＋よつば': ['tentou', 'clover'],
 };
 function play(fav, seed) {
   const st = G.newGame('endless', { starter: 'basic' });
