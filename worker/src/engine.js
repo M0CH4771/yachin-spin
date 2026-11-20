@@ -148,8 +148,8 @@ const SYM = {
               act(c, i) { c.all().forEach(j => { if (c.key(j) === 'coin') c.mul(j, 2, i); }); } },
   hina:     { e: '🎎', n: 'ひなにんぎょう', r: 'R', v: 3, p: 2, likes: ['hina'], d: '3コイン。盤面にほかの🎎がいると稼ぎ ×3',
               act(c, i) { if (c.all().some(j => j !== i && c.key(j) === 'hina')) { c.mul(i, 3, i); c.flag('hina'); } } },
-  mallet:   { e: '🔨', n: 'うちでのこづち', r: 'R', v: 1, p: 1, likes: ['*'], d: '盤面に出るたび 1/3で、となりのシンボルを1つ手持ちに複製',
-              act(c, i) { const t = c.nb(i); if (t.length && rnd() < 1 / 3) c.spawn(c.key(t[Math.floor(rnd() * t.length)]), i); } },
+  mallet:   { e: '🔨', n: 'うちでのこづち', r: 'R', v: 1, p: 1, likes: ['*'], d: '盤面に出るたび 1/3で、となりのシンボルを1つ手持ちに複製（育ちや倍率もそのまま）',
+              act(c, i) { const t = c.nb(i); if (t.length && rnd() < 1 / 3) { const j = t[Math.floor(rnd() * t.length)]; c.spawn(c.key(j), i, c.sym(j)); } } },
   mirror:   { e: '🪞', n: 'かがみ', r: 'R', v: 0, p: 3, likes: ['*'], d: 'となりで いちばん稼いだシンボルと同じだけ稼ぐ',
               act(c, i) { let best = 0, bj = null; c.nb(i).forEach(j => { if (c.key(j) === 'mirror') return; const v = c.valueNow(j); if (v > best) { best = v; bj = j; } }); if (bj !== null) c.add(i, best, bj); } },
 
@@ -684,7 +684,7 @@ function spin(st) {
     },
     vanish: (i, why) => { cell[i].was = baseOf(i); cell[i].vanish = why || true; ev.push({ t: 'boom', a: i }); },
     transform: (j, key, from, keep, inherit) => { transforms.push({ j, key, keep, inherit }); ev.push({ t: 'magic', a: from, b: j }); },
-    spawn: (key, from) => { spawns.push({ i: from, key }); ev.push({ t: 'spawn', a: from }); },
+    spawn: (key, from, src) => { spawns.push({ i: from, key, src }); ev.push({ t: 'spawn', a: from }); },
     purgeCheapest: () => {
       const cand = st.inv.filter(s => !onBoard.has(s.id) && !purged.includes(s) && s.key !== 'ninja');
       if (!cand.length) return false;
@@ -762,11 +762,11 @@ function spin(st) {
     if (d.grow) { s.c = (s.c || 0) + (fast && s.key === 'seed' ? 2 : 1); if (s.c >= d.grow) { changes.push({ i, from: s.key, to: GROW[s.key] }); s.key = GROW[s.key]; s.c = 0; } }
     else if (s.key === 'egg' && rnd() < (neighbors(i).some(j => cells[j] && !removed.has(cells[j].id) && cells[j].key === 'chicken') ? 0.5 : 0.2)) { changes.push({ i, from: 'egg', to: 'chick' }); s.key = 'chick'; s.c = 0; }
   });
-  const born = spawns.map(x => ({ i: x.i, key: x.key }));
+  const born = spawns.map(x => ({ i: x.i, key: x.key, src: x.src }));
   cells.forEach((s, i) => { if (s && !removed.has(s.id) && s.key === 'chicken' && changes.every(c => c.i !== i) && rnd() < 0.15) born.push({ i, key: 'egg' }); });
   if (st.curse === 'rats') born.push({ i: null, key: 'mouse' });
   st.inv = st.inv.filter(s => !removed.has(s.id));
-  born.forEach(b => st.inv.push(mk(b.key)));
+  born.forEach(b => { const n = mk(b.key); if (b.src && b.src.key === b.key) { ['c', 'b', 'g'].forEach(f => { if (b.src[f]) n[f] = b.src[f]; }); } st.inv.push(n); });   // 複製は育ち・倍率もそのまま
 
   // 進行と記録
   const wasLast = st.spinsLeft === 1;
@@ -793,7 +793,7 @@ function spin(st) {
     if (q.type !== 'lean' && q.progress >= q.target) questDone = completeQuest(st);
   }
 
-  const res = { keys: keysAtSpin, values, dead: cell.map(c => !!(c && (c.dead || c.vanish))), ev, total, boardTotal, bonuses, changes, born, detail, blocked: [...blocked], purged: purged.map(s => s.key), flags: [...flags], questDone, wasLast };
+  const res = { keys: keysAtSpin, values, dead: cell.map(c => !!(c && (c.dead || c.vanish))), ev, total, boardTotal, bonuses, changes, born: born.map(b => ({ i: b.i, key: b.key })), detail, blocked: [...blocked], purged: purged.map(s => s.key), flags: [...flags], questDone, wasLast };
   st.last = { detail, total, boardTotal, bonuses, changes, born, blocked: [...blocked], purged: res.purged };
   return res;
 }

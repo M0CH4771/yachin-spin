@@ -399,6 +399,8 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
 #rentBig,#rentAfter,#endStats,.val,.eq span,.res{overflow-wrap:anywhere;min-width:0}
 .longnum{font-size:.55em!important;line-height:1.1;word-break:break-all}
 #coins,#need{white-space:nowrap}
+.cnt.moonx{font-size:14px;font-weight:700;background:var(--gold);color:#3a1a00;padding:1px 4px;box-shadow:0 0 0 2px var(--edge)}
+.moonlist{margin-top:6px;color:var(--gold);font-weight:700}
 </style>
 <style>:root{--sheet:url(data:image/png;base64,/*__SHEET__*/)}</style>
 </head>
@@ -1137,7 +1139,7 @@ function renderBoard() {
     if (!key) { c.classList.add(blk.has(i) ? 'blocked' : 'empty'); continue; }
     if (!alive) c.classList.add('ghost');
     const lab = cntLabel(alive);
-    if (lab) c.insertAdjacentHTML('beforeend', `<span class="cnt">${lab}</span>`);
+    if (lab) c.insertAdjacentHTML('beforeend', `<span class="cnt${key === 'moon' ? ' moonx' : ''}">${lab}</span>`);
     c.insertAdjacentHTML('beforeend', valChip(det));
   }
   applySel();
@@ -1196,7 +1198,7 @@ function renderInfo() {
     } else if (det && det.key !== key) {
       eq = `<div class="eq"><span>${E(det.key)}→${E(key)} に変わった</span><i>/</i><span>今回</span><span class="res">${fmtN(det.value)}</span></div>`;
     }
-    box.innerHTML = `<div class="ttl"><span style="font-size:22px">${d.e}</span>${d.n}<span style="color:${r.color};font-size:11px">${r.name}</span><span class="sub">点線＝となりのマス</span></div>${eq}<div class="desc">${d.d}</div>`;
+    box.innerHTML = `<div class="ttl"><span style="font-size:22px">${d.e}</span>${d.n}<span style="color:${r.color};font-size:11px">${r.name}</span><span class="sub">点線＝となりのマス</span></div>${eq}${key === 'moon' && st.board && st.board[sel] ? `<div class="moonlist">🌕 このまんげつの倍率：×${fmtN(Math.pow(2, 1 + (st.board[sel].c || 0)))}</div>` : ''}<div class="desc">${d.d}</div>`;
     return;
   }
   if (!st.last) {
@@ -1632,6 +1634,10 @@ const NEWS = [
     ]],
     ['まんげつ', [
       '🌕まんげつ同士がとなりに出ると合体して、倍率がかけ算に（×2と×2で×4、×4と×4で×16、×16と×16で×256…）',
+      'まんげつの倍率は、マスの左上の金色の札と、マスを押したとき・手持ちの画面で見られるように',
+    ]],
+    ['うちでのこづち', [
+      'こづちで複製したシンボルは、育ちや倍率もそのまま写すように（育ったかたつむりなら、育ったまま増える）',
     ]],
     ['カンスト', [
       '所持縁銭が表示できる最大まで届くか、家賃を千回払いきったら…… 番外のエンディングが見られます（実績もあり）',
@@ -2078,7 +2084,9 @@ function removalPreviewValue(key) {
 function renderInvDetail(key) {
   const value = removalPreviewValue(key);
   const copies = st.inv.filter(s => s.key === key).length;
+  const moons = key === 'moon' ? st.inv.filter(s => s.key === 'moon').map(s => Math.pow(2, 1 + (s.c || 0))).sort((a, b) => b - a) : [];
   $('#invDetail').innerHTML = symRow(key) +
+    (moons.length ? `<div class="moonlist">🌕 手持ちのまんげつ：${moons.map(m => '×' + fmtN(m)).join('・')}${moons.length > 1 ? `（ぜんぶ盤面に出ると ×${fmtN(moons.reduce((a, b) => a * b, 1))}）` : ''}</div>` : '') +
     `<div class="removal-preview">✂️ 除去される個体：<strong>現在の稼ぎ ${value} コイン</strong>（成長分込み）${copies > 1 ? `<br>${copies}個のうち、最も稼ぎが低い個体を除去します。` : ''}</div>`;
 }
 function openInv() {
@@ -2087,7 +2095,7 @@ function openInv() {
   const keys = Object.keys(counts).sort((a, b) => SYM_KEYS.indexOf(a) - SYM_KEYS.indexOf(b));
   const room = N - (st.curse === 'fog' ? 4 : 0);
   $('#invLead').innerHTML = `${st.inv.length}個持っている。盤面は${room}マス${st.inv.length > room ? `なので、<b style="color:var(--gold)">毎回ランダムに${room}個だけ</b>出る` : 'なので、全部が毎回出る'}。<br>✂️除去の残り：${st.removals}回${hasItem(st, 'broom') ? '（🧹除去するたび+8コイン）' : ''}`;
-  $('#invGrid').innerHTML = keys.map(k => `<button class="inv-item" data-k="${k}" style="border-color:${SYM[k].r === 'C' ? '' : RARITY[SYM[k].r].color + '88'}">${E(k)}<span class="n">×${counts[k]}</span></button>`).join('');
+  $('#invGrid').innerHTML = keys.map(k => `<button class="inv-item" data-k="${k}" style="border-color:${SYM[k].r === 'C' ? '' : RARITY[SYM[k].r].color + '88'}">${E(k)}<span class="n">×${counts[k]}</span>${k === 'moon' ? `<span class="cnt moonx" style="position:absolute;left:2px;top:1px">×${fmtN(Math.max(...st.inv.filter(s => s.key === 'moon').map(s => Math.pow(2, 1 + (s.c || 0)))))}</span>` : ''}</button>`).join('');
   $$('#invGrid .inv-item').forEach(b => b.onclick = () => { invSel = b.dataset.k; $$('#invGrid .inv-item').forEach(x => x.classList.toggle('sel', x === b)); renderInvDetail(invSel); updRemove(); });
   $('#invDetail').innerHTML = '<div class="dd" style="color:var(--mute)">シンボルをタップすると説明が出る。いらないものは除去できる。</div>';
   updRemove(); $('#ovInv').classList.add('show');
