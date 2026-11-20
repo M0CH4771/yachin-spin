@@ -2520,16 +2520,16 @@ function buildBoard() {
     b.appendChild(c);
   }
 }
-// 大きい数は K・M・B・T… で短く（1,000 = 1K、1,000,000 = 1M）
-const NUM_UNITS = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'];
+// 大きい数は 万・億・兆・京・垓 で短く（12,345 = 1.23万）。垓の先は指数（1.23e24）
+const NUM_UNITS = ['', '万', '億', '兆', '京', '垓'];
 function fmtN(n) {
   if (typeof n !== 'number' || !isFinite(n)) return String(n);
   const neg = n < 0; let v = Math.abs(n), k = 0;
-  if (v < 1000) return (neg ? '-' : '') + (Number.isInteger(v) ? v : Math.round(v * 100) / 100);
-  while (v >= 999.5 && k < NUM_UNITS.length - 1) { v /= 1000; k++; }
-  if (v >= 999.5) return (neg ? '-' : '') + Math.abs(n).toExponential(2);
+  if (v < 10000) return (neg ? '-' : '') + (Number.isInteger(v) ? v : Math.round(v * 100) / 100);
+  while (v >= 9999.5 && k < NUM_UNITS.length - 1) { v /= 10000; k++; }
+  if (v >= 9999.5) return (neg ? '-' : '') + Math.abs(n).toExponential(2);
   const s = v < 10 ? v.toFixed(2) : v < 100 ? v.toFixed(1) : v.toFixed(0);
-  return (neg ? '-' : '') + s.replace(/\.?0+$/, '') + NUM_UNITS[k];
+  return (neg ? '-' : '') + s.replace(/\.0+$|(\.\d*?)0+$/, '$1') + NUM_UNITS[k];
 }
 const fmtV = s => String(s).replace(/\d+(\.\d+)?/g, x => fmtN(+x));   // 文字の中の数を置きかえ（お守りの +n・×n など）
 function cntLabel(s) {
@@ -3045,7 +3045,7 @@ const NEWS = [
       '「むずかしい」「ちょうむずかしい」の家賃を少し上げました（コンボが伸びやすくなったぶん）',
     ]],
     ['表示', [
-      '大きい数は K・M・B・T… で短く表示するように（1,000 = 1K、1,000,000 = 1M、10億 = 1B、1兆 = 1T）',
+      '大きい数は 万・億・兆・京・垓 で短く表示するように（12,345 = 1.23万、3億4100万 = 3.41億）。垓より大きい数は 1.23e24 のように表示',
     ]],
   ] },
   { v: '1.4', date: '2026年11月20日', secs: [
