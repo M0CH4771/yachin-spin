@@ -1212,7 +1212,7 @@ function renderInfo() {
     .sort((a, b) => b.d.value - a.d.value).slice(0, 4);
   const eaten = L.detail.filter(d => d && d.eatenBy);
   const chips = combos.map(({ d }) => {
-    const why = [...d.parts.filter(p => p.n > 0).map(srcLabel), ...d.muls.map(m => `${SYM[m.src] ? E(m.src) : m.src}×${m.m}`)];
+    const why = [...d.parts.filter(p => p.n > 0).map(srcLabel), ...d.muls.map(m => `${SYM[m.src] ? E(m.src) : m.src}×${fmtN(m.m)}`)];
     return `<span>${E(d.key)} <b>+${fmtN(d.value)}</b> <small style="color:var(--mute)">${[...new Set(why)].slice(0, 2).join('・')}</small></span>`;
   });
   (L.bonuses || []).forEach(b => chips.push(`<span class="${b.v[0] === '-' ? 'bad' : 'it'}">${b.e} ${b.n} <b>${fmtV(b.v)}</b></span>`));
