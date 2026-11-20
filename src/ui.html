@@ -758,7 +758,7 @@ function drec(d) { return rec.diff[d] || (rec.diff[d] = { best: 0, clears: 0, en
 // ---------- 実績 ----------
 const ACH = [
   { id: 'first', e: '🎰', n: 'はじめの一回', d: 'はじめて まわす', c: s => s.totalSpins >= 1 },
-  { id: 'kanst', e: '♾️', n: 'カンスト', d: 'コインも家賃も、表示できる最大までたどりつく', c: s => s.phase === 'kanst' },
+  { id: 'kanst', e: '♾️', n: 'カンスト', d: '所持縁銭が、表示できる最大までたどりつく', c: s => s.phase === 'kanst' },
   { id: 'rent1', e: '🏠', n: 'はじめての家賃', d: '家賃を1回払う', c: s => s.rentIdx >= 1 },
   { id: 'stage2', e: '🏮', n: '二段目', d: 'エンドレス(?)で第2段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 2 },
   { id: 'stage4', e: '🎆', n: '四段目', d: 'エンドレス(?)で第4段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 4 },
@@ -1505,11 +1505,19 @@ async function doSpin() {
   res.keys.forEach(k => k && seeSym(k)); res.born.forEach(b => seeSym(b.key));
   saveRec();
   await animateSpin(res, before);
+  if (res.kanst) { st.phase = 'kanst'; busy = false; kanstEnd(); return; }
   st.phase = 'choose'; save();
   busy = false; renderAll();
   scrollGameToBottom();
   if (res.questDone) { sfx.quest(); toast(`📜 依頼達成！ 報酬 ${fmtV(st.quest.reward.txt)}`); }
   checkAch(res);
+}
+// カンスト：所持縁銭が最大になった
+function kanstEnd() {
+  stopAuto && stopAuto();
+  unlock('kanst'); sfx.mega(); save(); renderAll();
+  if (st.daily) rankSync();
+  playScene(['kanst', 'kanst2', 'kanst3', 'kanst4', 'kanst5', 'kanst6', 'kanst7'], () => showEnd(true));
 }
 function scrollGameToBottom() {
   requestAnimationFrame(() => {
@@ -1570,12 +1578,7 @@ function pay() {
   if (st.endless && !isEndlessMode(st)) r.endless = Math.max(r.endless || 0, st.rentIdx - totalRents(st));
   if (before + 1 === 5 && st.inv.length <= 10) unlock('mini');
   saveRec();
-  if (st.phase === 'kanst') {   // カンスト：コインも家賃も最大になった
-    unlock('kanst'); sfx.mega(); save(); renderAll();
-    if (st.daily) rankSync();
-    playScene(['kanst', 'kanst2', 'kanst3', 'kanst4', 'kanst5', 'kanst6', 'kanst7'], () => showEnd(true));
-    return;
-  }
+  if (st.phase === 'kanst') { kanstEnd(); return; }
   if (st.phase === 'clear') {
     r.clears++; if (st.daily) rec.daily[st.daily].clear = true;
     saveRec();
@@ -1630,7 +1633,7 @@ const NEWS = [
       '13回目以降の家賃は、長く続くほど上がり方が少しずつ大きくなるように（育ちの加速に合わせて）',
     ]],
     ['カンスト', [
-      'コインも家賃も、表示できる最大まで届いてしまったら…… 番外のエンディング「カンスト」が見られます（実績もあり）',
+      '所持縁銭が、表示できる最大まで届いてしまったら…… 番外のエンディング「カンスト」が見られます（実績もあり）',
     ]],
     ['表示', [
       '大きい数は 万・億・兆・京・垓…無量大数 まで、和式の単位で短く表示するように（12,345 = 1.23万、3億4100万 = 3.41億）',

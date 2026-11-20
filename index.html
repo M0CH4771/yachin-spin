@@ -1003,12 +1003,12 @@ const BASE_RENTS = [
   { rent: 1100, spins: 9 }, { rent: 1400, spins: 10 }, { rent: 1750, spins: 10 },
   { rent: 2150, spins: 10 }, { rent: 2700, spins: 11 },
 ];
-const RENT_ACCEL = 0.002;
+const RENT_ACCEL = 0.001;
 function baseRent(idx, growth) {
   if (idx < BASE_RENTS.length) return BASE_RENTS[idx];
   const last = BASE_RENTS[BASE_RENTS.length - 1];
   const m = idx - BASE_RENTS.length + 1;
-  // 長く続くほど、上がり方そのものが少しずつ大きくなる（1回ごとの倍率が ×10^(0.002m) ずつ上乗せ）
+  // 長く続くほど、上がり方そのものが少しずつ大きくなる（1回ごとの倍率が ×10^(0.001m) ずつ上乗せ）
   return { rent: Math.round(last.rent * Math.pow(growth || 1.3, m) * Math.pow(10, RENT_ACCEL * m * m / 2)), spins: 11 };
 }
 const round5 = x => Math.max(5, Math.round(x / 5) * 5);
@@ -1208,6 +1208,7 @@ function act(st, code) {
   if (c === 's') {
     if (st.phase !== 'spin') return null;
     r = spin(st); st.last.questDone = r.questDone; rollChoices(st); st.phase = 'choose';
+    if (st.coins >= MAXC) { st.phase = 'kanst'; r.kanst = true; }   // 所持縁銭がカンストしたら、その時点で終わり
   } else if (c === 'p') {
     if (st.phase !== 'choose' || (arg && !(st.choices || []).includes(arg))) return null;
     if (arg) st.inv.push(mk(arg));
@@ -1497,7 +1498,7 @@ function payRent(st) {
   const info = { ok: false, paid: st.rent, bonus: [], questDone: false };
   const q = st.quest;
   if (q && !q.done && q.type === 'lean' && st.inv.length <= q.target) info.questDone = completeQuest(st);
-  if (st.rent >= MAXC && st.coins >= MAXC) { info.ok = true; info.kanst = true; st.phase = 'kanst'; return info; }   // コインも家賃も最大：カンスト
+  if (st.coins >= MAXC) { info.ok = true; info.kanst = true; st.phase = 'kanst'; return info; }   // 所持縁銭がカンスト
   if (st.coins < st.rent) { st.phase = 'over'; return info; }
   info.ok = true;
   st.coins -= st.rent;
@@ -2004,7 +2005,7 @@ const SCENES = {
     { who: 'me', f: 's', t: 'はじめて聞きました、それ。' },
     { who: 'okon', f: 'x', t: 'うるさいね。マネキから聞いたよ。ハナの手紙があるんだろう。読みな。' },
   ],
-  // ───────────── 番外：カンスト（コインも家賃も表示できる最大になったとき） ─────────────
+  // ───────────── 番外：カンスト（所持縁銭が表示できる最大になったとき） ─────────────
   // 1 帳場：そろばんが止まる
   kanst: [
     { bg: 'choba', title: '番外　カンスト' },
@@ -2018,10 +2019,10 @@ const SCENES = {
     { who: 'maneki', t: '……ただのう。招きすぎて、腕がつった。しばらく上がらん。' },
     { who: 'me', t: 'それ、招き猫として大丈夫なの。' },
     { bg: 'choba' },
-    { who: 'okon', t: '笑いごとじゃないよ。家賃のほうも見な。' },
-    { who: 'narr', t: '家賃の欄も、同じだった。どこまでも続く数字が、こっちの数字とぴったり同じ長さで並んでいる。' },
-    { who: 'okon', t: 'あたしの家賃も、これより上はどう書いても上がらない。あんたの稼ぎも、これより上は増えない。' },
-    { who: 'okon', f: 'x', t: '払えば、あんたの手元はまた同じだけ。取っても、こっちは同じだけ。……勘定が、合いすぎてる。' },
+    { who: 'okon', t: '笑いごとじゃないよ。今月の家賃と、比べてごらん。' },
+    { who: 'narr', t: '家賃の欄は、ちゃんと一行に収まっていた。それなのに、こっちの数字は、帳簿の何十冊ぶんあっても書ききれない。' },
+    { who: 'okon', t: 'あんたの手元は、これより上はどう書いても増えない。家賃をいくら上げたって、勘定の外さ。' },
+    { who: 'okon', f: 'x', t: '払っても、払わなくても、帳簿の上じゃ同じこと。……勘定が、成り立たない。' },
     { who: 'me', t: 'じゃあ、どうなるんですか。' },
     { who: 'okon', t: 'わからないよ。長いこと大家をやってきたけど、こんなのは、はじめてだ。' },
     { who: 'narr', t: 'そのとき、表の戸ががらりと開いた。' },
@@ -2377,7 +2378,7 @@ function drec(d) { return rec.diff[d] || (rec.diff[d] = { best: 0, clears: 0, en
 // ---------- 実績 ----------
 const ACH = [
   { id: 'first', e: '🎰', n: 'はじめの一回', d: 'はじめて まわす', c: s => s.totalSpins >= 1 },
-  { id: 'kanst', e: '♾️', n: 'カンスト', d: 'コインも家賃も、表示できる最大までたどりつく', c: s => s.phase === 'kanst' },
+  { id: 'kanst', e: '♾️', n: 'カンスト', d: '所持縁銭が、表示できる最大までたどりつく', c: s => s.phase === 'kanst' },
   { id: 'rent1', e: '🏠', n: 'はじめての家賃', d: '家賃を1回払う', c: s => s.rentIdx >= 1 },
   { id: 'stage2', e: '🏮', n: '二段目', d: 'エンドレス(?)で第2段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 2 },
   { id: 'stage4', e: '🎆', n: '四段目', d: 'エンドレス(?)で第4段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 4 },
@@ -3124,11 +3125,19 @@ async function doSpin() {
   res.keys.forEach(k => k && seeSym(k)); res.born.forEach(b => seeSym(b.key));
   saveRec();
   await animateSpin(res, before);
+  if (res.kanst) { st.phase = 'kanst'; busy = false; kanstEnd(); return; }
   st.phase = 'choose'; save();
   busy = false; renderAll();
   scrollGameToBottom();
   if (res.questDone) { sfx.quest(); toast(`📜 依頼達成！ 報酬 ${fmtV(st.quest.reward.txt)}`); }
   checkAch(res);
+}
+// カンスト：所持縁銭が最大になった
+function kanstEnd() {
+  stopAuto && stopAuto();
+  unlock('kanst'); sfx.mega(); save(); renderAll();
+  if (st.daily) rankSync();
+  playScene(['kanst', 'kanst2', 'kanst3', 'kanst4', 'kanst5', 'kanst6', 'kanst7'], () => showEnd(true));
 }
 function scrollGameToBottom() {
   requestAnimationFrame(() => {
@@ -3189,12 +3198,7 @@ function pay() {
   if (st.endless && !isEndlessMode(st)) r.endless = Math.max(r.endless || 0, st.rentIdx - totalRents(st));
   if (before + 1 === 5 && st.inv.length <= 10) unlock('mini');
   saveRec();
-  if (st.phase === 'kanst') {   // カンスト：コインも家賃も最大になった
-    unlock('kanst'); sfx.mega(); save(); renderAll();
-    if (st.daily) rankSync();
-    playScene(['kanst', 'kanst2', 'kanst3', 'kanst4', 'kanst5', 'kanst6', 'kanst7'], () => showEnd(true));
-    return;
-  }
+  if (st.phase === 'kanst') { kanstEnd(); return; }
   if (st.phase === 'clear') {
     r.clears++; if (st.daily) rec.daily[st.daily].clear = true;
     saveRec();
@@ -3249,7 +3253,7 @@ const NEWS = [
       '13回目以降の家賃は、長く続くほど上がり方が少しずつ大きくなるように（育ちの加速に合わせて）',
     ]],
     ['カンスト', [
-      'コインも家賃も、表示できる最大まで届いてしまったら…… 番外のエンディング「カンスト」が見られます（実績もあり）',
+      '所持縁銭が、表示できる最大まで届いてしまったら…… 番外のエンディング「カンスト」が見られます（実績もあり）',
     ]],
     ['表示', [
       '大きい数は 万・億・兆・京・垓…無量大数 まで、和式の単位で短く表示するように（12,345 = 1.23万、3億4100万 = 3.41億）',

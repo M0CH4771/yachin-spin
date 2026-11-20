@@ -370,12 +370,12 @@ const BASE_RENTS = [
   { rent: 1100, spins: 9 }, { rent: 1400, spins: 10 }, { rent: 1750, spins: 10 },
   { rent: 2150, spins: 10 }, { rent: 2700, spins: 11 },
 ];
-const RENT_ACCEL = 0.002;
+const RENT_ACCEL = 0.001;
 function baseRent(idx, growth) {
   if (idx < BASE_RENTS.length) return BASE_RENTS[idx];
   const last = BASE_RENTS[BASE_RENTS.length - 1];
   const m = idx - BASE_RENTS.length + 1;
-  // 長く続くほど、上がり方そのものが少しずつ大きくなる（1回ごとの倍率が ×10^(0.002m) ずつ上乗せ）
+  // 長く続くほど、上がり方そのものが少しずつ大きくなる（1回ごとの倍率が ×10^(0.001m) ずつ上乗せ）
   return { rent: Math.round(last.rent * Math.pow(growth || 1.3, m) * Math.pow(10, RENT_ACCEL * m * m / 2)), spins: 11 };
 }
 const round5 = x => Math.max(5, Math.round(x / 5) * 5);
@@ -575,6 +575,7 @@ function act(st, code) {
   if (c === 's') {
     if (st.phase !== 'spin') return null;
     r = spin(st); st.last.questDone = r.questDone; rollChoices(st); st.phase = 'choose';
+    if (st.coins >= MAXC) { st.phase = 'kanst'; r.kanst = true; }   // 所持縁銭がカンストしたら、その時点で終わり
   } else if (c === 'p') {
     if (st.phase !== 'choose' || (arg && !(st.choices || []).includes(arg))) return null;
     if (arg) st.inv.push(mk(arg));
@@ -864,7 +865,7 @@ function payRent(st) {
   const info = { ok: false, paid: st.rent, bonus: [], questDone: false };
   const q = st.quest;
   if (q && !q.done && q.type === 'lean' && st.inv.length <= q.target) info.questDone = completeQuest(st);
-  if (st.rent >= MAXC && st.coins >= MAXC) { info.ok = true; info.kanst = true; st.phase = 'kanst'; return info; }   // コインも家賃も最大：カンスト
+  if (st.coins >= MAXC) { info.ok = true; info.kanst = true; st.phase = 'kanst'; return info; }   // 所持縁銭がカンスト
   if (st.coins < st.rent) { st.phase = 'over'; return info; }
   info.ok = true;
   st.coins -= st.rent;
