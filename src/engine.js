@@ -376,6 +376,8 @@ function baseRent(idx, growth) {
   return { rent: Math.round(last.rent * Math.pow(growth || 1.3, idx - BASE_RENTS.length + 1)), spins: 11 };
 }
 const round5 = x => Math.max(5, Math.round(x / 5) * 5);
+const MAXC = Number.MAX_VALUE;                                  // 表示できる最大（カンスト）
+const capN = x => (x > 0 ? Math.min(x, MAXC) : 0);              // 0〜最大におさめる（NaN は 0）
 const pickOne = a => a[Math.floor(rnd() * a.length)];
 const hasItem = (st, k) => st.items.includes(k);
 
@@ -423,7 +425,7 @@ function startPeriod(st) {
   let rent = b.rent * D.rentMul * (1 + (D.ramp || 0) * Math.min(st.rentIdx, 13));
   if (st.curse === 'raise') rent *= 1.2;
   if (hasItem(st, 'key')) rent *= 0.9;
-  st.rent = round5(rent);
+  st.rent = Math.min(round5(rent), MAXC);
   st.spinsMax = Math.max(2, b.spins + (hasItem(st, 'hourglass') ? 1 : 0) - (st.curse === 'hurry' ? 1 : 0));
   st.spinsLeft = st.spinsMax;
   st.periodEarned = 0;
@@ -590,7 +592,7 @@ function act(st, code) {
   } else if (c === '$') {
     if (st.phase !== 'rent') return null;
     r = payRent(st);
-    if (r.ok && st.phase !== 'clear') { st.phase = 'item'; prepItems(st); }
+    if (r.ok && st.phase !== 'clear' && st.phase !== 'kanst') { st.phase = 'item'; prepItems(st); }
   } else if (c === 'x') {
     if (!['spin', 'choose', 'item'].includes(st.phase) || !removeSymbol(st, arg)) return null;
     r = {};
@@ -706,7 +708,7 @@ function spin(st) {
   runPhase(4);   // 食べるのはいちばん最後（ほかの効果が出たあと）
   runPhase(5);   // 食べられた・消えた数を見るもの（つぼ）
 
-  const values = cells.map((s, i) => (!s || cell[i].dead) ? 0 : Math.max(0, (baseOf(i) + cell[i].add) * cell[i].mul));
+  const values = cells.map((s, i) => (!s || cell[i].dead) ? 0 : capN((baseOf(i) + cell[i].add) * cell[i].mul));
   const boardTotal = values.reduce((a, b) => a + b, 0);
   const keysAtSpin = cells.map(s => s && s.key);
   const detail = cells.map((s, i) => s ? {
@@ -733,7 +735,7 @@ function spin(st) {
     if (it.flat) { const n = it.flat(st, R); if (n) { flat += n; bonuses.push({ e: it.e, n: it.n, v: '+' + n }); } }
     if (it.mult) { const m = it.mult(st, R); if (m !== 1) { mult *= m; bonuses.push({ e: it.e, n: it.n, v: '×' + (Math.round(m * 100) / 100) }); } }
   });
-  let total = Math.floor((boardTotal + flat) * mult);
+  let total = capN(Math.floor(capN(boardTotal + flat) * mult));
   if (st.curse === 'tax') { const t = Math.floor(total * 0.15); if (t) { total -= t; bonuses.push({ e: '💸', n: 'ぜいきん', v: '-' + t }); } }
 
   // 後処理：消滅、変身、成長、誕生
@@ -757,7 +759,8 @@ function spin(st) {
 
   // 進行と記録
   const wasLast = st.spinsLeft === 1;
-  st.coins += total; st.totalEarned += total; st.totalSpins++; st.periodEarned += total;
+  st.coins = capN(st.coins + total); st.totalEarned = capN(st.totalEarned + total); st.totalSpins++; st.periodEarned = capN(st.periodEarned + total);
+  st.inv.forEach(x => { if (x.c > MAXC) x.c = MAXC; if (x.b > MAXC) x.b = MAXC; });   // 育ちもカンストまで
   st.best = Math.max(st.best, total);
   st.spinsLeft--;
   st.stats.eats += eats; st.stats.gone += R.gone;
@@ -858,6 +861,7 @@ function payRent(st) {
   const info = { ok: false, paid: st.rent, bonus: [], questDone: false };
   const q = st.quest;
   if (q && !q.done && q.type === 'lean' && st.inv.length <= q.target) info.questDone = completeQuest(st);
+  if (st.rent >= MAXC && st.coins >= MAXC) { info.ok = true; info.kanst = true; st.phase = 'kanst'; return info; }   // コインも家賃も最大：カンスト
   if (st.coins < st.rent) { st.phase = 'over'; return info; }
   info.ok = true;
   st.coins -= st.rent;

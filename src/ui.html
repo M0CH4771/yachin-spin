@@ -396,6 +396,9 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
 .cell .emo { margin-top: -4px; }
 .dex-row .de { width: 50px; }
 .choice .ce { line-height: 1; min-height: 48px; display: grid; place-items: center; }
+#rentBig,#rentAfter,#endStats,.val,.eq span,.res{overflow-wrap:anywhere;min-width:0}
+.longnum{font-size:.55em!important;line-height:1.1;word-break:break-all}
+#coins,#need{white-space:nowrap}
 </style>
 <style>:root{--sheet:url(data:image/png;base64,/*__SHEET__*/)}</style>
 </head>
@@ -745,7 +748,7 @@ function loadSave() {
   }
   return null;
 }
-function inProgress(s) { return s && !['over', 'clear'].includes(s.phase); }
+function inProgress(s) { return s && !['over', 'clear', 'kanst'].includes(s.phase); }
 const seenCount = () => rec.seen.filter(k => SYM[k]).length;   // なくなったシンボルは数えない
 function seeSym(k) { if (k && !rec.seen.includes(k)) { rec.seen.push(k); saveRec(); } }
 function seeItem(k) { if (k && !rec.seenItems.includes(k)) { rec.seenItems.push(k); saveRec(); } }
@@ -755,6 +758,7 @@ function drec(d) { return rec.diff[d] || (rec.diff[d] = { best: 0, clears: 0, en
 // ---------- 実績 ----------
 const ACH = [
   { id: 'first', e: '🎰', n: 'はじめの一回', d: 'はじめて まわす', c: s => s.totalSpins >= 1 },
+  { id: 'kanst', e: '♾️', n: 'カンスト', d: 'コインも家賃も、表示できる最大までたどりつく', c: s => s.phase === 'kanst' },
   { id: 'rent1', e: '🏠', n: 'はじめての家賃', d: '家賃を1回払う', c: s => s.rentIdx >= 1 },
   { id: 'stage2', e: '🏮', n: '二段目', d: 'エンドレスで第2段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 2 },
   { id: 'stage4', e: '🎆', n: '四段目', d: 'エンドレスで第4段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 4 },
@@ -1075,7 +1079,7 @@ function enterGame() {
   renderAll();
   if (st.phase === 'rent') openRent();
   else if (st.phase === 'over') showEnd(false);
-  else if (st.phase === 'clear') showEnd(true);
+  else if (st.phase === 'clear' || st.phase === 'kanst') showEnd(true);
   window.scrollTo(0, 0);
 }
 
@@ -1094,7 +1098,7 @@ function buildBoard() {
 // 大きい数は 万・億・兆・京・垓・秭・穣・溝・澗・正・載・極・恒河沙・阿僧祇・那由他・不可思議・無量大数 で短く（12,345 = 1.23万）。無量大数の先は、無量大数の前の桁が増えていく
 const NUM_UNITS = ['', '万', '億', '兆', '京', '垓', '秭', '穣', '溝', '澗', '正', '載', '極', '恒河沙', '阿僧祇', '那由他', '不可思議', '無量大数'];
 function fmtN(n) {
-  if (typeof n !== 'number' || !isFinite(n)) return String(n);
+  if (typeof n !== 'number' || !isFinite(n) || n >= Number.MAX_VALUE) return n >= Number.MAX_VALUE ? 'カンスト' : String(n);
   const neg = n < 0; let v = Math.abs(n), k = 0;
   if (v < 10000) return (neg ? '-' : '') + (Number.isInteger(v) ? v : Math.round(v * 100) / 100);
   while (v >= 9999.5 && k < NUM_UNITS.length - 1) { v /= 10000; k++; }
@@ -1225,7 +1229,7 @@ function renderInfo() {
 function renderHUD(coinsOverride) {
   const coins = coinsOverride !== undefined ? coinsOverride : st.coins;
   const ok = coins >= st.rent, T = totalRents(st);
-  $('#coins').textContent = fmtN(coins);
+  $('#coins').textContent = fmtN(coins); $('#coins').classList.toggle('longnum', $('#coins').textContent.length > 10);
   $('#need').textContent = `/ ${fmtN(st.rent)} コイン`;
   $('#verdict').textContent = ok ? '払える' : `あと ${fmtN(st.rent - coins)}`;
   $('#verdict').classList.toggle('ok', ok);
@@ -1374,7 +1378,7 @@ async function runAutoUntilRent(runId) {
       if (scene) { stopAuto('会話が始まったため一時停止しました。終わったら再開できます'); return; }
       continue;
     }
-    if (st.phase === 'over' || st.phase === 'clear') { stopAuto(); return; }
+    if (st.phase === 'over' || st.phase === 'clear' || st.phase === 'kanst') { stopAuto(); return; }
     if (busy) { await sleep(50); continue; }
     stopAuto(); return;
   }
@@ -1536,7 +1540,7 @@ function pickItem(k) {
 function openRent() {
   const ok = st.coins >= st.rent;
   $('#rentLead').textContent = ok ? `${st.rentIdx + 1}回目の家賃です。` : 'コインが足りない…！';
-  $('#rentBig').innerHTML = `<span style="color:${ok ? 'var(--good)' : 'var(--bad)'}">${fmtN(st.coins)}</span> <span style="color:var(--mute);font-size:22px">/ ${fmtN(st.rent)}</span>`;
+  $('#rentBig').innerHTML = `<span class="${fmtN(st.coins).length > 10 ? 'longnum' : ''}" style="color:${ok ? 'var(--good)' : 'var(--bad)'}">${fmtN(st.coins)}</span> <span style="color:var(--mute);font-size:22px">/ ${fmtN(st.rent)}</span>`;
   const T = totalRents(st), last = !st.endless && st.rentIdx + 1 >= T;
   $('#rentAfter').textContent = ok ? (last ? 'これで、最後の家賃。' : `払っても ${fmtN(st.coins - st.rent)} 残る。おまけ付き。`) : `${fmtN(st.rent - st.coins)} 足りない。`;
   $('#bPay').textContent = ok ? '家賃を払う' : '結果を見る';
@@ -1565,6 +1569,12 @@ function pay() {
   if (st.endless && !isEndlessMode(st)) r.endless = Math.max(r.endless || 0, st.rentIdx - totalRents(st));
   if (before + 1 === 5 && st.inv.length <= 10) unlock('mini');
   saveRec();
+  if (st.phase === 'kanst') {   // カンスト：コインも家賃も最大になった
+    unlock('kanst'); sfx.mega(); save(); renderAll();
+    if (st.daily) rankSync();
+    playScene('kanst', () => showEnd(true));
+    return;
+  }
   if (st.phase === 'clear') {
     r.clears++; if (st.daily) rec.daily[st.daily].clear = true;
     saveRec();
@@ -1614,6 +1624,9 @@ const NEWS = [
     ]],
     ['物語モード', [
       '「むずかしい」「ちょうむずかしい」の家賃を少し上げました（コンボが伸びやすくなったぶん）',
+    ]],
+    ['カンスト', [
+      'コインも家賃も、表示できる最大まで届いてしまったら…… 番外のエンディング「カンスト」が見られます（実績もあり）',
     ]],
     ['表示', [
       '大きい数は 万・億・兆・京・垓…無量大数 まで、和式の単位で短く表示するように（12,345 = 1.23万、3億4100万 = 3.41億）',
@@ -1761,7 +1774,7 @@ async function doSync() {
   if (S.rank.result) noteRank(S.daily, S.rank.result);
   if (S === st) { save(); updRankBadge(); updEndRank(); }
   // 終わった回を送りきれなかったら、あとで送る
-  if (!done && !S.rank.error && S.phase === 'over' && !pend.some(p => p.run === S.rank.run)) { pend.push({ run: S.rank.run, day: S.daily, from: S.rank.from, log: S.log.slice() }); saveRec(); }
+  if (!done && !S.rank.error && (S.phase === 'over' || S.phase === 'kanst') && !pend.some(p => p.run === S.rank.run)) { pend.push({ run: S.rank.run, day: S.daily, from: S.rank.from, log: S.log.slice() }); saveRec(); }
 }
 function noteRank(day, res) { const d = rec.daily[day] || (rec.daily[day] = { best: 0 }); if (res.rank) d.rank = res.rank; saveRec(); }
 function updRankBadge() {
@@ -1831,7 +1844,7 @@ function resultInfo(S) {
     return { mode: `デイリー ${S.daily}`, color: '#5ab0e8', big: `家賃 ${S.rentIdx}回`, sub: `お題：${CURSES[S.fixedCurse].n}`, extra: r && r.rank ? `今日の ${r.rank}位 / ${r.total}人` : '' };
   }
   if (isEndlessMode(S)) return { mode: 'エンドレス', color: '#f2c14e', big: `家賃 ${S.rentIdx}回`, sub: `第${endlessStage(S.rentIdx)}段まで住んだ`, extra: '' };
-  const win = S.phase === 'clear';
+  const win = S.phase === 'clear' || S.phase === 'kanst';
   if (CH) return { mode: `ストーリー ${CH.n}「${CH.t}」`, color: '#ff9ab0', big: win ? 'クリア！' : `家賃 ${Math.min(S.rentIdx, T)}/${T}回`, sub: win ? '家賃を払いきった' : '追い出された…', extra: '' };
   return { mode: D.n, color: D.color, big: win ? 'クリア！' : S.endless ? `家賃 ${S.rentIdx}回` : `家賃 ${Math.min(S.rentIdx, T)}/${T}回`, sub: '', extra: '' };
 }
@@ -1981,6 +1994,10 @@ function showEndEndless() {
   checkAch();
 }
 function showEnd(win) {
+  if (st.phase === 'kanst') { showEndInner(win); $('#endEmo').textContent = '♾️'; $('#endTitle').textContent = 'カンスト！ 永代店子になった'; return; }
+  showEndInner(win);
+}
+function showEndInner(win) {
   if (isEndlessMode(st)) { showEndEndless(); return; }
   if (st.daily) { showEndDaily(); return; }
   const D = DIFFS[st.diff], T = totalRents(st);

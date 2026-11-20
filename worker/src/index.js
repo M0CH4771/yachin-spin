@@ -88,7 +88,7 @@ async function step(env, body) {
   const ok = G.stepDaily(st, fresh);
   G.setRng(null);
   if (!ok) return bad('記録を確かめられませんでした');
-  const over = st.phase === 'over' ? 1 : 0;
+  const over = st.phase === 'over' || st.phase === 'kanst' ? 1 : 0;
   const rents = st.rentIdx, earned = Math.min(SCORE_K - 1, Math.max(0, Math.floor(st.totalEarned || 0)));
   const score = (rents > 0 || over) ? rents * SCORE_K + earned : null;
   if (body.name) await upsertPlayer(env, body.player, body.name);
