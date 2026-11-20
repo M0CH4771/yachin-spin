@@ -213,7 +213,7 @@ h1{font-size:18px;margin:0}
 .cell[data-r="V"]{box-shadow:inset 0 0 0 2px #f2c14e,inset 0 -4px 0 #0005}
 .cell[data-r="S"]{box-shadow:inset 0 0 0 2px #f59ab888,inset 0 -4px 0 #0005}
 .emo{font-size:clamp(22px,7.4vw,36px);line-height:1;margin-top:-6px}
-.cnt{position:absolute;left:2px;top:1px;font-size:11px;background:var(--edge);padding:0 3px;color:#e2d8f2}
+.cnt{position:absolute;left:2px;top:1px;font-size:11px;background:var(--edge);padding:0 3px;color:#e2d8f2;white-space:nowrap;max-width:calc(100% - 4px);overflow:hidden}
 .val{position:absolute;left:50%;bottom:-4px;transform:translate(-50%,0);font-size:13px;line-height:1;padding:2px 4px 1px;background:var(--edge);color:var(--gold);white-space:nowrap;animation:pop2 .2s steps(3)}
 .val.hi{background:var(--red);color:#fff;box-shadow:0 0 0 2px var(--edge)}
 .val.mega{background:var(--gold);color:#3a1a00;box-shadow:0 0 0 2px var(--edge)}
@@ -1003,10 +1003,13 @@ const BASE_RENTS = [
   { rent: 1100, spins: 9 }, { rent: 1400, spins: 10 }, { rent: 1750, spins: 10 },
   { rent: 2150, spins: 10 }, { rent: 2700, spins: 11 },
 ];
+const RENT_ACCEL = 0.004;
 function baseRent(idx, growth) {
   if (idx < BASE_RENTS.length) return BASE_RENTS[idx];
   const last = BASE_RENTS[BASE_RENTS.length - 1];
-  return { rent: Math.round(last.rent * Math.pow(growth || 1.3, idx - BASE_RENTS.length + 1)), spins: 11 };
+  const m = idx - BASE_RENTS.length + 1;
+  // 長く続くほど、上がり方そのものが少しずつ大きくなる（1回ごとの倍率が ×10^(0.004m) ずつ上乗せ）
+  return { rent: Math.round(last.rent * Math.pow(growth || 1.3, m) * Math.pow(10, RENT_ACCEL * m * m / 2)), spins: 11 };
 }
 const round5 = x => Math.max(5, Math.round(x / 5) * 5);
 const MAXC = Number.MAX_VALUE;                                  // 表示できる最大（カンスト）
@@ -2834,8 +2837,8 @@ function renderInfo() {
   (L.changes || []).forEach(ch => chips.push(`<span>${ch.magic ? '🦝 化けた' : '✨ 育った'} ${E(ch.from)}→${E(ch.to)}</span>`));
   if (L.born && L.born.length) chips.push(`<span>🎁 ${L.born.map(b => E(b.key)).join('')} が手持ちに入った</span>`);
   if (L.purged && L.purged.length) chips.push(`<span>🥷 手持ちの${L.purged.map(E).join('')}を消した</span>`);
-  if (L.questDone) chips.unshift(`<span class="ok">📜 依頼達成！ ${st.quest.reward.txt}</span>`);
-  const boardNote = L.bonuses && L.bonuses.length ? `<span class="sub">盤面 ${L.boardTotal}＋アイテムなど</span>` : '<span class="sub">マスをタップで内訳</span>';
+  if (L.questDone) chips.unshift(`<span class="ok">📜 依頼達成！ ${fmtV(st.quest.reward.txt)}</span>`);
+  const boardNote = L.bonuses && L.bonuses.length ? `<span class="sub">盤面 ${fmtN(L.boardTotal)}＋アイテムなど</span>` : '<span class="sub">マスをタップで内訳</span>';
   box.innerHTML = `<div class="ttl">今回の稼ぎ <span class="big">+${fmtN(L.total)}</span>${boardNote}</div>` +
     (chips.length ? `<div class="hl">${chips.join('')}</div>` : `<div class="muted" style="margin-top:6px">となり同士は、今回は知らんぷり。</div>`);
 }
@@ -2867,7 +2870,7 @@ function renderEvents() {
   if (q) {
     const prog = q.type === 'lean' ? `いま ${st.inv.length}個` : `${Math.min(q.progress, q.target)} / ${q.target}`;
     const pct = q.type === 'lean' ? (st.inv.length <= q.target ? 100 : Math.max(0, 100 - (st.inv.length - q.target) * 8)) : Math.min(100, q.progress / q.target * 100);
-    h += `<div class="ev ${q.done ? 'done' : ''}"><span class="ei">${q.done ? '✅' : '📜'}</span><div class="et"><b>大家の依頼${q.done ? '（達成！）' : ''}</b>${q.txt}${q.done ? '' : `<div class="qbar"><i style="width:${pct}%"></i></div>`}</div><span class="rw">${q.done ? '受取済 ' : ''}${q.reward.txt}</span></div>`;
+    h += `<div class="ev ${q.done ? 'done' : ''}"><span class="ei">${q.done ? '✅' : '📜'}</span><div class="et"><b>大家の依頼${q.done ? '（達成！）' : ''}</b>${q.txt}${q.done ? '' : `<div class="qbar"><i style="width:${pct}%"></i></div>`}</div><span class="rw">${q.done ? '受取済 ' : ''}${fmtV(q.reward.txt)}</span></div>`;
   }
   if (st.curse) {
     const c = CURSES[st.curse]; seeCurse(st.curse);
@@ -3124,7 +3127,7 @@ async function doSpin() {
   st.phase = 'choose'; save();
   busy = false; renderAll();
   scrollGameToBottom();
-  if (res.questDone) { sfx.quest(); toast(`📜 依頼達成！ 報酬 ${st.quest.reward.txt}`); }
+  if (res.questDone) { sfx.quest(); toast(`📜 依頼達成！ 報酬 ${fmtV(st.quest.reward.txt)}`); }
   checkAch(res);
 }
 function scrollGameToBottom() {
@@ -3172,7 +3175,7 @@ function pay() {
   const before = st.rentIdx;
   const info = act(st, '$'); if (!info) return;
   $('#ovRent').classList.remove('show');
-  if (info.questDone) { rec.quests++; toast(`📜 依頼達成！ 報酬 ${st.quest.reward.txt}`); }
+  if (info.questDone) { rec.quests++; toast(`📜 依頼達成！ 報酬 ${fmtV(st.quest.reward.txt)}`); }
   const r = st.daily ? { best: 0, clears: 0, endless: 0 } : drec(st.diff);
   if (st.daily) { const d = rec.daily[st.daily] || (rec.daily[st.daily] = { best: 0, clear: false }); d.best = Math.max(d.best, st.rentIdx); }
   if (isEndlessMode(st)) { rec.endlessBest = Math.max(rec.endlessBest || 0, st.rentIdx); }
@@ -3241,6 +3244,9 @@ const NEWS = [
     ]],
     ['物語モード', [
       '「むずかしい」「ちょうむずかしい」の家賃を少し上げました（コンボが伸びやすくなったぶん）',
+    ]],
+    ['エンドレス・デイリー', [
+      '13回目以降の家賃は、長く続くほど上がり方が少しずつ大きくなるように（育ちの加速に合わせて）',
     ]],
     ['カンスト', [
       'コインも家賃も、表示できる最大まで届いてしまったら…… 番外のエンディング「カンスト」が見られます（実績もあり）',
