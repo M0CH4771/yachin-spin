@@ -38,7 +38,7 @@ const SYM = {
   onigiri:  { e: '🍙', n: 'おにぎり', r: 'C', v: 2, likes: ['fox'], d: '2コイン。🦊のエサ。' },
   seed:     { e: '🌱', n: 'たね', r: 'C', v: 0, grow: 4, d: '盤面に4回出ると 🌸さくら（5コイン）に育つ' },
   egg:      { e: '🥚', n: 'たまご', r: 'C', v: 1, likes: ['chicken'], d: '盤面に出るたび 20%で 🐣ひよこ にかえる（🐔のとなりなら50%）' },
-  mouse:    { e: '🐭', n: 'ねずみ', r: 'C', v: 1, p: 4, store: true, likes: ['rice', 'cat', 'fox', 'sake'], d: 'となりの🌾を食べる。1つにつき +5、育つ（+2、10%で今の育ちが ×2）',
+  mouse:    { e: '🐭', n: 'ねずみ', r: 'C', v: 1, p: 4, store: true, likes: ['rice', 'cat', 'fox', 'sake'], d: 'となりの🌾を食べる。1つにつき +5、育つ（+2、食べるたびに育つ量が+1ずつ増える。10%で今の育ちが ×2）',
               act(c, i, s) { c.nb(i).forEach(j => { if (c.key(j) === 'rice') { c.eat(i, j, 5); c.eatGrow(s, 2); } }); } },
   dice:     { e: '🎲', n: 'サイコロ', r: 'C', v: 0, p: 1, d: '毎回 0〜4コインのどれか',
               act(c, i) { c.add(i, Math.floor(rnd() * 5), 'サイコロの目'); } },
@@ -46,9 +46,9 @@ const SYM = {
               act(c, i, s) { let hit = false; c.nb(i).forEach(j => { if (c.key(j) === 'dango' || c.key(j) === 'chadango') { c.add(i, 2, j); hit = true; } }); if (hit) c.grow(s, 2, 30); } },
   frog:     { e: '🐸', n: 'かえる', r: 'C', v: 1, p: 1, likes: ['frog', 'sake'], d: '盤面のほかの🐸 1匹につき +1（どこにいてもOK）',
               act(c, i) { c.all().forEach(j => { if (j !== i && c.key(j) === 'frog') c.add(i, 1, j); }); } },
-  cat:      { e: '🐱', n: 'ねこ', r: 'U', v: 1, p: 4, store: true, likes: ['goldfish', 'mouse', 'sake', 'kotatsu'], d: 'となりの🐟と🐭を食べる。1匹につき +8、育つ（+2、10%で今の育ちが ×2）',
+  cat:      { e: '🐱', n: 'ねこ', r: 'U', v: 1, p: 4, store: true, likes: ['goldfish', 'mouse', 'sake', 'kotatsu'], d: 'となりの🐟と🐭を食べる。1匹につき +8、育つ（+2、食べるたびに育つ量が+1ずつ増える。10%で今の育ちが ×2）',
               act(c, i, s) { c.nb(i).forEach(j => { const k = c.key(j); if (k === 'goldfish' || k === 'mouse') { c.eat(i, j, 8); c.eatGrow(s, 2); } }); } },
-  fox:      { e: '🦊', n: 'きつね', r: 'U', v: 2, p: 4, store: true, likes: ['mouse', 'onigiri', 'inari', 'torii', 'sake', 'kitsunebi'], d: 'となりの🐭を食べて +10、🍙🥟を食べて +5。食べるたび育つ（+2、10%で今の育ちが ×2）',
+  fox:      { e: '🦊', n: 'きつね', r: 'U', v: 2, p: 4, store: true, likes: ['mouse', 'onigiri', 'inari', 'torii', 'sake', 'kitsunebi'], d: 'となりの🐭を食べて +10、🍙🥟を食べて +5。食べるたび育つ（+2、食べるたびに育つ量が+1ずつ増える。10%で今の育ちが ×2）',
               act(c, i, s) { c.nb(i).forEach(j => { const k = c.key(j); if (k === 'mouse') { c.eat(i, j, 10); c.eatGrow(s, 2); } else if (k === 'onigiri' || k === 'inari') { c.eat(i, j, 5); c.eatGrow(s, 2); } }); } },
   lantern:  { e: '🏮', n: 'ちょうちん', r: 'U', v: 0, p: 2, likes: ['*'], d: 'となりのシンボル全部の稼ぎを ×2',
               act(c, i) { const m = c.has('candle') ? 3 : 2; c.nb(i).forEach(j => c.mul(j, m, i)); } },
@@ -63,7 +63,7 @@ const SYM = {
               act(c, i) { c.nb(i).forEach(j => { if (ANIMALS.has(c.key(j))) c.add(i, 2, j); }); } },
   shooting: { e: '🎯', n: 'しゃてき', r: 'U', v: 1, p: 4, likes: ['*'], d: 'となりでいちばん安いシンボルを撃ち落とす（手持ちから消える）。その基本の稼ぎ（育った分もふくむ）×8を獲得',
               act(c, i) { const t = c.nb(i); if (!t.length) return; const j = t.reduce((a, b) => c.baseOf(b) < c.baseOf(a) ? b : a); c.eat(i, j, Math.max(1, c.baseOf(j)) * 8); } },
-  purse:    { e: '👛', n: 'がまぐち', r: 'U', v: 0, p: 4, store: true, likes: ['coin'], d: 'となりの🪙を吸い込む。1枚につき、このがまぐちが育つ（+3 ＋ その🪙の稼ぎ。かどまつなどの倍がけも込み。10%で今の育ちが ×2）',
+  purse:    { e: '👛', n: 'がまぐち', r: 'U', v: 0, p: 4, store: true, likes: ['coin'], d: 'となりの🪙を吸い込む。1枚につき、このがまぐちが育つ（+3 ＋ その🪙の稼ぎ。かどまつなどの倍がけも込み。食べるたびに育つ量が+1ずつ増える。10%で今の育ちが ×2）',
               act(c, i, s) { c.nb(i).forEach(j => { if (c.key(j) === 'coin') { const v = c.valueNow(j); c.eat(i, j, 0); c.eatGrow(s, 3 + v); } }); } },
   sakura:   { e: '🌸', n: 'さくら', r: 'S', v: 5, d: '5コイン。🌱から育つ。' },
 
@@ -85,9 +85,9 @@ const SYM = {
               act(c, i) { c.all().forEach(j => c.add(j, 1, i)); } },
 
   // ===== 追加シンボル =====
-  oden:     { e: '🍢', n: 'おでん', r: 'C', v: 1, p: 4, store: true, likes: FOODL.concat(['yatai']), d: 'となりの食べ物を鍋に入れて煮込む（食べる）。1つにつき +1、その稼ぎ（育った分も）だけ育つ。となりに🛖があれば、煮込んだスピンは今の育ちが ×2',
+  oden:     { e: '🍢', n: 'おでん', r: 'C', v: 1, p: 4, store: true, likes: FOODL.concat(['yatai']), d: 'となりの食べ物を鍋に入れて煮込む（食べる）。1つにつき +1、その稼ぎ（育った分も）だけ育つ（食べるたびに育つ量が+1ずつ増える。10%で今の育ちが ×2）。となりに🛖があれば、煮込んだスピンは今の育ちが ×2',
               act(c, i, s) {
-                let n = 0; c.nb(i).forEach(j => { const k = c.key(j); if (FOOD.has(k) && k !== 'oden') { const v = c.base(j); c.eat(i, j, 1); c.grow(s, v); n++; } });
+                let n = 0; c.nb(i).forEach(j => { const k = c.key(j); if (FOOD.has(k) && k !== 'oden') { const v = c.base(j); c.eat(i, j, 1); c.eatGrow(s, v); n++; } });
                 if (n && c.nb(i).some(j => c.key(j) === 'yatai')) s.c = (s.c || 0) * 2;
               } },
   yakiimo:  { e: '🍠', n: 'やきいも', r: 'C', v: 1, p: 1, store: true, hint: '出るたび育つ', d: '盤面に出るたび育つ（+1、最大+5）',
@@ -130,7 +130,7 @@ const SYM = {
   ramen:    { e: '🍜', n: 'ラーメン', r: 'U', v: 0, p: 1, likes: FOODL, d: '盤面に出ている食べ物の種類の数 ×2',
               act(c, i) { const n = new Set(c.all().map(j => c.key(j)).filter(k => FOOD.has(k))).size; c.add(i, n * 2, '食べ物の種類'); } },
 
-  bear:     { e: '🐻', n: 'くま', r: 'R', v: 2, p: 4, store: true, likes: ['honey', 'bee'], d: 'となりの🍯を食べる。1つにつき +12、育つ（+4、10%で今の育ちが ×2）',
+  bear:     { e: '🐻', n: 'くま', r: 'R', v: 2, p: 4, store: true, likes: ['honey', 'bee'], d: 'となりの🍯を食べる。1つにつき +12、育つ（+4、食べるたびに育つ量が+1ずつ増える。10%で今の育ちが ×2）',
               act(c, i, s) { c.nb(i).forEach(j => { if (c.key(j) === 'honey') { c.eat(i, j, 12); c.eatGrow(s, 4); } }); } },
   fuji:     { e: '🗻', n: 'ふじさん', r: 'R', v: 3, p: 2, likes: ['japan'], hint: '上の段で強い', d: '3コイン。いちばん上の段にいると稼ぎ ×3',
               act(c, i) { if (c.row(i) === 0) c.mul(i, 3, i); } },
@@ -149,13 +149,13 @@ const SYM = {
 
   butterfly:{ e: '🦋', n: 'ちょうちょ', r: 'C', v: 1, p: 1, store: true, likes: ['sakura'], d: 'となりの🌸 1つにつき +4。となりにいれば育つ（+2）',
               act(c, i, s) { let hit = false; c.nb(i).forEach(j => { if (c.key(j) === 'sakura') { c.add(i, 4, j); hit = true; } }); if (hit) c.grow(s, 2); } },
-  sparrow:  { e: '🐦', n: 'すずめ', r: 'C', v: 1, p: 4, store: true, likes: ['rice'], d: 'となりの🌾を食べる。1つにつき +4、育つ（+2、10%で今の育ちが ×2）',
+  sparrow:  { e: '🐦', n: 'すずめ', r: 'C', v: 1, p: 4, store: true, likes: ['rice'], d: 'となりの🌾を食べる。1つにつき +4、育つ（+2、食べるたびに育つ量が+1ずつ増える。10%で今の育ちが ×2）',
               act(c, i, s) { c.nb(i).forEach(j => { if (c.key(j) === 'rice') { c.eat(i, j, 4); c.eatGrow(s, 2); } }); } },
   snail:    { e: '🐌', n: 'かたつむり', r: 'C', v: 0, p: 1, store: true, hint: 'ゆっくり育つ', d: '盤面に出るたび育つ（+1、上限なし）',
               act(c, i, s) { s.c = (s.c || 0) + 1; } },
   octopus:  { e: '🐙', n: 'たこ', r: 'C', v: 1, p: 1, likes: ['*'], d: 'となりのシンボル 1つにつき +1',
               act(c, i) { c.nb(i).forEach(j => c.add(i, 1, j)); } },
-  snake:    { e: '🐍', n: 'へび', r: 'U', v: 1, p: 4, store: true, likes: ['mouse', 'frog', 'eagle'], d: 'となりの🐭と🐸を食べる。1匹につき +8、育つ（+2、10%で今の育ちが ×2）',
+  snake:    { e: '🐍', n: 'へび', r: 'U', v: 1, p: 4, store: true, likes: ['mouse', 'frog', 'eagle'], d: 'となりの🐭と🐸を食べる。1匹につき +8、育つ（+2、食べるたびに育つ量が+1ずつ増える。10%で今の育ちが ×2）',
               act(c, i, s) { c.nb(i).forEach(j => { const k = c.key(j); if (k === 'mouse' || k === 'frog') { c.eat(i, j, 8); c.eatGrow(s, 2); } }); } },
   sushi:    { e: '🍣', n: 'おすし', r: 'U', v: 2, p: 1, store: true, likes: ['goldfish'], d: 'となりの🐟 1匹につき +3。となりにいれば育つ（+2）',
               act(c, i, s) { let hit = false; c.nb(i).forEach(j => { if (c.key(j) === 'goldfish') { c.add(i, 3, j); hit = true; } }); if (hit) c.grow(s, 2); } },
@@ -163,7 +163,7 @@ const SYM = {
               act(c, i) { if (rnd() < 0.25) { c.mul(i, 0, 'どく'); c.nb(i).forEach(j => c.mul(j, 0, 'どく')); c.flag('fugu'); } } },
   kaminari: { e: '⚡', n: 'かみなり', r: 'U', v: 0, p: 1, hint: '運しだい', d: '盤面のランダムな3つのシンボルに +5',
               act(c, i) { const a = c.all(); for (let k = 0; k < 3 && a.length; k++) { const j = a.splice(Math.floor(rnd() * a.length), 1)[0]; c.add(j, 5, i); } } },
-  eagle:    { e: '🦅', n: 'わし', r: 'R', v: 2, p: 4, store: true, likes: ['snake', 'goldfish', 'mouse'], d: 'となりの🐍🐟🐭を食べる。1匹につき +14。食べた相手の稼ぎ（育った分も）だけ、わしが育つ（10%で今の育ちが ×2）',
+  eagle:    { e: '🦅', n: 'わし', r: 'R', v: 2, p: 4, store: true, likes: ['snake', 'goldfish', 'mouse'], d: 'となりの🐍🐟🐭を食べる。1匹につき +14。食べた相手の稼ぎ（育った分も）だけ、わしが育つ（食べるたびに育つ量が+1ずつ増える。10%で今の育ちが ×2）',
               act(c, i, s) { c.nb(i).forEach(j => { const k = c.key(j); if (k === 'snake' || k === 'goldfish' || k === 'mouse') { const v = c.base(j); c.eat(i, j, 14); c.eatGrow(s, v); } }); } },
   wave:     { e: '🌊', n: 'おおなみ', r: 'R', v: 1, p: 2, likes: SEAL, d: '盤面の海の生き物（🐟🦑🦀🐢🐙🐡🐋）の稼ぎをすべて ×2',
               act(c, i) { c.all().forEach(j => { if (SEA.has(c.key(j))) c.mul(j, 2, i); }); } },
@@ -205,7 +205,7 @@ const SYM = {
               act(c, i) { const t = c.nb(i).map(j => c.key(j)); if (t.length >= 3 && new Set(t).size === t.length) c.add(i, 20, 'はなまる！'); } },
   kazan:    { e: '🌋', n: 'かざん', r: 'V', v: 0, p: 1, store: true, hint: 'ためて爆発', d: '盤面に出るたび育つ（+4）。でも10%で噴火して育った分が0にもどり、となり全部の稼ぎ ×3',
               act(c, i, s) { if (rnd() < 0.1) { s.c = 0; c.nb(i).forEach(j => c.mul(j, 3, i)); c.flag('kazan'); } else s.c = (s.c || 0) + 4; } },
-  whale:    { e: '🐋', n: 'くじら', r: 'V', v: 2, p: 4, store: true, likes: ['goldfish'], d: 'となりの🐟を全部のみこむ。1匹につき +15、育つ（+4、10%で今の育ちが ×2）',
+  whale:    { e: '🐋', n: 'くじら', r: 'V', v: 2, p: 4, store: true, likes: ['goldfish'], d: 'となりの🐟を全部のみこむ。1匹につき +15、育つ（+4、食べるたびに育つ量が+1ずつ増える。10%で今の育ちが ×2）',
               act(c, i, s) { c.nb(i).forEach(j => { if (c.key(j) === 'goldfish') { c.eat(i, j, 15); c.eatGrow(s, 4); } }); } },
   tengu:    { e: '👺', n: 'てんぐ', r: 'V', v: 2, p: 2, likes: ['*'], d: 'となりのシンボル全部の稼ぎを ×3',
               act(c, i) { c.nb(i).forEach(j => c.mul(j, 3, i)); } },
@@ -219,7 +219,7 @@ const SYM = {
   bonodori: { e: '💃', n: 'ぼんおどり', r: 'R', v: 2, p: 1, likes: ['*'], hint: '同じものを集める', d: '盤面でいちばん多いシンボル全部に、その数だけ +（5つなら それぞれ +5）',
               act(c, i) { const m = {}; c.all().forEach(j => { const k = c.key(j); if (k !== 'bonodori') m[k] = (m[k] || 0) + 1; }); let top = null; for (const k in m) if (!top || m[k] > m[top]) top = k; if (top && m[top] >= 2) c.all().forEach(j => { if (c.key(j) === top) c.add(j, m[top] * (c.has('bachi') ? 2 : 1), i); }); } },
   kyuri:    { e: '🥒', n: 'きゅうり', r: 'C', v: 1, likes: ['kappa'], d: 'ただの1コイン。かっぱの大好物。' },
-  kappa:    { e: '🧌', n: 'かっぱ', r: 'U', v: 1, p: 4, store: true, likes: ['kyuri'], d: 'となりの🥒を食べる。1本につき +6、育つ（+2、10%で今の育ちが ×2）',
+  kappa:    { e: '🧌', n: 'かっぱ', r: 'U', v: 1, p: 4, store: true, likes: ['kyuri'], d: 'となりの🥒を食べる。1本につき +6、育つ（+2、食べるたびに育つ量が+1ずつ増える。10%で今の育ちが ×2）',
               act(c, i, s) { c.nb(i).forEach(j => { if (c.key(j) === 'kyuri') { c.eat(i, j, 6); c.eatGrow(s, 2); } }); } },
   susuki:   { e: '🌿', n: 'すすき', r: 'C', v: 1, p: 1, store: true, likes: ['mikazuki', 'hangetsu', 'moon', 'sun'], d: '盤面に🌕がいると育つ（+1）。植物',
               act(c, i, s) { if (c.all().some(j => c.key(j) === 'moon')) c.grow(s, 1); } },
@@ -346,9 +346,9 @@ const DIFFS = {
             desc: ['家賃が安い', '最初からアイテム1つ', '🔄2 ✂️2・シンボル多めでスタート'] },
   normal: { n: 'NORMAL', jp: 'ふつう', color: '#5aa9ff', rentMul: 1.1, ramp: 0.1, rents: 12, rerolls: 1, removals: 1, extra: [], startItem: true, curseFrom: 99, curseChance: 0, luck: 0,
             desc: ['おすすめのバランス', '最初からアイテム1つ', '家賃12回でクリア'] },
-  hard:   { n: 'HARD', jp: 'むずかしい', color: '#ffb547', rentMul: 1.25, ramp: 0.16, rents: 12, rerolls: 0, removals: 1, extra: [], startItem: false, curseFrom: 2, curseChance: 0.5, luck: 0,
+  hard:   { n: 'HARD', jp: 'むずかしい', color: '#ffb547', rentMul: 1.35, ramp: 0.17, rents: 12, rerolls: 0, removals: 1, extra: [], startItem: false, curseFrom: 2, curseChance: 0.5, luck: 0,
             desc: ['家賃が高く、後半ほど急に上がる', '初期アイテム・🔄なし', '3回目から ときどき大家の気まぐれ'] },
-  super:  { n: 'SUPER HARD', jp: 'ちょうむずかしい', color: '#ff5d8f', rentMul: 1.4, ramp: 0.15, rents: 14, rerolls: 0, removals: 0, extra: [], startItem: false, curseFrom: 1, curseChance: 1, luck: -0.01,
+  super:  { n: 'SUPER HARD', jp: 'ちょうむずかしい', color: '#ff5d8f', rentMul: 1.55, ramp: 0.16, rents: 14, rerolls: 0, removals: 0, extra: [], startItem: false, curseFrom: 1, curseChance: 1, luck: -0.01,
             desc: ['家賃が高い上に全14回', '2回目から毎回 大家の気まぐれ', '🔄✂️なし・レアが出にくい'] },
   // ストーリークリアで解放。終わりなし。5回ごとに「段」が上がって、家賃と気まぐれがきつくなる
   endless: { n: 'エンドレス', jp: 'どこまで住める？', color: '#f2c14e', rentMul: 1.25, ramp: 0, rents: Infinity, rerolls: 1, removals: 1, extra: [], startItem: true, curseFrom: 5, curseChance: 0, luck: 0, endless: true, growth: 1.2,
@@ -684,7 +684,7 @@ function spin(st) {
     goneWorth: () => cells.reduce((t, s, j) => t + (s && (cell[j].dead || cell[j].vanish) ? (cell[j].was || 0) : 0), 0),
     goneCount: () => cells.filter((s, j) => s && (cell[j].dead || cell[j].vanish)).length,
     has: k => hasItem(st, k),
-    eatGrow: (s, n) => { const e = hasItem(st, 'enmusubi') ? 1 : 0; if (s.xs !== st.totalSpins && rnd() < 0.1) { s.xs = st.totalSpins; s.c = (s.c || 0) * 2 + n + e; ev.push({ t: 'x2' }); } else s.c = (s.c || 0) + n + e; },   // 食べて育つ：1回食べるごとに10%で今の育ちが ×2（×2 は1スピンに1回まで）
+    eatGrow: (s, n) => { const e = hasItem(st, 'enmusubi') ? 1 : 0; const add = n + (s.g || 0) + e; s.g = (s.g || 0) + 1; if (s.xs !== st.totalSpins && rnd() < 0.1) { s.xs = st.totalSpins; s.c = (s.c || 0) * 2 + add; } else s.c = (s.c || 0) + add; },   // 食べて育つ：食べるたびに育つ量が+1ずつ増える。10%で今の育ちが ×2（1スピンに1回まで）
     grow: (s, n, cap) => { s.c = Math.min(cap || Infinity, (s.c || 0) + n + (hasItem(st, 'enmusubi') ? 1 : 0)); },   // コンボで育つ（えんむすびで +1）
     topInv: skip => { const m = {}; st.inv.forEach(x => { if (!skip.includes(x.key)) m[x.key] = (m[x.key] || 0) + 1; }); let top = null; for (const k in m) if (!top || m[k] > m[top]) top = k; return top; },
     row: i => (i / W) | 0, col: i => i % W,
