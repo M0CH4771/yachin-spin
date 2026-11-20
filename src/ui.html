@@ -963,7 +963,7 @@ function showTitle() {
   const cont = $('#bContinue');
   if (inProgress(saved)) {
     const D = DIFFS[saved.diff];
-    cont.innerHTML = `▸ つづきから<small>${D.n}・家賃 ${saved.endless ? '♾️' : ''}${saved.rentIdx + 1}回目・もちコイン ${saved.coins}</small>`;
+    cont.innerHTML = `▸ つづきから<small>${D.n}・家賃 ${saved.endless ? '♾️' : ''}${saved.rentIdx + 1}回目・もちコイン ${fmtN(saved.coins)}</small>`;
     cont.classList.remove('hidden');
   } else cont.classList.add('hidden');
   armedDiff = null; $('#bDaily').dataset.armed = ''; $('#bEndless').dataset.armed = '';
@@ -1091,21 +1091,33 @@ function buildBoard() {
     b.appendChild(c);
   }
 }
+// 大きい数は K・M・B・T… で短く（1,000 = 1K、1,000,000 = 1M）
+const NUM_UNITS = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'];
+function fmtN(n) {
+  if (typeof n !== 'number' || !isFinite(n)) return String(n);
+  const neg = n < 0; let v = Math.abs(n), k = 0;
+  if (v < 1000) return (neg ? '-' : '') + (Number.isInteger(v) ? v : Math.round(v * 100) / 100);
+  while (v >= 999.5 && k < NUM_UNITS.length - 1) { v /= 1000; k++; }
+  if (v >= 999.5) return (neg ? '-' : '') + Math.abs(n).toExponential(2);
+  const s = v < 10 ? v.toFixed(2) : v < 100 ? v.toFixed(1) : v.toFixed(0);
+  return (neg ? '-' : '') + s.replace(/\.?0+$/, '') + NUM_UNITS[k];
+}
+const fmtV = s => String(s).replace(/\d+(\.\d+)?/g, x => fmtN(+x));   // 文字の中の数を置きかえ（お守りの +n・×n など）
 function cntLabel(s) {
   if (!s) return '';
   const d = SYM[s.key];
   if (d.grow) return `${s.c || 0}/${d.grow}`;
   if (s.key === 'firework') return `${s.c || 0}/5`;
   if (s.key === 'kakigori') return `${s.c || 0}/3`;
-  if (d.store) return `+${(s.c || 0) + (s.b || 0)}`;
-  if (s.b) return `+${s.b}`;
+  if (d.store) return `+${fmtN((s.c || 0) + (s.b || 0))}`;
+  if (s.b) return `+${fmtN(s.b)}`;
   return '';
 }
 function valChip(det) {
   if (!det) return '';
   if (det.eatenBy) return `<span class="val x">🍴${E(det.eatenBy)}</span>`;
   const cls = det.value >= 100 ? 'mega' : det.value >= 10 ? 'hi' : det.value === 0 ? 'zero' : '';
-  return `<span class="val ${cls}">+${det.value}${det.vanish ? '💨' : ''}</span>`;
+  return `<span class="val ${cls}">+${fmtN(det.value)}${det.vanish ? '💨' : ''}</span>`;
 }
 function blockedSet() { return new Set(st.curse === 'fog' ? [0, W - 1, W * (H - 1), N - 1] : []); }
 function renderBoard() {
@@ -1170,13 +1182,13 @@ function renderInfo() {
     let eq = '';
     if (det && det.eatenBy) eq = `<div class="eq"><span>${E(det.eatenBy)} に食べられた</span><i>→</i><span class="res">0</span><span style="background:none;border:0;color:var(--mute);font-weight:700">手持ちから消えた</span></div>`;
     else if (det && det.key === key || det && det.vanish) {
-      eq = `<div class="eq"><span>基本 ${det.base}</span>` +
-        groupParts(det.parts).map(g => `<i>${g.n < 0 ? '−' : '+'}</i><span class="${g.n < 0 ? 'minus' : 'plus'}">${g.label} ${g.n < 0 ? g.n : '+' + g.n}${g.k > 1 ? ` <small style="opacity:.7">(${g.k}つ分)</small>` : ''}</span>`).join('') +
-        det.muls.map(m => `<i>×</i><span class="times">${SYM[m.src] ? E(m.src) : m.src} ×${m.m}</span>`).join('') +
-        `<i>=</i><span class="res">${det.value}</span></div>` +
+      eq = `<div class="eq"><span>基本 ${fmtN(det.base)}</span>` +
+        groupParts(det.parts).map(g => `<i>${g.n < 0 ? '−' : '+'}</i><span class="${g.n < 0 ? 'minus' : 'plus'}">${g.label} ${g.n < 0 ? fmtN(g.n) : '+' + fmtN(g.n)}${g.k > 1 ? ` <small style="opacity:.7">(${g.k}つ分)</small>` : ''}</span>`).join('') +
+        det.muls.map(m => `<i>×</i><span class="times">${SYM[m.src] ? E(m.src) : m.src} ×${fmtN(m.m)}</span>`).join('') +
+        `<i>=</i><span class="res">${fmtN(det.value)}</span></div>` +
         (det.vanish ? `<div class="desc" style="color:var(--bad)">💨 ${typeof det.vanish === 'string' ? det.vanish : 'きえた'}ので手持ちからなくなった</div>` : '');
     } else if (det && det.key !== key) {
-      eq = `<div class="eq"><span>${E(det.key)}→${E(key)} に変わった</span><i>/</i><span>今回</span><span class="res">${det.value}</span></div>`;
+      eq = `<div class="eq"><span>${E(det.key)}→${E(key)} に変わった</span><i>/</i><span>今回</span><span class="res">${fmtN(det.value)}</span></div>`;
     }
     box.innerHTML = `<div class="ttl"><span style="font-size:22px">${d.e}</span>${d.n}<span style="color:${r.color};font-size:11px">${r.name}</span><span class="sub">点線＝となりのマス</span></div>${eq}<div class="desc">${d.d}</div>`;
     return;
@@ -1193,9 +1205,9 @@ function renderInfo() {
   const eaten = L.detail.filter(d => d && d.eatenBy);
   const chips = combos.map(({ d }) => {
     const why = [...d.parts.filter(p => p.n > 0).map(srcLabel), ...d.muls.map(m => `${SYM[m.src] ? E(m.src) : m.src}×${m.m}`)];
-    return `<span>${E(d.key)} <b>+${d.value}</b> <small style="color:var(--mute)">${[...new Set(why)].slice(0, 2).join('・')}</small></span>`;
+    return `<span>${E(d.key)} <b>+${fmtN(d.value)}</b> <small style="color:var(--mute)">${[...new Set(why)].slice(0, 2).join('・')}</small></span>`;
   });
-  (L.bonuses || []).forEach(b => chips.push(`<span class="${b.v[0] === '-' ? 'bad' : 'it'}">${b.e} ${b.n} <b>${b.v}</b></span>`));
+  (L.bonuses || []).forEach(b => chips.push(`<span class="${b.v[0] === '-' ? 'bad' : 'it'}">${b.e} ${b.n} <b>${fmtV(b.v)}</b></span>`));
   if (eaten.length) chips.push(`<span>🍴 ${eaten.map(d => E(d.key)).join('')} が食べられた</span>`);
   L.detail.filter(d => d && d.vanish).forEach(d => chips.push(`<span>💨 ${E(d.key)} ${typeof d.vanish === 'string' ? d.vanish : 'きえた'}</span>`));
   (L.changes || []).forEach(ch => chips.push(`<span>${ch.magic ? '🦝 化けた' : '✨ 育った'} ${E(ch.from)}→${E(ch.to)}</span>`));
@@ -1203,7 +1215,7 @@ function renderInfo() {
   if (L.purged && L.purged.length) chips.push(`<span>🥷 手持ちの${L.purged.map(E).join('')}を消した</span>`);
   if (L.questDone) chips.unshift(`<span class="ok">📜 依頼達成！ ${st.quest.reward.txt}</span>`);
   const boardNote = L.bonuses && L.bonuses.length ? `<span class="sub">盤面 ${L.boardTotal}＋アイテムなど</span>` : '<span class="sub">マスをタップで内訳</span>';
-  box.innerHTML = `<div class="ttl">今回の稼ぎ <span class="big">+${L.total}</span>${boardNote}</div>` +
+  box.innerHTML = `<div class="ttl">今回の稼ぎ <span class="big">+${fmtN(L.total)}</span>${boardNote}</div>` +
     (chips.length ? `<div class="hl">${chips.join('')}</div>` : `<div class="muted" style="margin-top:6px">となり同士は、今回は知らんぷり。</div>`);
 }
 
@@ -1213,9 +1225,9 @@ function renderInfo() {
 function renderHUD(coinsOverride) {
   const coins = coinsOverride !== undefined ? coinsOverride : st.coins;
   const ok = coins >= st.rent, T = totalRents(st);
-  $('#coins').textContent = coins;
-  $('#need').textContent = `/ ${st.rent} コイン`;
-  $('#verdict').textContent = ok ? '払える' : `あと ${st.rent - coins}`;
+  $('#coins').textContent = fmtN(coins);
+  $('#need').textContent = `/ ${fmtN(st.rent)} コイン`;
+  $('#verdict').textContent = ok ? '払える' : `あと ${fmtN(st.rent - coins)}`;
   $('#verdict').classList.toggle('ok', ok);
   $('#rentBar').style.width = Math.min(100, coins / st.rent * 100) + '%';
   $('#rentBar').classList.toggle('ok', ok);
@@ -1288,7 +1300,7 @@ function autoItemChoice() {
 }
 function autoModeLabel() {
   if (autoModeKey() === 'end') return 'ゲーム終了まで（家賃は自動払い）';
-  if (autoModeKey() === 'target') return '1回の稼ぎが' + Number(settings.autoThreshold || 1000000).toLocaleString('ja-JP') + 'コイン以上で停止';
+  if (autoModeKey() === 'target') return '1回の稼ぎが' + fmtN(Number(settings.autoThreshold || 1000000)) + 'コイン以上で停止';
   return '次の家賃まで';
 }
 function autoControlHTML() {
@@ -1451,7 +1463,7 @@ async function animateSpin(res, coinsBefore) {
   const mulTo = {};
   res.ev.filter(e => e.t === 'mul' && !res.dead[e.b]).forEach(e => { mulTo[e.b] = (mulTo[e.b] || 1) * e.m; cells[e.a].classList.add('glow'); });
   const mulKeys = Object.keys(mulTo);
-  if (mulKeys.length) { mulKeys.forEach(j => { const b = document.createElement('span'); b.className = 'mulb' + (mulTo[j] === 0 ? ' zero' : ''); b.textContent = '×' + mulTo[j]; cells[j].appendChild(b); }); sfx.mul(); await sleep(380); }
+  if (mulKeys.length) { mulKeys.forEach(j => { const b = document.createElement('span'); b.className = 'mulb' + (mulTo[j] === 0 ? ' zero' : ''); b.textContent = '×' + fmtN(mulTo[j]); cells[j].appendChild(b); }); sfx.mul(); await sleep(380); }
   res.ev.filter(e => e.t === 'boom').forEach(e => { cells[e.a].classList.add('glow'); sfx.boom(); });
   const magic = res.ev.filter(e => e.t === 'magic' || e.t === 'spawn');
   if (magic.length) { magic.forEach(e => { if (cells[e.a]) cells[e.a].classList.add('glow'); if (e.b !== undefined) cells[e.b].classList.add('glow'); }); sfx.grow(); await sleep(260); }
@@ -1462,7 +1474,7 @@ async function animateSpin(res, coinsBefore) {
   const steps = 14;
   for (let k = 1; k <= steps; k++) { renderHUD(Math.round(coinsBefore + res.total * k / steps)); await sleep(26); }
   if (res.total >= 40) {
-    $('#totalPop').innerHTML = `<span>+${res.total}</span>`; (res.total >= 300 ? sfx.mega : sfx.big)();
+    $('#totalPop').innerHTML = `<span>+${fmtN(res.total)}</span>`; (res.total >= 300 ? sfx.mega : sfx.big)();
     setTimeout(() => $('#totalPop').innerHTML = '', Math.max(40, 1150 * animationSpeed())); await sleep(700);
   }
   await sleep(250);
@@ -1524,9 +1536,9 @@ function pickItem(k) {
 function openRent() {
   const ok = st.coins >= st.rent;
   $('#rentLead').textContent = ok ? `${st.rentIdx + 1}回目の家賃です。` : 'コインが足りない…！';
-  $('#rentBig').innerHTML = `<span style="color:${ok ? 'var(--good)' : 'var(--bad)'}">${st.coins}</span> <span style="color:var(--mute);font-size:22px">/ ${st.rent}</span>`;
+  $('#rentBig').innerHTML = `<span style="color:${ok ? 'var(--good)' : 'var(--bad)'}">${fmtN(st.coins)}</span> <span style="color:var(--mute);font-size:22px">/ ${fmtN(st.rent)}</span>`;
   const T = totalRents(st), last = !st.endless && st.rentIdx + 1 >= T;
-  $('#rentAfter').textContent = ok ? (last ? 'これで、最後の家賃。' : `払っても ${st.coins - st.rent} 残る。おまけ付き。`) : `${st.rent - st.coins} 足りない。`;
+  $('#rentAfter').textContent = ok ? (last ? 'これで、最後の家賃。' : `払っても ${fmtN(st.coins - st.rent)} 残る。おまけ付き。`) : `${fmtN(st.rent - st.coins)} 足りない。`;
   $('#bPay').textContent = ok ? '家賃を払う' : '結果を見る';
   const kind = !ok ? 'fail' : st.coins >= st.rent * 3 ? 'rich' : st.coins < st.rent * 1.2 ? 'tight' : 'ok';
   const lines = RENT_LINES[kind];
@@ -1602,6 +1614,9 @@ const NEWS = [
     ]],
     ['物語モード', [
       '「むずかしい」「ちょうむずかしい」の家賃を少し上げました（コンボが伸びやすくなったぶん）',
+    ]],
+    ['表示', [
+      '大きい数は K・M・B・T… で短く表示するように（1,000 = 1K、1,000,000 = 1M、10億 = 1B、1兆 = 1T）',
     ]],
   ] },
   { v: '1.4', date: '2026年11月20日', secs: [
@@ -1773,7 +1788,7 @@ function showEndDaily() {
   $('#endTitle').textContent = `デイリー ${st.daily}`;
   $('#endLead').textContent = `お題「${C.n}」で、家賃を ${n}回払った。` + (isBest ? '今日の自己ベスト！' : `今日の自己ベストは ${d.best}回。`);
   $('#endStats').innerHTML = [
-    ['払った家賃', `${n}回`], ['合計かせぎ', st.totalEarned], ['最高の1スピン', st.best], ['アイテム', st.items.length],
+    ['払った家賃', `${n}回`], ['合計かせぎ', fmtN(st.totalEarned)], ['最高の1スピン', fmtN(st.best)], ['アイテム', st.items.length],
   ].map(([a, b]) => `<div class="stat"><b>${b}</b><span>${a}</span></div>`).join('') + (RANK_API ? `<div class="rankbox" id="endRank" style="grid-column:1/-1"></div>` : '');
   $('#endBtns').innerHTML = `<button class="btn gold" id="eShareImg">𝕏 に結果をポストする</button>` +
     (RANK_API ? `<button class="btn" id="eRank">🏆 ランキングを見る</button>` : '') +
@@ -1841,7 +1856,7 @@ async function makeResultImage(S) {
   let y = 336;
   if (R.sub) { txt(ctx, R.sub, 58, y, 30, '#f3e9d2'); y += 44; }
   if (R.extra) { txt(ctx, R.extra, 58, y, 34, '#7ccf62'); y += 46; }
-  txt(ctx, `最高の1スピン ${S.best}コイン・合計 ${S.totalEarned}コイン`, 58, y + 4, 22, '#b0a3c8');
+  txt(ctx, `最高の1スピン ${fmtN(S.best)}コイン・合計 ${fmtN(S.totalEarned)}コイン`, 58, y + 4, 22, '#b0a3c8');
   // 右：最後の盤面
   const cs = 76, bx = W - 56 - cs * 5, by = 72;
   frame(ctx, bx, by, cs * 5, cs * 4, '#231b36');
@@ -1951,11 +1966,11 @@ function showEndEndless() {
   $('#endTitle').textContent = isNew ? '自己ベスト！' : '追い出された…';
   $('#endLead').textContent = `家賃を ${n}回払って、第${sg}段まで住んだ。` + (isNew ? '' : `自己ベストは ${best}回。`);
   $('#endStats').innerHTML = [
-    ['払った家賃', `${n}回`], ['とどいた段', `第${sg}段`], ['最高の1スピン', st.best],
-    ['合計かせぎ', st.totalEarned], ['アイテム', st.items.length], ['依頼の達成', st.stats.quests],
+    ['払った家賃', `${n}回`], ['とどいた段', `第${sg}段`], ['最高の1スピン', fmtN(st.best)],
+    ['合計かせぎ', fmtN(st.totalEarned)], ['アイテム', st.items.length], ['依頼の達成', st.stats.quests],
   ].map(([a, b]) => `<div class="stat"><b>${b}</b><span>${a}</span></div>`).join('');
   const top = Object.entries(st.inv.reduce((m, s) => (m[s.key] = (m[s.key] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k]) => E(k)).join('');
-  const text = `ヤチンスピン【エンドレス】\n家賃${n}回・第${sg}段まで住んだ🏮${isNew ? '（自己ベスト）' : ''}\n最高1スピン${st.best}コイン\n編成：${top}\n#ヤチンスピン #よいまつり横丁`;
+  const text = `ヤチンスピン【エンドレス】\n家賃${n}回・第${sg}段まで住んだ🏮${isNew ? '（自己ベスト）' : ''}\n最高1スピン${fmtN(st.best)}コイン\n編成：${top}\n#ヤチンスピン #よいまつり横丁`;
   shareText = text;
   $('#endBtns').innerHTML = `<button class="btn gold" id="eShareImg">𝕏 で記録をポストする</button>` +
     `<button class="btn primary" id="eAgain">もう一回（エンドレス）</button><button class="btn" id="eTitle">🏮 タイトルへ</button>`;
@@ -1974,15 +1989,15 @@ function showEnd(win) {
   $('#endTitle').textContent = win ? (CH ? `${CH.n}「${CH.t}」クリア！` : st.daily ? `デイリー クリア！` : `${D.n} クリア！`) : '家賃が払えなかった…';
   $('#endLead').textContent = win ? '払いきった。おコンさんが、ちょっとだけ笑った。' : st.endless ? `払いきったあと、さらに ${st.rentIdx - T}回。` : `${st.rentIdx}回目で、追い出し。`;
   $('#endStats').innerHTML = [
-    ['払った家賃', st.endless ? `${T}+${st.rentIdx - T}` : `${Math.min(st.rentIdx, T)}/${T}`], ['最高の1スピン', st.best],
-    ['合計スピン', st.totalSpins], ['合計かせぎ', st.totalEarned],
+    ['払った家賃', st.endless ? `${T}+${st.rentIdx - T}` : `${Math.min(st.rentIdx, T)}/${T}`], ['最高の1スピン', fmtN(st.best)],
+    ['合計スピン', st.totalSpins], ['合計かせぎ', fmtN(st.totalEarned)],
     ['アイテム', st.items.length], ['依頼の達成', st.stats.quests],
   ].map(([a, b]) => `<div class="stat"><b>${b}</b><span>${a}</span></div>`).join('');
   const top = Object.entries(st.inv.reduce((m, s) => (m[s.key] = (m[s.key] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k]) => E(k)).join('');
   const its = st.items.slice(0, 6).map(k => ITEMS[k].e).join('');
   const label = CH ? `ストーリー${CH.n}` : st.daily ? `デイリー${st.daily}` : D.n;
   const head = st.daily ? `ヤチンスピン【デイリー ${st.daily}】家賃${Math.min(st.rentIdx, T)}/${T}回${win ? '👑' : ''}` : CH && win ? `ヤチンスピン【${label}「${CH.t}」】クリア🏮` : win ? `ヤチンスピン【${D.n}】クリア🎆` : st.endless ? `ヤチンスピン【${D.n}】エンドレス${st.rentIdx - T}回♾️` : `ヤチンスピン【${D.n}】家賃${st.rentIdx}/${T}回🏠`;
-  const text = `${head}\n最高1スピン${st.best}コイン\n編成：${top}${its ? `\nお守り：${its}` : ''}\n#ヤチンスピン #よいまつり横丁`;
+  const text = `${head}\n最高1スピン${fmtN(st.best)}コイン\n編成：${top}${its ? `\nお守り：${its}` : ''}\n#ヤチンスピン #よいまつり横丁`;
   shareText = text;
   const share = `<button class="btn" id="eShareImg">𝕏 でポストする</button>`;
   const nextCh = CH && win && CH.id < 4 ? CHAPTERS[CH.id] : null;
