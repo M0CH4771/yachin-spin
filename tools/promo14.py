@@ -57,7 +57,7 @@ img.convert('RGB').save(os.path.join(OUT, 'v14_3_combo.png'), optimize=True)
 
 # ---- 4枚目：大物とお守り ----
 img = base(); y = header(img, '大物も育つ ＆ 新しいお守り', None)
-BIG = [('whale', 'くじら', '金魚をのみこむたび\n育つ（+4）'), ('bear', 'くま', 'はちみつ・金魚を\n食べるたび 育つ（+4）'),
+BIG = [('whale', 'くじら', '金魚をのみこむたび\n育つ（+4）'), ('bear', 'くま', 'はちみつを\n食べるたび 育つ（+4）'),
        ('eagle', 'わし', '食べた相手の稼ぎ\nまるごと わしが育つ'), ('i_enmusubi', 'えんむすび', 'お宝のお守り。コンボで\n育つとき さらに +1')]
 grid(img, BIG, y + 20, 2, 560, 170, 104, 380, 34, 24)
 footer(img); img.convert('RGB').save(os.path.join(OUT, 'v14_4_big.png'), optimize=True)

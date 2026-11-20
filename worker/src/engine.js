@@ -128,8 +128,8 @@ const SYM = {
   ramen:    { e: '🍜', n: 'ラーメン', r: 'U', v: 0, p: 1, likes: FOODL, d: '盤面に出ている食べ物の種類の数 ×2',
               act(c, i) { const n = new Set(c.all().map(j => c.key(j)).filter(k => FOOD.has(k))).size; c.add(i, n * 2, '食べ物の種類'); } },
 
-  bear:     { e: '🐻', n: 'くま', r: 'R', v: 2, p: 0, store: true, likes: ['honey', 'goldfish'], d: 'となりの🍯と🐟を食べる。1つにつき +12、育つ（+4）',
-              act(c, i, s) { c.nb(i).forEach(j => { const k = c.key(j); if (k === 'honey' || k === 'goldfish') { c.eat(i, j, 12); c.grow(s, 4); } }); } },
+  bear:     { e: '🐻', n: 'くま', r: 'R', v: 2, p: 0, store: true, likes: ['honey'], d: 'となりの🍯を食べる。1つにつき +12、育つ（+4）',
+              act(c, i, s) { c.nb(i).forEach(j => { if (c.key(j) === 'honey') { c.eat(i, j, 12); c.grow(s, 4); } }); } },
   fuji:     { e: '🗻', n: 'ふじさん', r: 'R', v: 3, p: 2, likes: ['japan'], hint: '上の段で強い', d: '3コイン。いちばん上の段にいると稼ぎ ×3',
               act(c, i) { if (c.row(i) === 0) c.mul(i, 3, i); } },
   sun:      { e: '☀️', n: 'おひさま', r: 'R', v: 2, p: 2, likes: PLANTL, d: '盤面の植物（🌾🌸🎋🎍）の稼ぎをすべて ×2。🌱も2倍速で育つ',
