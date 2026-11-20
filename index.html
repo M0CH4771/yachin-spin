@@ -2527,7 +2527,7 @@ function fmtN(n) {
   const neg = n < 0; let v = Math.abs(n), k = 0;
   if (v < 10000) return (neg ? '-' : '') + (Number.isInteger(v) ? v : Math.round(v * 100) / 100);
   while (v >= 9999.5 && k < NUM_UNITS.length - 1) { v /= 10000; k++; }
-  if (v >= 9999.5) return (neg ? '-' : '') + BigInt(Math.round(v)).toString() + NUM_UNITS[k];   // 無量大数の先は、桁がそのまま増えていく
+  if (v >= 9999.5) { const d = Math.floor(Math.log10(v)) + 1, top = Math.round(v / 10 ** (d - 4)); return (neg ? '-' : '') + String(top).slice(0, 4) + '0'.repeat(d - 4 + (String(top).length - 4)) + NUM_UNITS[k]; }   // 無量大数の先は、桁がそのまま増えていく（上4桁＋0）
   const s = v < 10 ? v.toFixed(2) : v < 100 ? v.toFixed(1) : v.toFixed(0);
   return (neg ? '-' : '') + s.replace(/\.0+$|(\.\d*?)0+$/, '$1') + NUM_UNITS[k];
 }
