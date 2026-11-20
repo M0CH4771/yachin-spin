@@ -352,7 +352,7 @@ const DIFFS = {
   super:  { n: 'SUPER HARD', jp: 'ちょうむずかしい', color: '#ff5d8f', rentMul: 1.55, ramp: 0.16, rents: 14, rerolls: 0, removals: 0, extra: [], startItem: false, curseFrom: 1, curseChance: 1, luck: -0.01,
             desc: ['家賃が高い上に全14回', '2回目から毎回 大家の気まぐれ', '🔄✂️なし・レアが出にくい'] },
   // ストーリークリアで解放。終わりなし。5回ごとに「段」が上がって、家賃と気まぐれがきつくなる
-  endless: { n: 'エンドレス', jp: 'どこまで住める？', color: '#f2c14e', rentMul: 1.25, ramp: 0, rents: Infinity, rerolls: 1, removals: 1, extra: [], startItem: true, curseFrom: 5, curseChance: 0, luck: 0, endless: true, growth: 1.2,
+  endless: { n: 'エンドレス(?)', jp: 'どこまで住める？', color: '#f2c14e', rentMul: 1.25, ramp: 0, rents: Infinity, rerolls: 1, removals: 1, extra: [], startItem: true, curseFrom: 5, curseChance: 0, luck: 0, endless: true, growth: 1.2,
             desc: ['家賃を払いつづける', '5回ごとに段が上がる', '第2段から気まぐれ'] },
   // デイリー：お題（ずっと続く気まぐれ）・荷物・最初のおまけは全員同じ。そのあとは1回ごとにランダム。払えるかぎり続く
   daily: { n: 'デイリー', jp: '今日のお題', color: '#5ab0e8', rentMul: 1.15, ramp: 0, rents: Infinity, rerolls: 1, removals: 1, extra: [], startItem: true, curseFrom: 99, curseChance: 0, luck: 0, growth: 1.2,

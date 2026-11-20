@@ -415,7 +415,7 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
   <div class="title-reels"><span>🏮</span><span>🦊</span><span>🍡</span><span>🐉</span><span>🎆</span></div>
   <button class="continue hidden" id="bContinue"></button>
   <button class="mode story" id="bStory"><span class="mi">📖</span><div><div class="mt">ストーリー</div><div class="md">ばあちゃんのスロット台と、ツケの残った長屋の話。</div><div class="mp" id="storyProg"></div></div><span class="go">›</span></button>
-  <button class="mode endless" id="bEndless"><span class="mi" id="endlessIcon">🏮</span><div><div class="mt">エンドレス</div><div class="md">家賃を払いつづけて、どこまで住めるか。5回ごとに段が上がる。</div><div class="mp" id="endlessProg"></div></div><span class="go">›</span></button>
+  <button class="mode endless" id="bEndless"><span class="mi" id="endlessIcon">🏮</span><div><div class="mt">エンドレス(?)</div><div class="md">家賃を払いつづけて、どこまで住めるか。5回ごとに段が上がる。</div><div class="mp" id="endlessProg"></div></div><span class="go">›</span></button>
   <button class="mode daily" id="bDaily"><span class="mi" id="dailyIcon">🎯</span><div><div class="mt">デイリーチャレンジ</div><div class="md" id="dailyDesc"></div><div class="mp" id="dailyProg"></div></div><span class="go">›</span></button>
   <button class="rankbtn hidden" id="bRank">🏆 デイリーランキングを見る</button>
   <div class="title-btns">
@@ -481,7 +481,7 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
 <div id="cgView"></div>
 <div class="ov" id="ovChapters"><div class="sheet">
   <h2>📖 ストーリー</h2>
-  <p class="lead">話をクリアすると次の話が解放される。最終話をクリアすると、エンドレスとデイリーが解放される。</p>
+  <p class="lead">話をクリアすると次の話が解放される。最終話をクリアすると、エンドレス(?)とデイリーが解放される。</p>
   <div id="chapList"></div>
   <div class="sec">🎞️ 思い出（見たシーンをもう一度）</div>
   <div class="replay" id="replayList"></div>
@@ -563,15 +563,15 @@ a.btn{display:block;text-align:center;text-decoration:none;color:#fff;background
   <div class="steps">
     <div class="stp"><div class="si">🧿</div><div><b>お守り</b><span>家賃を払うと、おコンさんがおまけを1つくれる。盤面には出ないで、ずっと効く。</span></div></div>
     <div class="stp"><div class="si">📜</div><div><b>大家の依頼</b><span>2回目の家賃から、ちょっとした頼みごとが来る。片づければ、その場でお礼がもらえる。</span></div></div>
-    <div class="stp"><div class="si">😈</div><div><b>大家の気まぐれ</b><span>話が進むと、おコンさんの機嫌で妙なルールがつく。四すみを使うな、とか。エンドレスでは第2段から。</span></div></div>
+    <div class="stp"><div class="si">😈</div><div><b>大家の気まぐれ</b><span>話が進むと、おコンさんの機嫌で妙なルールがつく。四すみを使うな、とか。エンドレス(?)では第2段から。</span></div></div>
     <div class="stp"><div class="si">🎒</div><div><b>手持ちと盤面</b><span>台は20マス。手持ちが多すぎると、出番のないシンボルが出てくる。✂️で減らすのも手。</span></div></div>
     <div class="stp"><div class="si">🌱</div><div><b>育つ</b><span>シンボルの「基本」の稼ぎが増えること。マスの左上の数字（+1、+2…）が育った分で、次の回からもずっと上乗せされる。手持ちから消えるとなくなる。</span></div></div>
     <div class="stp"><div class="si">🥮</div><div><b>合体</b><span>だんごとお茶、みかづき同士など、となりに出ると1つにまとまって別のシンボルに変わるものがある。みかづき→はんげつ→まんげつと進化していく。</span></div></div>
     <div class="stp"><div class="si">🍴</div><div><b>食べる・消える</b><span>食べられたシンボルは、手持ちからいなくなる。食べるのはいちばん最後なので、食べられる前に、となりへの効果（金魚すくいなど）はちゃんと出る。</span></div></div>
     <div class="stp"><div class="si">🏘️</div><div><b>横丁のできごと</b><span>支払いのあと、ときどき横丁で何か起きる。どっちに転ぶかは、選び方しだい。</span></div></div>
-    <div class="stp"><div class="si">🎒</div><div><b>はじめの荷物</b><span>エンドレスでは、最初に持っていくシンボルを選べる。話を進めると増える。</span></div></div>
+    <div class="stp"><div class="si">🎒</div><div><b>はじめの荷物</b><span>エンドレス(?)では、最初に持っていくシンボルを選べる。話を進めると増える。</span></div></div>
     <div class="stp"><div class="si">🎯</div><div><b>デイリーチャレンジ</b><span>その日のお題（ずっと続く気まぐれ・はじめの荷物・最初のおまけ）は全員同じ。そのあとの出方は毎回ちがう。家賃を何回払えたかでランキングを競う。何回でも挑戦できて、いちばんいい記録が残る。</span></div></div>
-    <div class="stp"><div class="si">♾️</div><div><b>エンドレス</b><span>ストーリーをクリアすると解放。5回ごとに段が上がって、家賃も気まぐれもきつくなる。どこまで住めたかを𝕏でくらべよう。</span></div></div>
+    <div class="stp"><div class="si">♾️</div><div><b>エンドレス(?)</b><span>ストーリーをクリアすると解放。5回ごとに段が上がって、家賃も気まぐれもきつくなる。どこまで住めたかを𝕏でくらべよう。</span></div></div>
   </div>
   <div class="actions"><button class="btn" data-close>とじる</button></div>
 </div></div>
@@ -984,7 +984,7 @@ const DIFFS = {
   super:  { n: 'SUPER HARD', jp: 'ちょうむずかしい', color: '#ff5d8f', rentMul: 1.55, ramp: 0.16, rents: 14, rerolls: 0, removals: 0, extra: [], startItem: false, curseFrom: 1, curseChance: 1, luck: -0.01,
             desc: ['家賃が高い上に全14回', '2回目から毎回 大家の気まぐれ', '🔄✂️なし・レアが出にくい'] },
   // ストーリークリアで解放。終わりなし。5回ごとに「段」が上がって、家賃と気まぐれがきつくなる
-  endless: { n: 'エンドレス', jp: 'どこまで住める？', color: '#f2c14e', rentMul: 1.25, ramp: 0, rents: Infinity, rerolls: 1, removals: 1, extra: [], startItem: true, curseFrom: 5, curseChance: 0, luck: 0, endless: true, growth: 1.2,
+  endless: { n: 'エンドレス(?)', jp: 'どこまで住める？', color: '#f2c14e', rentMul: 1.25, ramp: 0, rents: Infinity, rerolls: 1, removals: 1, extra: [], startItem: true, curseFrom: 5, curseChance: 0, luck: 0, endless: true, growth: 1.2,
             desc: ['家賃を払いつづける', '5回ごとに段が上がる', '第2段から気まぐれ'] },
   // デイリー：お題（ずっと続く気まぐれ）・荷物・最初のおまけは全員同じ。そのあとは1回ごとにランダム。払えるかぎり続く
   daily: { n: 'デイリー', jp: '今日のお題', color: '#5ab0e8', rentMul: 1.15, ramp: 0, rents: Infinity, rerolls: 1, removals: 1, extra: [], startItem: true, curseFrom: 99, curseChance: 0, luck: 0, growth: 1.2,
@@ -2220,7 +2220,7 @@ const SCENES = {
     { who: 'maneki', t: 'ゆくか、{name}。' },
     { who: 'me', f: 's', t: '行く。今月の家賃、まだ払ってないし。' },
     { who: 'narr', t: '——ヤチンスピン　おしまい' },
-    { who: 'narr', t: '（横丁の夜は、フリープレイとエンドレスとデイリーで、まだつづく）' },
+    { who: 'narr', t: '（横丁の夜は、フリープレイとエンドレス(?)とデイリーで、まだつづく）' },
   ],
   ch4o: [
     { bg: 'dim' },
@@ -2379,10 +2379,10 @@ const ACH = [
   { id: 'first', e: '🎰', n: 'はじめの一回', d: 'はじめて まわす', c: s => s.totalSpins >= 1 },
   { id: 'kanst', e: '♾️', n: 'カンスト', d: 'コインも家賃も、表示できる最大までたどりつく', c: s => s.phase === 'kanst' },
   { id: 'rent1', e: '🏠', n: 'はじめての家賃', d: '家賃を1回払う', c: s => s.rentIdx >= 1 },
-  { id: 'stage2', e: '🏮', n: '二段目', d: 'エンドレスで第2段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 2 },
-  { id: 'stage4', e: '🎆', n: '四段目', d: 'エンドレスで第4段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 4 },
-  { id: 'stage6', e: '🏯', n: '六段目', d: 'エンドレスで第6段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 6 },
-  { id: 'stage8', e: '👑', n: '八段目', d: 'エンドレスで第8段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 8 },
+  { id: 'stage2', e: '🏮', n: '二段目', d: 'エンドレス(?)で第2段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 2 },
+  { id: 'stage4', e: '🎆', n: '四段目', d: 'エンドレス(?)で第4段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 4 },
+  { id: 'stage6', e: '🏯', n: '六段目', d: 'エンドレス(?)で第6段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 6 },
+  { id: 'stage8', e: '👑', n: '八段目', d: 'エンドレス(?)で第8段に上がる', c: s => isEndlessMode(s) && endlessStage(s.rentIdx) >= 8 },
   { id: 's50', e: '💴', n: 'いい稼ぎ', d: '1回で50コイン以上', c: (s, r) => r && r.total >= 50 },
   { id: 's150', e: '💰', n: '大もうけ', d: '1回で150コイン以上', c: (s, r) => r && r.total >= 150 },
   { id: 's500', e: '🏦', n: '千両役者', d: '1回で500コイン以上', c: (s, r) => r && r.total >= 500 },
@@ -2405,8 +2405,8 @@ const ACH = [
   { id: 'quest20', e: '🏅', n: '頼れる店子', d: '依頼を通算20回 達成する', c: () => rec.quests >= 20 },
   { id: 'curse5', e: '😈', n: '気まぐれ慣れ', d: '1回の遊びで 気まぐれを5回のりこえる', c: s => s.stats.curses >= 5 },
   { id: 'noremove', e: '✋', n: 'ありのまま', d: '✂️除去を使わずに NORMAL以上をクリア' },
-  { id: 'endless3', e: '♾️', n: 'まだまだ住む', d: 'エンドレスで10回 家賃を払う', c: s => endlessCount(s) >= 10 },
-  { id: 'endless10', e: '🏯', n: '長屋の主', d: 'エンドレスで25回 家賃を払う', c: s => endlessCount(s) >= 25 },
+  { id: 'endless3', e: '♾️', n: 'まだまだ住む', d: 'エンドレス(?)で10回 家賃を払う', c: s => endlessCount(s) >= 10 },
+  { id: 'endless10', e: '🏯', n: '長屋の主', d: 'エンドレス(?)で25回 家賃を払う', c: s => endlessCount(s) >= 25 },
   { id: 'spins300', e: '🔁', n: '常連さん', d: '通算300回 まわす', c: () => rec.spins >= 300 },
   { id: 'story1', e: '🏠', n: '横丁の店子', d: 'ストーリー第一話をクリア', c: () => rec.story >= 1 },
   { id: 'story2', e: '🎆', n: 'まつりの立役者', d: 'ストーリー第二話をクリア', c: () => rec.story >= 2 },
@@ -2855,7 +2855,7 @@ function renderHUD(coinsOverride) {
   $('#verdict').classList.toggle('ok', ok);
   $('#rentBar').style.width = Math.min(100, coins / st.rent * 100) + '%';
   $('#rentBar').classList.toggle('ok', ok);
-  $('#rentNo').textContent = st.daily ? `🎯 ${st.rentIdx + 1}回目` : isEndlessMode(st) ? `第${endlessStage(st.rentIdx)}段・${st.rentIdx + 1}回目` : st.endless ? `♾️ エンドレス ${st.rentIdx - T + 1}回目` : `${Math.min(st.rentIdx + 1, T)} / ${T} 回目`;
+  $('#rentNo').textContent = st.daily ? `🎯 ${st.rentIdx + 1}回目` : isEndlessMode(st) ? `第${endlessStage(st.rentIdx)}段・${st.rentIdx + 1}回目` : st.endless ? `♾️ エンドレス(?) ${st.rentIdx - T + 1}回目` : `${Math.min(st.rentIdx + 1, T)} / ${T} 回目`;
   const left = Math.max(0, st.spinsLeft);
   $('#spinsLeft').textContent = left;
   $('#pips').innerHTML = Array.from({ length: st.spinsMax }, (_, k) => `<span class="${k < left ? 'on' : ''} ${k === 0 && left === 1 ? 'last' : ''}"></span>`).join('');
@@ -3204,7 +3204,7 @@ function pay() {
       const ch = CHAPTERS[st.story - 1];
       const firstClear = rec.story < ch.id;
       rec.story = Math.max(rec.story, ch.id); saveRec();
-      playScene(ch.id === 4 ? [ch.end, 'epilogue'] : ch.end, () => { showEnd(true); if (firstClear && ch.id < 4) setTimeout(() => toast(`📖 ${CHAPTERS[ch.id].n}「${CHAPTERS[ch.id].t}」が解放された！`), 400); if (firstClear && ch.id === 4) setTimeout(() => toast('🏮 エンドレスとデイリーが解放された！'), 400); checkAch(); });
+      playScene(ch.id === 4 ? [ch.end, 'epilogue'] : ch.end, () => { showEnd(true); if (firstClear && ch.id < 4) setTimeout(() => toast(`📖 ${CHAPTERS[ch.id].n}「${CHAPTERS[ch.id].t}」が解放された！`), 400); if (firstClear && ch.id === 4) setTimeout(() => toast('🏮 エンドレス(?)とデイリーが解放された！'), 400); checkAch(); });
     } else showEnd(true);
     return;
   }
@@ -3245,7 +3245,7 @@ const NEWS = [
     ['物語モード', [
       '「むずかしい」「ちょうむずかしい」の家賃を少し上げました（コンボが伸びやすくなったぶん）',
     ]],
-    ['エンドレス・デイリー', [
+    ['エンドレス(?)・デイリー', [
       '13回目以降の家賃は、長く続くほど上がり方が少しずつ大きくなるように（育ちの加速に合わせて）',
     ]],
     ['カンスト', [
@@ -3466,7 +3466,7 @@ function resultInfo(S) {
     const r = S.rank && S.rank.result;
     return { mode: `デイリー ${S.daily}`, color: '#5ab0e8', big: `家賃 ${S.rentIdx}回`, sub: `お題：${CURSES[S.fixedCurse].n}`, extra: r && r.rank ? `今日の ${r.rank}位 / ${r.total}人` : '' };
   }
-  if (isEndlessMode(S)) return { mode: 'エンドレス', color: '#f2c14e', big: `家賃 ${S.rentIdx}回`, sub: `第${endlessStage(S.rentIdx)}段まで住んだ`, extra: '' };
+  if (isEndlessMode(S)) return { mode: 'エンドレス(?)', color: '#f2c14e', big: `家賃 ${S.rentIdx}回`, sub: `第${endlessStage(S.rentIdx)}段まで住んだ`, extra: '' };
   const win = S.phase === 'clear' || S.phase === 'kanst';
   if (CH) return { mode: `ストーリー ${CH.n}「${CH.t}」`, color: '#ff9ab0', big: win ? 'クリア！' : `家賃 ${Math.min(S.rentIdx, T)}/${T}回`, sub: win ? '家賃を払いきった' : '追い出された…', extra: '' };
   return { mode: D.n, color: D.color, big: win ? 'クリア！' : S.endless ? `家賃 ${S.rentIdx}回` : `家賃 ${Math.min(S.rentIdx, T)}/${T}回`, sub: '', extra: '' };
@@ -3606,10 +3606,10 @@ function showEndEndless() {
     ['合計かせぎ', fmtN(st.totalEarned)], ['アイテム', st.items.length], ['依頼の達成', st.stats.quests],
   ].map(([a, b]) => `<div class="stat"><b>${b}</b><span>${a}</span></div>`).join('');
   const top = Object.entries(st.inv.reduce((m, s) => (m[s.key] = (m[s.key] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k]) => E(k)).join('');
-  const text = `ヤチンスピン【エンドレス】\n家賃${n}回・第${sg}段まで住んだ🏮${isNew ? '（自己ベスト）' : ''}\n最高1スピン${fmtN(st.best)}コイン\n編成：${top}\n#ヤチンスピン #よいまつり横丁`;
+  const text = `ヤチンスピン【エンドレス(?)】\n家賃${n}回・第${sg}段まで住んだ🏮${isNew ? '（自己ベスト）' : ''}\n最高1スピン${fmtN(st.best)}コイン\n編成：${top}\n#ヤチンスピン #よいまつり横丁`;
   shareText = text;
   $('#endBtns').innerHTML = `<button class="btn gold" id="eShareImg">𝕏 で記録をポストする</button>` +
-    `<button class="btn primary" id="eAgain">もう一回（エンドレス）</button><button class="btn" id="eTitle">🏮 タイトルへ</button>`;
+    `<button class="btn primary" id="eAgain">もう一回（エンドレス(?)）</button><button class="btn" id="eTitle">🏮 タイトルへ</button>`;
   $('#eShareImg').onclick = () => shareResult();
   $('#eAgain').onclick = () => { $('#ovEnd').classList.remove('show'); openStarter('endless'); };
   $('#eTitle').onclick = showTitle;
@@ -3636,13 +3636,13 @@ function showEndInner(win) {
   const top = Object.entries(st.inv.reduce((m, s) => (m[s.key] = (m[s.key] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k]) => E(k)).join('');
   const its = st.items.slice(0, 6).map(k => ITEMS[k].e).join('');
   const label = CH ? `ストーリー${CH.n}` : st.daily ? `デイリー${st.daily}` : D.n;
-  const head = st.daily ? `ヤチンスピン【デイリー ${st.daily}】家賃${Math.min(st.rentIdx, T)}/${T}回${win ? '👑' : ''}` : CH && win ? `ヤチンスピン【${label}「${CH.t}」】クリア🏮` : win ? `ヤチンスピン【${D.n}】クリア🎆` : st.endless ? `ヤチンスピン【${D.n}】エンドレス${st.rentIdx - T}回♾️` : `ヤチンスピン【${D.n}】家賃${st.rentIdx}/${T}回🏠`;
+  const head = st.daily ? `ヤチンスピン【デイリー ${st.daily}】家賃${Math.min(st.rentIdx, T)}/${T}回${win ? '👑' : ''}` : CH && win ? `ヤチンスピン【${label}「${CH.t}」】クリア🏮` : win ? `ヤチンスピン【${D.n}】クリア🎆` : st.endless ? `ヤチンスピン【${D.n}】エンドレス(?)${st.rentIdx - T}回♾️` : `ヤチンスピン【${D.n}】家賃${st.rentIdx}/${T}回🏠`;
   const text = `${head}\n最高1スピン${fmtN(st.best)}コイン\n編成：${top}${its ? `\nお守り：${its}` : ''}\n#ヤチンスピン #よいまつり横丁`;
   shareText = text;
   const share = `<button class="btn" id="eShareImg">𝕏 でポストする</button>`;
   const nextCh = CH && win && CH.id < 4 ? CHAPTERS[CH.id] : null;
   $('#endBtns').innerHTML = (nextCh ? `<button class="btn gold" id="eNext">📖 つぎの話へ：${nextCh.t}</button>` : '') +
-    (win && CH && CH.id === 4 ? `<button class="btn gold" id="eEndless">🏮 エンドレスへ</button>` : '') + share +
+    (win && CH && CH.id === 4 ? `<button class="btn gold" id="eEndless">🏮 エンドレス(?)へ</button>` : '') + share +
     `<button class="btn primary" id="eAgain">${CH ? 'この話をもう一回' : st.daily ? 'デイリーにもう一回挑戦' : `もう一回（${D.n}）`}</button><button class="btn" id="eTitle">🏮 タイトルへ</button>`;
   $('#eShareImg').onclick = () => shareResult();
   if (nextCh) $('#eNext').onclick = () => { $('#ovEnd').classList.remove('show'); startRun(nextCh.diff, { story: nextCh.id, starter: 'basic' }); };
@@ -3717,7 +3717,7 @@ function renderDex() {
     }).join('');
   } else if (dexTab === 'curse') {
     const ks = Object.keys(CURSES);
-    h = `<div class="progress-line">出会った：${rec.seenCurses.length} / ${ks.length}種　（話の後半とエンドレスで出てくる）</div><div class="dex">` +
+    h = `<div class="progress-line">出会った：${rec.seenCurses.length} / ${ks.length}種　（話の後半とエンドレス(?)で出てくる）</div><div class="dex">` +
       ks.map(k => rec.seenCurses.includes(k) ? `<div class="dex-row"><div class="de">${CURSES[k].e}</div><div><div class="dn">${CURSES[k].n}</div><div class="dd">${CURSES[k].d}</div></div></div>` : `<div class="dex-row unk"><div class="de">${CURSES[k].e}</div><div><div class="dn">？？？</div><div class="dd">まだ出会っていない</div></div></div>`).join('') + '</div>';
   } else {
     h = `<div class="progress-line">解除：${rec.ach.length} / ${ACH.length}　・通算 ${rec.spins}回まわした・依頼 ${rec.quests}回達成</div><div class="dex">` +
