@@ -1114,6 +1114,7 @@ function cntLabel(s) {
   if (d.grow) return `${s.c || 0}/${d.grow}`;
   if (s.key === 'firework') return `${s.c || 0}/5`;
   if (s.key === 'kakigori') return `${s.c || 0}/3`;
+  if (s.key === 'moon') return `×${fmtN(Math.pow(2, 1 + (s.c || 0)))}`;
   if (d.store) return `+${fmtN((s.c || 0) + (s.b || 0))}`;
   if (s.b) return `+${fmtN(s.b)}`;
   return '';
@@ -1628,6 +1629,9 @@ const NEWS = [
     ]],
     ['物語モード', [
       '「むずかしい」「ちょうむずかしい」の家賃を少し上げました（コンボが伸びやすくなったぶん）',
+    ]],
+    ['まんげつ', [
+      '🌕まんげつ同士がとなりに出ると合体して、倍率がかけ算に（×2と×2で×4、×4と×4で×16、×16と×16で×256…）',
     ]],
     ['カンスト', [
       '所持縁銭が表示できる最大まで届くか、家賃を千回払いきったら…… 番外のエンディングが見られます（実績もあり）',

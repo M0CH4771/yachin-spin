@@ -69,8 +69,13 @@ const SYM = {
 
   torii:    { e: '⛩️', n: 'とりい', r: 'R', v: 3, p: 1, likes: ['fox'], d: '盤面の🦊 1匹につき +6（どこにいてもOK）',
               act(c, i) { c.all().forEach(j => { if (c.key(j) === 'fox') c.add(i, 6, j); }); } },
-  moon:     { e: '🌕', n: 'まんげつ', r: 'S', v: 3, p: 2, likes: ['rabbit', 'dango', 'chadango', 'mikazuki', 'hangetsu'], d: '🌓はんげつ どうしの合体でできる。盤面の🐰🍡🥮すべての稼ぎを ×2（🌕が2つなら ×4）',
-              act(c, i) { c.all().forEach(j => { const k = c.key(j); if (k === 'rabbit' || k === 'dango' || k === 'chadango') c.mul(j, 2, i); }); } },
+  moon:     { e: '🌕', n: 'まんげつ', r: 'S', v: 3, p: 2, likes: ['moon', 'rabbit', 'dango', 'chadango', 'mikazuki', 'hangetsu'], d: '🌓はんげつ どうしの合体でできる。盤面の🐰🍡🥮すべての稼ぎを ×2。となりの🌕と合体すると倍率がかけ算になる（×2と×2で×4、×4と×4で×16）',
+              act(c, i, s) {
+                // となりのまんげつと合体：倍率 2^(1+c) どうしのかけ算（c は指数）
+                c.nb(i).forEach(j => { if (c.key(j) === 'moon') { const o = c.sym(j); c.merge(i, j); s.c = Math.min(1020, (s.c || 0) + (o.c || 0) + 1); } });
+                const m = Math.pow(2, 1 + (s.c || 0));
+                c.all().forEach(j => { const k = c.key(j); if (k === 'rabbit' || k === 'dango' || k === 'chadango') c.mul(j, m, i); });
+              } },
   hanafuda: { e: '🎴', n: 'はなふだ', r: 'R', v: 0, p: 1, d: '盤面に出ているシンボルの種類の数だけ +1',
               act(c, i) { c.add(i, new Set(c.all().map(j => c.key(j))).size, '種類の数'); } },
   clover:   { e: '🍀', n: 'よつば', r: 'R', v: 1, d: '1コイン。持っているだけで候補にレアが出やすくなる' },
