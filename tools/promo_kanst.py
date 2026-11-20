@@ -25,7 +25,6 @@ d = ImageDraw.Draw(img); d.rectangle((210, yy, W - 210, yy + 150), fill=(20, 14,
 text(img, '見られる条件（どちらか）', W // 2, yy + 16, 24, GOLD, 'ma')
 text(img, '・所持縁銭が、表示できる最大までたどりつく', 250, yy + 62, 22, INK, stroke=2)
 text(img, '・家賃を、千回払いきる', 250, yy + 100, 22, INK, stroke=2)
-center(img, '8人全員登場・新しい挿絵7枚・背景2枚', yy + 176, 11)
 footer(img); img.convert('RGB').save(os.path.join(OUT, 'kanst_1_ending.png'), optimize=True)
 
 # ---- 2枚目：エンドレス(?)と、数の表示 ----
