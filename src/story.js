@@ -55,6 +55,7 @@ const CGS = {
   kanst_meibo:    { t: '店子名簿', ch: '番外', wip: true },
   kanst_sakura:   { t: '夏の桜', ch: '番外', wip: true },
   kanst_hanabira: { t: '届いたもの', ch: '番外', wip: true },
+  kanst_dai:      { t: '奥の店', ch: '番外', wip: true },
 };
 
 const SCENES = {
@@ -644,6 +645,14 @@ const SCENES = {
     { who: 'maneki', t: 'ゆくか、{name}。家賃は、もういらんのじゃろう。' },
     { who: 'me', f: 's', t: '行く。今月の分、顔を見せに行かなきゃ。' },
     { who: 'narr', t: '——番外　カンスト　おしまい' },
+    { bg: 'dim' },
+    { who: 'narr', t: '……' },
+    { who: 'narr', t: 'その夜。灯りがあふれた横丁の、いちばん奥。' },
+    { who: 'narr', t: 'ずっと閉まったままの、古い店の戸のすきまから、ほんの少しだけ、光がもれていた。' },
+    { cg: 'kanst_dai' },
+    { who: 'narr', t: 'ほこりをかぶった、背の高い台。ガラスの奥に、金色の釘がびっしりと並んでいる。' },
+    { who: 'narr', t: 'ちりん。' },
+    { who: 'narr', t: 'どこかで、小さな玉の転がる音がした。' },
   ],
   epilogue: [
     { bg: 'letter', title: 'エピローグ　ハナの手紙' },
