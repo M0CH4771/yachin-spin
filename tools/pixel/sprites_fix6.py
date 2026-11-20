@@ -47,3 +47,17 @@ def _():
     s.rect(7, 9, 25, 10, '#e0303a'); s.rect(7, 11, 25, 11, '#ffffff')          # 紅白の水引
     s.ring(12, 6, 2.6, 1, '#e0303a'); s.ring(20, 6, 2.6, 1, '#ffffff'); s.px(16, 8, '#f0c040')
     return s
+
+# かぎや：花火屋の目じるしの鍵と、ぱっと開いた花火
+@sp('kagiya')
+def _():
+    s = S(True)
+    for k in range(12):                                                         # 花火（うしろ）
+        a = k * math.pi / 6
+        s.line(20, 11, 20 + math.cos(a) * 9, 11 + math.sin(a) * 9, '#ff8fb0' if k % 2 else '#ffd36a', 1)
+    s.ring(10, 22, 5.5, 2.2, '#e0b040')                                         # 鍵の輪
+    s.line(14, 18, 24, 8, '#e0b040', 2)                                         # 鍵の軸
+    s.rect(19, 9, 21, 12, '#e0b040'); s.rect(22, 6, 24, 9, '#e0b040')           # 鍵の歯
+    s.finish()
+    s.px(8, 20, '#fff4c0'); s.px(20, 11, '#ffffff')
+    return s
