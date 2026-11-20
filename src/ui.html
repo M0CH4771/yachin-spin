@@ -865,6 +865,7 @@ function setBg(k) {
 }
 // 挿絵を全画面に出す。次の { bg } まで、顔窓はかくす
 function setCg(k) {
+  if (!CGS[k] || CGS[k].wip) return;   // 絵がまだない挿絵は出さない（背景のまま）
   const sc = $('#scene');
   sc.style.background = `linear-gradient(180deg, rgba(12,9,20,0) 0%, rgba(12,9,20,0) 62%, rgba(12,9,20,.7) 100%), url(cg/${k}.jpg) center top / cover no-repeat, #140f1e`;
   $('#scDeco').innerHTML = ''; scene.cg = k;
@@ -1061,7 +1062,7 @@ function openChapters() {
   const seen = Object.keys(names).filter(k => rec.scenes.includes(k));
   $('#replayList').innerHTML = seen.length ? seen.map(k => `<button data-s="${k}">${names[k]}</button>`).join('') : '<span class="muted" style="font-size:12px">まだ見たシーンはない</span>';
   $$('#replayList button').forEach(b => b.onclick = () => playScene(b.dataset.s));
-  const cgk = Object.keys(CGS);
+  const cgk = Object.keys(CGS).filter(k => !CGS[k].wip);
   $('#cgN').textContent = `${rec.cgs.length} / ${cgk.length}`;
   $('#cgList').innerHTML = cgk.map(k => rec.cgs.includes(k)
     ? `<button data-cg="${k}" style="background-image:url(cg/${k}.jpg)"><span>${CGS[k].t}</span></button>`
@@ -1572,7 +1573,7 @@ function pay() {
   if (st.phase === 'kanst') {   // カンスト：コインも家賃も最大になった
     unlock('kanst'); sfx.mega(); save(); renderAll();
     if (st.daily) rankSync();
-    playScene('kanst', () => showEnd(true));
+    playScene(['kanst', 'kanst2', 'kanst3', 'kanst4', 'kanst5', 'kanst6', 'kanst7'], () => showEnd(true));
     return;
   }
   if (st.phase === 'clear') {
