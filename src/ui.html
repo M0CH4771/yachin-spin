@@ -1091,14 +1091,14 @@ function buildBoard() {
     b.appendChild(c);
   }
 }
-// 大きい数は 万・億・兆・京・垓・秭・穣・溝・澗・正・載・極・恒河沙・阿僧祇・那由他・不可思議・無量大数 で短く（12,345 = 1.23万）。無量大数の先は指数
+// 大きい数は 万・億・兆・京・垓・秭・穣・溝・澗・正・載・極・恒河沙・阿僧祇・那由他・不可思議・無量大数 で短く（12,345 = 1.23万）。無量大数の先は、無量大数の前の桁が増えていく
 const NUM_UNITS = ['', '万', '億', '兆', '京', '垓', '秭', '穣', '溝', '澗', '正', '載', '極', '恒河沙', '阿僧祇', '那由他', '不可思議', '無量大数'];
 function fmtN(n) {
   if (typeof n !== 'number' || !isFinite(n)) return String(n);
   const neg = n < 0; let v = Math.abs(n), k = 0;
   if (v < 10000) return (neg ? '-' : '') + (Number.isInteger(v) ? v : Math.round(v * 100) / 100);
   while (v >= 9999.5 && k < NUM_UNITS.length - 1) { v /= 10000; k++; }
-  if (v >= 9999.5) return (neg ? '-' : '') + Math.abs(n).toExponential(2);
+  if (v >= 9999.5) return (neg ? '-' : '') + BigInt(Math.round(v)).toString() + NUM_UNITS[k];   // 無量大数の先は、桁がそのまま増えていく
   const s = v < 10 ? v.toFixed(2) : v < 100 ? v.toFixed(1) : v.toFixed(0);
   return (neg ? '-' : '') + s.replace(/\.0+$|(\.\d*?)0+$/, '$1') + NUM_UNITS[k];
 }
