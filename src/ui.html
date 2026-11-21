@@ -980,7 +980,7 @@ function showTitle() {
   $('#tEvN').textContent = Object.keys(EVENTS).length; $('#tStN').textContent = Object.keys(STARTERS).length;
   $('#storyProg').textContent = rec.story >= 4 ? '👑 全話クリア！ 思い出を見返せる' : rec.story ? `${CHAPTERS[rec.story - 1].n}までクリア・つぎは「${CHAPTERS[rec.story].t}」` : 'まずはここから！';
   const td = todayStr(), dp = dailyPreview(td), dr = rec.daily[td];
-  $('#dailyDesc').innerHTML = `${td}　お題：${CURSES[dp.curse].e}${CURSES[dp.curse].n}・${STARTERS[dp.starter].e}${STARTERS[dp.starter].n}・${ITEMS[dp.item].e}${ITEMS[dp.item].n}`;
+  $('#dailyDesc').innerHTML = `${td}　お題：${CURSES[dp.curse].e}${CURSES[dp.curse].n}・${STARTERS[dp.starter].e}${STARTERS[dp.starter].n}・${ITEMS[dp.item].e}${ITEMS[dp.item].n}<br>今日の縛り：<b style="color:var(--bad)">${ruleTxt(dp.rule)}</b>（${DAILY_RULES[dp.rule].d}）`;
   $('#dailyProg').textContent = dr ? `今日の自己ベスト：家賃 ${dr.best}回${dr.rank ? `・${dr.rank}位` : ''}` : '今日はまだ挑戦していない';
   $('#bRank').classList.toggle('hidden', !RANK_API);
   updInstall(); updNewsBtn();
@@ -993,11 +993,12 @@ function showTitle() {
   setRng(null);
   window.scrollTo(0, 0);
 }
+const ruleTxt = k => k && DAILY_RULES[k] ? `${DAILY_RULES[k].e}${DAILY_RULES[k].n}` : '';
 let dailyCache = {};
 function dailyPreview(td) {
   if (dailyCache[td]) return dailyCache[td];
   const d = dailySetup(td);
-  return dailyCache[td] = { curse: d.curse, starter: d.starter, item: d.item };
+  return dailyCache[td] = { curse: d.curse, starter: d.starter, item: d.item, rule: d.rule };
 }
 const modesOpen = () => rec.story >= 4;
 function renderDiffs(saved) {
@@ -1244,7 +1245,7 @@ function renderHUD(coinsOverride) {
   $('#spinsLeft').textContent = left;
   $('#pips').innerHTML = Array.from({ length: st.spinsMax }, (_, k) => `<span class="${k < left ? 'on' : ''} ${k === 0 && left === 1 ? 'last' : ''}"></span>`).join('');
   $('#invN').textContent = st.inv.length;
-  $('#rrN').textContent = st.curse === 'seal' ? '🔒' : st.rerolls; $('#rmN').textContent = st.removals;
+  $('#rrN').textContent = st.curse === 'seal' || st.dailyRule === 'noreroll' ? '🔒' : st.rerolls; $('#rmN').textContent = st.dailyRule === 'noremove' ? '🔒' : st.removals;
   $('#bFast').classList.toggle('on', settings.fast);
   $('#bSound').textContent = settings.sound ? '🔊' : '🔇';
 }
@@ -1259,6 +1260,10 @@ function renderEvents() {
   if (st.curse) {
     const c = CURSES[st.curse]; seeCurse(st.curse);
     h += `<div class="ev curse"><span class="ei">${c.e}</span><div class="et"><b>😈 大家の気まぐれ：${c.n}</b>${c.d}</div></div>`;
+  }
+  if (st.dailyRule && DAILY_RULES[st.dailyRule]) {   // デイリーの「今日の縛り」は、ずっと見えるように
+    const r = DAILY_RULES[st.dailyRule];
+    h += `<div class="ev curse"><span class="ei">${r.e}</span><div class="et"><b>⛓ 今日の縛り：${r.n}</b>${r.d}</div></div>`;
   }
   box.innerHTML = h; box.classList.toggle('hidden', !h);
 }
@@ -1416,7 +1421,7 @@ function renderAct() {
     act.innerHTML = autoControlHTML() + `<div class="pickbox"><h3>ひとつ、持っていく</h3>
       <p class="lead">${st.spinsLeft <= 0 ? 'このあと、支払い。' : '色つきの小さい絵は、もう持っている相性の相手。'}</p>
       <div class="choices ${n === 4 ? 'four' : n === 2 ? 'two' : ''}">${st.choices.map(symCard).join('')}</div>
-      <div class="pick-actions"><button class="btn" id="bReroll" ${canReroll(st) ? '' : 'disabled'}>${st.curse === 'seal' ? '🔒 引き直し封印中' : `🔄 引き直す（残り${st.rerolls}）`}</button><button class="btn" id="bSkip">いらない</button></div></div>`;
+      <div class="pick-actions"><button class="btn" id="bReroll" ${canReroll(st) ? '' : 'disabled'}>${st.dailyRule === 'noreroll' ? '🔒 今日は引き直しなし' : st.curse === 'seal' ? '🔒 引き直し封印中' : `🔄 引き直す（残り${st.rerolls}）`}</button><button class="btn" id="bSkip">いらない</button></div></div>`;
     $$('#act .choice').forEach(b => b.onclick = () => pick(b.dataset.k));
     $('#bReroll').onclick = reroll; $('#bSkip').onclick = () => pick(null);
     st.choices.forEach(seeSym);
@@ -1600,6 +1605,7 @@ function pay() {
   if (st.story && !st.endless) { const mid = CHAPTERS[st.story - 1].mids[st.rentIdx]; if (mid && !scene) playScene(mid); }
   sfx.coin(); toast('家賃を払った！ 🔄+1　✂️+1' + (info.bonus.length ? '　' + info.bonus.join(' ') : ''));
   if (st.curse) setTimeout(() => toast(`😈 大家の気まぐれ：${CURSES[st.curse].e} ${CURSES[st.curse].n}`), 300);
+  if (st.dailyRule && st.rentIdx === 0 && st.totalSpins === 0) setTimeout(() => toast(`⛓ 今日の縛り：${ruleTxt(st.dailyRule)}`), 900);
   if (isEndlessMode(st) && st.rentIdx % STAGE_LEN === 0) {
     const sg = endlessStage(st.rentIdx);
     setTimeout(() => toast(`🏮 第${sg}段へ。家賃がまた上がる${sg === 2 ? '。気まぐれも出はじめる' : ''}`), 600);
@@ -1638,6 +1644,9 @@ const NEWS = [
     ]],
     ['うちでのこづち', [
       'こづちで複製したシンボルは、育ちや倍率もそのまま写すように（育ったかたつむりなら、育ったまま増える）',
+    ]],
+    ['デイリー', [
+      '日替わりの「今日の縛り」を追加（除去なし・引き直しなし・お守りなし・コモンだけ・候補2つ・食べる系なし・ようかいなし・縁起物なし のどれか1つ）',
     ]],
     ['カンスト', [
       '所持縁銭が表示できる最大まで届くか、家賃を千回払いきったら…… 番外のエンディングが見られます（実績もあり）',
@@ -1813,7 +1822,7 @@ function showEndDaily() {
   const isBest = n > 0 && n >= d.best;
   $('#endEmo').textContent = '🎯';
   $('#endTitle').textContent = `デイリー ${st.daily}`;
-  $('#endLead').textContent = `お題「${C.n}」で、家賃を ${n}回払った。` + (isBest ? '今日の自己ベスト！' : `今日の自己ベストは ${d.best}回。`);
+  $('#endLead').textContent = `お題「${C.n}」${st.dailyRule ? `・縛り「${DAILY_RULES[st.dailyRule].n}」` : ''}で、家賃を ${n}回払った。` + (isBest ? '今日の自己ベスト！' : `今日の自己ベストは ${d.best}回。`);
   $('#endStats').innerHTML = [
     ['払った家賃', `${n}回`], ['合計かせぎ', fmtN(st.totalEarned)], ['最高の1スピン', fmtN(st.best)], ['アイテム', st.items.length],
   ].map(([a, b]) => `<div class="stat"><b>${b}</b><span>${a}</span></div>`).join('') + (RANK_API ? `<div class="rankbox" id="endRank" style="grid-column:1/-1"></div>` : '');
@@ -1858,7 +1867,7 @@ function resultInfo(S) {
   const D = DIFFS[S.diff], T = totalRents(S), CH = S.story ? CHAPTERS[S.story - 1] : null;
   if (S.daily) {
     const r = S.rank && S.rank.result;
-    return { mode: `デイリー ${S.daily}`, color: '#5ab0e8', big: `家賃 ${S.rentIdx}回`, sub: `お題：${CURSES[S.fixedCurse].n}`, extra: r && r.rank ? `今日の ${r.rank}位 / ${r.total}人` : '' };
+    return { mode: `デイリー ${S.daily}`, color: '#5ab0e8', big: `家賃 ${S.rentIdx}回`, sub: `お題：${CURSES[S.fixedCurse].n}${S.dailyRule ? `・縛り ${DAILY_RULES[S.dailyRule].n}` : ''}`, extra: r && r.rank ? `今日の ${r.rank}位 / ${r.total}人` : '' };
   }
   if (isEndlessMode(S)) return { mode: 'エンドレス(?)', color: '#f2c14e', big: `家賃 ${S.rentIdx}回`, sub: `第${endlessStage(S.rentIdx)}段まで住んだ`, extra: '' };
   const win = S.phase === 'clear' || S.phase === 'kanst';
@@ -1926,7 +1935,7 @@ async function shareResult() {
   const S = st, btn = $('#eShareImg'), label = btn ? btn.innerHTML : '';
   if (S.daily && S.phase !== 'kanst') {
     const r = S.rank && S.rank.result, top = Object.entries(S.inv.reduce((m, s) => (m[s.key] = (m[s.key] || 0) + 1, m), {})).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k]) => E(k)).join('');
-    shareText = `ヤチンスピン【デイリー ${S.daily}】\n家賃${S.rentIdx}回🎯${r && r.rank ? `今日の${r.rank}位/${r.total}人` : ''}\nお題：${CURSES[S.fixedCurse].n}\n編成：${top}\n#ヤチンスピン #よいまつり横丁`;
+    shareText = `ヤチンスピン【デイリー ${S.daily}】\n家賃${S.rentIdx}回🎯${r && r.rank ? `今日の${r.rank}位/${r.total}人` : ''}\nお題：${CURSES[S.fixedCurse].n}${S.dailyRule ? `・縛り ${DAILY_RULES[S.dailyRule].n}` : ''}\n編成：${top}\n#ヤチンスピン #よいまつり横丁`;
   }
   const mobile = matchMedia('(pointer: coarse)').matches && navigator.canShare;
   const win = mobile ? null : window.open('', '_blank');   // ポップアップ止めにかからないよう、先にひらいておく
@@ -1954,7 +1963,7 @@ let rkAgo = 0, rkTimer = null, rkData = null;
 function rkDay(ago) { return new Date(Date.now() + 9 * 3600000 - ago * 86400000).toISOString().slice(0, 10); }
 async function loadRank() {
   const day = rkDay(rkAgo), dp = dailyPreview(day);
-  $('#rkLead').innerHTML = `${day}　お題：${CURSES[dp.curse].e}${CURSES[dp.curse].n}・${STARTERS[dp.starter].e}${STARTERS[dp.starter].n}・${ITEMS[dp.item].e}${ITEMS[dp.item].n}`;
+  $('#rkLead').innerHTML = `${day}　お題：${CURSES[dp.curse].e}${CURSES[dp.curse].n}・${STARTERS[dp.starter].e}${STARTERS[dp.starter].n}・${ITEMS[dp.item].e}${ITEMS[dp.item].n}・縛り ${ruleTxt(dp.rule)}`;
   try {
     const r = await api(`/api/ranking?day=${day}&limit=100&player=${encodeURIComponent(playerId())}`);
     if (!r.ok) throw new Error();
@@ -2100,7 +2109,7 @@ function openInv() {
   $('#invDetail').innerHTML = '<div class="dd" style="color:var(--mute)">シンボルをタップすると説明が出る。いらないものは除去できる。</div>';
   updRemove(); $('#ovInv').classList.add('show');
 }
-function updRemove() { const b = $('#bRemove'); b.disabled = !invSel || st.removals <= 0 || !['spin', 'choose', 'item'].includes(st.phase); b.textContent = st.removals <= 0 ? '✂️ 除去の残りなし' : invSel ? `✂️ 稼ぎ${removalPreviewValue(invSel)}の個体を除去` : '✂️ これを1つ除去'; }
+function updRemove() { const b = $('#bRemove'); const ban = st.dailyRule === 'noremove'; b.disabled = ban || !invSel || st.removals <= 0 || !['spin', 'choose', 'item'].includes(st.phase); b.textContent = ban ? '✂️ 今日は除去なし' : st.removals <= 0 ? '✂️ 除去の残りなし' : invSel ? `✂️ 稼ぎ${removalPreviewValue(invSel)}の個体を除去` : '✂️ これを1つ除去'; }
 function removeSel() {
   if (!invSel || !act(st, 'x:' + invSel)) return;
   save(); renderHUD(); tone(240, 0.1, 'sawtooth', 0.05, -80);

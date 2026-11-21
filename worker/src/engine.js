@@ -346,6 +346,23 @@ const CURSES = {
   seal:    { e: '🔒', n: 'ふういん', d: '🔄引き直しが使えない' },
 };
 
+// ===== デイリーの「今日の縛り」（日替わりで1つ） =====
+const DAILY_RULES = {
+  noremove: { e: '✂️', n: '除去なし',     d: '今日は ✂️除去が使えない' },
+  noreroll: { e: '🔄', n: '引き直しなし', d: '今日は 🔄引き直しが使えない' },
+  noitem:   { e: '🧿', n: 'お守りなし',   d: '家賃を払ったあとの お守り選びがない（最初の1つだけ）' },
+  common:   { e: '⚪', n: 'コモンだけ',   d: 'シンボルの候補が コモンだけになる' },
+  two:      { e: '✌️', n: '候補2つ',     d: 'シンボルの候補が 2つだけになる' },
+  noeat:    { e: '🍽️', n: '食べる系なし', d: '食べる系のシンボルが 候補に出ない' },
+  noyokai:  { e: '👻', n: 'ようかいなし', d: 'ようかいが 候補に出ない' },
+  noengi:   { e: '🎍', n: '縁起物なし',   d: '縁起物が 候補に出ない' },
+};
+const ruleOf = st => (st && st.dailyRule) || null;
+function ruleBans(st, k) {
+  const r = ruleOf(st);
+  return (r === 'noeat' && SYM[k].p === 4) || (r === 'noyokai' && YOKAI.has(k)) || (r === 'noengi' && ENGI.has(k));
+}
+
 // ===== 難易度 =====
 const DIFFS = {
   easy:   { n: 'EASY', jp: 'かんたん', color: '#5fd99b', rentMul: 0.8, ramp: 0, rents: 12, rerolls: 2, removals: 2, extra: ['coin', 'rice', 'mouse'], startItem: true, curseFrom: 99, curseChance: 0, luck: 0.03,
@@ -551,8 +568,9 @@ function dailySetup(dateStr) {
   const curse = pickOne(Object.keys(CURSES).filter(k => k !== 'seal'));
   const starter = pickOne(Object.keys(STARTERS));
   const item = pickOne(Object.keys(ITEMS).filter(k => ITEMS[k].r !== 'R' && k !== 'ofuda'));
+  const rule = pickOne(Object.keys(DAILY_RULES));
   setRng(keep);
-  return { curse, starter, item, rng: tmp.rng };
+  return { curse, starter, item, rule, rng: tmp.rng };
 }
 // runSeed：1回ごとのタネ（ランキングではサーバーが配る）。最初のおまけの候補までは日付のタネで決めるので全員同じ
 function newDaily(dateStr, runSeed) {
@@ -560,6 +578,7 @@ function newDaily(dateStr, runSeed) {
   const tmp = { rng: D0.rng };
   setRng(seededRng(tmp));
   const st = newGame('daily', { starter: D0.starter, daily: dateStr, fixedCurse: D0.curse, item: D0.item });
+  st.dailyRule = D0.rule;
   st.runSeed = (runSeed === undefined ? 0 : runSeed) >>> 0;
   st.rng = (seedFrom('run-' + st.runSeed) ^ tmp.rng) | 0;
   st.log = [];
@@ -572,6 +591,7 @@ function newDaily(dateStr, runSeed) {
 // e:n=できごとの選択 $=家賃を払う x:k=シンボルを除去
 function afterItems(st) { st.itemChoices = null; st.phase = st.event ? 'event' : 'spin'; }
 function prepItems(st) {
+  if (ruleOf(st) === 'noitem' && st.rentIdx > 0) st.itemPicks = 0;   // 縛り：お守りなし（最初の1つだけ）
   if (st.itemPicks <= 0) { afterItems(st); return; }
   rollItems(st);
   if (!st.itemChoices.length) { st.itemPicks = 0; afterItems(st); }
@@ -807,7 +827,7 @@ function rarityOdds(st) {
   U = Math.min(U, 0.45); R = Math.max(0.01, Math.min(R, 0.32)); V = Math.max(0.002, Math.min(V, 0.13));
   return { C: Math.max(0, 1 - U - R - V), U, R, V };
 }
-function choiceCount(st) { return 3 + (hasItem(st, 'ticket') ? 1 : 0) - (st.curse === 'soldout' ? 1 : 0); }
+function choiceCount(st) { return Math.max(1, 3 + (hasItem(st, 'ticket') ? 1 : 0) - (st.curse === 'soldout' ? 1 : 0) - (ruleOf(st) === 'two' ? 1 : 0)); }
 
 function rollChoices(st) {
   const odds = rarityOdds(st), picks = [], n = choiceCount(st);
@@ -816,7 +836,8 @@ function rollChoices(st) {
   while (picks.length < n && guard++ < 200) {
     let x = rnd(), rar = 'C';
     for (const k of ['V', 'R', 'U', 'C']) { if (x < odds[k]) { rar = k; break; } x -= odds[k]; }
-    const opts = Object.keys(SYM).filter(k => SYM[k].r === rar && !picks.includes(k));
+    if (ruleOf(st) === 'common') rar = 'C';
+    const opts = Object.keys(SYM).filter(k => SYM[k].r === rar && !picks.includes(k) && !ruleBans(st, k));
     if (opts.length) {
       // 手持ちのシンボルと相性のいいもの（相方）は 5倍 出やすい
       const w = opts.map(k => pal.has(k) ? 5 : 1);
@@ -828,7 +849,7 @@ function rollChoices(st) {
   st.choices = picks;
   return picks;
 }
-function canReroll(st) { return st.rerolls > 0 && st.curse !== 'seal'; }
+function canReroll(st) { return st.rerolls > 0 && st.curse !== 'seal' && ruleOf(st) !== 'noreroll'; }
 
 function rollItems(st) {
   const luck = hasItem(st, 'omamori') ? 0.05 : 0;
@@ -851,7 +872,7 @@ function addItem(st, k) {
   if (k === 'tebukuro') st.removals += 3;
 }
 function removeSymbol(st, key) {
-  if (st.removals <= 0) return false;
+  if (st.removals <= 0 || ruleOf(st) === 'noremove') return false;
   // 同じ種類でも個体ごとに成長度が違うため、現在の基礎稼ぎが一番低いものを除去する
   let idx = -1, minValue = Infinity;
   st.inv.forEach((s, i) => {
@@ -893,6 +914,6 @@ function payRent(st) {
 }
 function goEndless(st) { st.endless = true; startPeriod(st); st.itemPicks++; rollItems(st); st.phase = 'item'; }
 
-if (typeof module !== 'undefined') module.exports = { exportDaily, importDaily, stepDaily, act, prepItems, afterItems, dailySetup, replayDaily, seedFrom, STAGE_LEN, endlessStage, stageCurseChance, isEndlessMode, endlessCount, W, H, N, SYM, ITEMS, CURSES, DIFFS, RARITY, STARTERS, EVENTS, newGame, newDaily, runEvent, setRng, seededRng, spin, rollChoices, rollItems, addItem, removeSymbol, rentDue, payRent, goEndless, canReroll, mk, rarityOdds, neighbors, partners, totalRents, hasItem };
+if (typeof module !== 'undefined') module.exports = { DAILY_RULES, exportDaily, importDaily, stepDaily, act, prepItems, afterItems, dailySetup, replayDaily, seedFrom, STAGE_LEN, endlessStage, stageCurseChance, isEndlessMode, endlessCount, W, H, N, SYM, ITEMS, CURSES, DIFFS, RARITY, STARTERS, EVENTS, newGame, newDaily, runEvent, setRng, seededRng, spin, rollChoices, rollItems, addItem, removeSymbol, rentDue, payRent, goEndless, canReroll, mk, rarityOdds, neighbors, partners, totalRents, hasItem };
 
 export default { act, exportDaily, importDaily, stepDaily, replayDaily, newDaily, dailySetup, setRng, SYM, ITEMS, CURSES, DIFFS };
